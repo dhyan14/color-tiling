@@ -328,6 +328,34 @@ export default function GameBoard() {
   const isThankYouPage = puzzleIndex === PUZZLES.length;
   const currentPuzzle = isThankYouPage ? null : PUZZLES[puzzleIndex];
 
+  const createEmptyGrid = (puzzleConfig: PuzzleConfig): Cell[][] => {
+    const rows = puzzleConfig.gridSize;
+    const cols = puzzleConfig.gridWidth || puzzleConfig.gridSize;
+    const grid: Cell[][] = Array(rows).fill(null).map(() =>
+      Array(cols).fill(null).map(() => ({
+        isOccupied: false,
+        dominoId: null,
+        orientation: null,
+        isFirst: false
+      }))
+    );
+
+    // Mark blocked cells
+    puzzleConfig.blockedCells.forEach(({ row, col }) => {
+      if (row < rows && col < cols) {
+        grid[row][col] = {
+          isOccupied: false,
+          dominoId: null,
+          orientation: null,
+          isFirst: false,
+          isBlocked: true
+        };
+      }
+    });
+
+    return grid;
+  };
+
   if (isThankYouPage) {
     return (
       <div className="w-full max-w-2xl mx-auto flex flex-col items-center gap-8 mt-16">
