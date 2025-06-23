@@ -1,13 +1,11 @@
 'use client';
 
-import { FC } from 'react';
-
-interface TetrominoPieceProps {
+type TetrominoPieceProps = {
   rotation?: number;
   isReflected?: boolean;
 }
 
-export const StraightPiece: FC<TetrominoPieceProps> = ({ rotation = 0 }) => {
+export function StraightPiece({ rotation = 0 }: TetrominoPieceProps) {
   const isVertical = rotation === 90 || rotation === 270;
   return (
     <div className="relative w-8 h-8">
@@ -19,9 +17,9 @@ export const StraightPiece: FC<TetrominoPieceProps> = ({ rotation = 0 }) => {
       />
     </div>
   );
-};
+}
 
-export const TPiece: FC<TetrominoPieceProps> = ({ rotation = 0 }) => {
+export const TPiece: TetrominoPieceProps = ({ rotation = 0 }) => {
   return (
     <div className="relative w-8 h-8">
       <div 
@@ -36,7 +34,7 @@ export const TPiece: FC<TetrominoPieceProps> = ({ rotation = 0 }) => {
   );
 };
 
-export const SquarePiece: FC = () => {
+export const SquarePiece: TetrominoPieceProps = () => {
   return (
     <div className="relative w-16 h-16">
       <div className="absolute bg-yellow-500 w-full h-full" />
@@ -44,7 +42,7 @@ export const SquarePiece: FC = () => {
   );
 };
 
-export const LPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isReflected = false }) => {
+export const LPiece: TetrominoPieceProps = ({ rotation = 0, isReflected = false }) => {
   return (
     <div className="relative w-8 h-8">
       <div 
@@ -63,7 +61,7 @@ export const LPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isReflected = fa
   );
 };
 
-export const SkewPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isReflected = false }) => {
+export const SkewPiece: TetrominoPieceProps = ({ rotation = 0, isReflected = false }) => {
   return (
     <div className="relative w-8 h-8">
       <div 

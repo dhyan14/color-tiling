@@ -3,17 +3,17 @@
 import { FC, useState, useCallback } from 'react';
 import { StraightPiece, TPiece, SquarePiece, LPiece, SkewPiece } from './TetrominoPieces';
 
+type TetrominoType = 'straight' | 'T' | 'square' | 'L' | 'skew';
+
 type Cell = {
   isOccupied: boolean;
   dominoId: number | null;
-  orientation: 'horizontal' | 'vertical' | 'T' | 'square' | 'straight' | 'L' | 'skew' | null;
+  orientation: TetrominoType | null;
   isFirst: boolean;
-  isBlocked?: boolean; // For blocked cells in puzzle 2
-  rotation?: number; // Add rotation for T pieces
+  isBlocked?: boolean;
+  rotation?: number;
   isReflected?: boolean;
 };
-
-type TetrominoType = 'straight' | 'T' | 'square' | 'L' | 'skew';
 
 type GameState = {
   grid: Cell[][];
@@ -32,7 +32,7 @@ type PuzzleConfig = {
   useSquareTetromino?: boolean;
   maxSquareTetrominoes?: number;
   tetrominoTypes?: TetrominoType[];
-  gridWidth?: number; // Added for rectangular grids
+  gridWidth?: number;
 };
 
 const PUZZLES: PuzzleConfig[] = [
