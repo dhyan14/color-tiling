@@ -366,16 +366,29 @@ export default function GameBoard() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
 
+  const isLastPuzzle = puzzleIndex === PUZZLES.length - 1;
+  const isThankYouPage = puzzleIndex === PUZZLES.length;
+
+  if (isThankYouPage) {
+    return (
+      <div className="w-full max-w-2xl mx-auto flex flex-col items-center gap-8 mt-16">
+        <h2 className="text-2xl font-bold text-gray-700 text-center">Thank you for playing!</h2>
+        <p className="text-lg text-center">You have completed all puzzles.</p>
+        <p className="text-base text-center">For any contact: <a href="mailto:jaiminpatel@svgu.ac.in" className="text-blue-600 underline">jaiminpatel@svgu.ac.in</a></p>
+      </div>
+    );
+  }
+
   const handlePasswordSubmit = () => {
     const cleanPassword = password.trim();
     if (cleanPassword === currentPuzzle.password) {
       setShowPasswordModal(false);
       setPassword('');
       setPasswordError(false);
-      if (puzzleIndex + 1 < PUZZLES.length) {
-        handleNextPuzzle();
+      if (isLastPuzzle) {
+        setPuzzleIndex(PUZZLES.length);
       } else {
-        setPuzzleIndex(PUZZLES.length); // Show thank you page
+        handleNextPuzzle();
       }
     } else {
       setPasswordError(true);
@@ -414,8 +427,6 @@ export default function GameBoard() {
       } else {
         setAvailableTetrominoTypes(['straight', 'T', 'square', 'L', 'skew']);
       }
-    } else {
-      setPuzzleIndex(PUZZLES.length); // triggers thank you page
     }
   };
 
@@ -847,18 +858,6 @@ export default function GameBoard() {
     ];
     return colors[id % colors.length];
   };
-
-  const isLastPuzzle = puzzleIndex === PUZZLES.length;
-
-  if (isLastPuzzle) {
-    return (
-      <div className="w-full max-w-2xl mx-auto flex flex-col items-center gap-8 mt-16">
-        <h2 className="text-2xl font-bold text-gray-700 text-center">Thank you for playing!</h2>
-        <p className="text-lg text-center">You have completed all puzzles.</p>
-        <p className="text-base text-center">For any contact: <a href="mailto:jaiminpatel@svgu.ac.in" className="text-blue-600 underline">jaiminpatel@svgu.ac.in</a></p>
-      </div>
-    );
-  }
 
   return (
     <div className="w-full max-w-4xl mx-auto flex flex-col items-center gap-8">

@@ -85,13 +85,26 @@ export const TPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isSelected = fal
   );
 };
 
-export const SquarePiece: FC = () => {
+export const SquarePiece: FC<TetrominoPieceProps> = ({ isTromino = false }) => {
   const cellSize = "w-[12px] h-[12px] sm:w-[20px] sm:h-[20px]";
   const baseCell = `absolute ${cellSize}`;
 
+  if (isTromino) {
+    // Single block for puzzle 7 and 8
+    return (
+      <div className="relative w-[36px] h-[36px] sm:w-[60px] sm:h-[60px] transition-transform hover:scale-105">
+        <div className={`${baseCell} left-[12px] sm:left-[20px] top-[12px] sm:top-[20px] bg-white border-[2px] sm:border-[3px] border-black`} />
+      </div>
+    );
+  }
+
+  // 2x2 square for other puzzles (like puzzle 5)
   return (
     <div className="relative w-[36px] h-[36px] sm:w-[60px] sm:h-[60px] transition-transform hover:scale-105">
-      <div className={`${baseCell} left-[12px] sm:left-[20px] top-[12px] sm:top-[20px] bg-white border-[2px] sm:border-[3px] border-black`} />
+      <div className={`${baseCell} left-[6px] sm:left-[10px] top-[6px] sm:top-[10px] bg-white border-[2px] sm:border-[3px] border-black`} />
+      <div className={`${baseCell} left-[18px] sm:left-[30px] top-[6px] sm:top-[10px] bg-white border-[2px] sm:border-[3px] border-l-0 border-black`} />
+      <div className={`${baseCell} left-[6px] sm:left-[10px] top-[18px] sm:top-[30px] bg-white border-[2px] sm:border-[3px] border-t-0 border-black`} />
+      <div className={`${baseCell} left-[18px] sm:left-[30px] top-[18px] sm:top-[30px] bg-white border-[2px] sm:border-[3px] border-t-0 border-l-0 border-black`} />
     </div>
   );
 };
