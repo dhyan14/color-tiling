@@ -129,9 +129,9 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
       } else if (rotation === 90) {
         cells.push([row, col], [row + 1, col], [row + 2, col], [row + 3, col]);
       } else if (rotation === 180) {
-        cells.push([row, col], [row, col - 1], [row, col - 2], [row, col - 3]);
+        cells.push([row, col - 3], [row, col - 2], [row, col - 1], [row, col]);
       } else { // 270
-        cells.push([row, col], [row - 1, col], [row - 2, col], [row - 3, col]);
+        cells.push([row - 3, col], [row - 2, col], [row - 1, col], [row, col]);
       }
       break;
       
@@ -139,11 +139,11 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
       if (rotation === 0) {
         cells.push([row, col], [row, col + 1], [row, col + 2], [row + 1, col + 1]);
       } else if (rotation === 90) {
-        cells.push([row, col], [row + 1, col], [row + 2, col], [row + 1, col + 1]);
+        cells.push([row - 1, col], [row, col], [row + 1, col], [row, col + 1]);
       } else if (rotation === 180) {
-        cells.push([row, col], [row, col + 1], [row, col + 2], [row - 1, col + 1]);
+        cells.push([row - 1, col + 1], [row, col], [row, col + 1], [row, col + 2]);
       } else { // 270
-        cells.push([row, col], [row + 1, col], [row + 2, col], [row + 1, col - 1]);
+        cells.push([row - 1, col], [row, col - 1], [row, col], [row + 1, col]);
       }
       break;
       
@@ -157,9 +157,9 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
       ] : rotation === 90 ? [
         [row, col], [row, col + 1], [row, col + 2], [row + 1, col]
       ] : rotation === 180 ? [
-        [row, col], [row - 1, col], [row - 2, col], [row - 2, col + 1]
+        [row - 2, col], [row - 1, col], [row, col], [row - 2, col + 1]
       ] : [ // 270
-        [row, col], [row, col + 1], [row, col + 2], [row - 1, col + 2]
+        [row, col], [row - 1, col + 2], [row, col + 1], [row, col + 2]
       ];
       
       // For 90-degree rotation, swap the reflection logic
