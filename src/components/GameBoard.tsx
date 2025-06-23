@@ -250,7 +250,7 @@ const TetrominoSelector: FC<{
       {selectedType && selectedType !== 'square' && (
         <div className="flex flex-col gap-2 w-full">
           <div className="flex justify-center gap-2">
-            {[0, 90, 180, 270].map((r) => (
+            {[0, 90].map((r) => (
               <button
                 key={r}
                 onClick={() => onRotate(r)}
@@ -833,18 +833,6 @@ export default function GameBoard() {
 
       {currentPuzzle.useTetromino ? (
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-            <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
-              {[0, 90, 180, 270].map((rotation) => (
-                <TetrominoOption
-                  key={rotation}
-                  rotation={rotation}
-                  isSelected={selectedRotation === rotation}
-                  onClick={() => setSelectedRotation(rotation)}
-                />
-              ))}
-            </div>
-          </div>
           {currentPuzzle.useSquareTetromino && (
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
               <span className="text-gray-700 text-sm sm:text-base">Square piece (one-time use):</span>
@@ -915,7 +903,8 @@ export default function GameBoard() {
           currentPuzzle.gridWidth === 5 ? 'grid-cols-5' :
           currentPuzzle.gridSize === 8 ? 'grid-cols-8' :
           currentPuzzle.gridSize === 6 ? 'grid-cols-6' :
-          currentPuzzle.gridSize === 4 ? 'grid-cols-4' : ''
+          currentPuzzle.gridSize === 4 ? 'grid-cols-4' :
+          currentPuzzle.gridSize === 5 ? 'grid-cols-5' : ''
         } gap-0.5 sm:gap-1 bg-gray-200 p-2 rounded`}>
           {currentState.grid.map((row, rowIndex) => (
             row.map((cell, colIndex) => {
