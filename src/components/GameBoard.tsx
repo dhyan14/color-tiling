@@ -705,7 +705,7 @@ export default function GameBoard() {
         </div>
       )}
 
-      {currentPuzzle.useTetromino && (
+      {currentPuzzle.useTetromino ? (
         <div className="flex flex-col gap-4">
           <div className="flex gap-4 items-center">
             <span className="text-gray-700">Select T-piece rotation:</span>
@@ -727,12 +727,48 @@ export default function GameBoard() {
                 onClick={() => setSelectedRotation(-1)} 
                 className={`w-[80px] h-[80px] relative transition-all hover:scale-105 ${
                   selectedRotation === -1 ? "text-blue-600" : "text-gray-500"
-                } transform hover:shadow-xl`}
+                } transform hover:shadow-xl ${
+                  squareTetrominoUsed ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={squareTetrominoUsed}
               >
                 <SquarePiece />
               </button>
             </div>
           )}
+        </div>
+      ) : (
+        <div className="flex gap-8 mb-4">
+          <button 
+            onClick={() => setSelectedOrientation('horizontal')}
+            className={`p-2 rounded transition-all ${
+              selectedOrientation === 'horizontal'
+                ? 'bg-blue-100 text-blue-600 scale-110'
+                : 'text-gray-400 hover:text-gray-600'
+            }`}
+            title="Place horizontal domino"
+          >
+            <div className="w-[60px] h-[30px] border-2 border-current rounded-lg relative">
+              <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-current"/>
+              <div className="absolute left-[25%] top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-current"/>
+              <div className="absolute left-[75%] top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-current"/>
+            </div>
+          </button>
+          <button
+            onClick={() => setSelectedOrientation('vertical')}
+            className={`p-2 rounded transition-all ${
+              selectedOrientation === 'vertical'
+                ? 'bg-blue-100 text-blue-600 scale-110'
+                : 'text-gray-400 hover:text-gray-600'
+            }`}
+            title="Place vertical domino"
+          >
+            <div className="w-[30px] h-[60px] border-2 border-current rounded-lg relative">
+              <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-current"/>
+              <div className="absolute left-1/2 top-[25%] -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-current"/>
+              <div className="absolute left-1/2 top-[75%] -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-current"/>
+            </div>
+          </button>
         </div>
       )}
       
