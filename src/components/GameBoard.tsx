@@ -114,7 +114,7 @@ const PUZZLES: PuzzleConfig[] = [
     description: "Place 8 straight trominoes (3 blocks long, only 0° and 90° rotations) and 1 single square piece (1x1) on a 5x5 grid. No restrictions on the middle cell.",
     useTetromino: true,
     requiresPassword: true,
-    password: "done",
+    password: "0577",
     tetrominoTypes: ['straight', 'square'],
     specialMiddleCell: false
   }
@@ -369,7 +369,11 @@ export default function GameBoard() {
       setShowPasswordModal(false);
       setPassword('');
       setPasswordError(false);
-      handleNextPuzzle();
+      if (puzzleIndex + 1 < PUZZLES.length) {
+        handleNextPuzzle();
+      } else {
+        setPuzzleIndex(PUZZLES.length); // Show thank you page
+      }
     } else {
       setPasswordError(true);
     }
