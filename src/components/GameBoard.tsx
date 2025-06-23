@@ -479,7 +479,7 @@ export default function GameBoard() {
         <div className="flex flex-col items-center gap-4">
           <p className="text-gray-600">Select a T-piece type to place</p>
           <div className="flex gap-8 items-center justify-center p-4">
-            {[0, 90, 180, 270].map((rotation) => (
+            {[180, 90, 0, 270].map((rotation) => (
               <TetrominoOption
                 key={rotation}
                 rotation={rotation}
