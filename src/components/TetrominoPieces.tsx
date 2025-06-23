@@ -1,45 +1,50 @@
 'use client';
 
-import React, { FC } from 'react';
+import React, { FC, HTMLAttributes } from 'react';
+import { JSX } from 'react/jsx-runtime';
 
-type TetrominoPieceProps = {
+interface TetrominoPieceProps extends HTMLAttributes<HTMLDivElement> {
   rotation?: number;
-  isReflected?: boolean;
   isSelected?: boolean;
   isTromino?: boolean;
-  onClick?: () => void;
+  isReflected?: boolean;
 }
 
-export const StraightPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isSelected = false, isTromino = false }) => {
+interface DominoCellProps extends HTMLAttributes<HTMLDivElement> {
+  className: string;
+  borders: string;
+}
+
+export const StraightPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isSelected = false, isTromino = false, ...props }): JSX.Element => {
   const cellSize = "w-[12px] h-[12px] sm:w-[20px] sm:h-[20px]";
   const baseCell = `absolute ${cellSize}`;
 
-  const DominoCell = ({ className, borders }: { className: string; borders: string }) => (
-    <div className={`${className} bg-white ${borders} border-black`} />
+  const DominoCell: FC<DominoCellProps> = ({ className, borders, ...props }): JSX.Element => (
+    <div className={`${className} bg-white ${borders} border-black`} {...props} />
   );
 
-  const isVertical = rotation === 90 || rotation === 270;
-  const cellCount = isTromino ? 3 : 4;
-
   return (
-    <div className="relative w-[48px] h-[48px] sm:w-[80px] sm:h-[80px] transition-transform hover:scale-105"
-         style={{ transform: `rotate(${rotation}deg)`, transformOrigin: 'center' }}>
-      {/* Always render in horizontal orientation and let CSS rotation handle the rest */}
-      <DominoCell
-        className={`${baseCell} left-[0px] top-[18px] sm:top-[30px]`}
+    <div 
+      className="relative w-[36px] h-[36px] sm:w-[60px] sm:h-[60px] transition-transform hover:scale-105" 
+      style={{ transform: `rotate(${rotation}deg)` }}
+      {...props}
+    >
+      {/* Horizontal row */}
+      <DominoCell 
+        className={`${baseCell} left-[0px] top-[12px] sm:top-[20px]`}
         borders="border-[2px] sm:border-[3px]"
       />
-      <DominoCell
-        className={`${baseCell} left-[12px] sm:left-[20px] top-[18px] sm:top-[30px]`}
+      <DominoCell 
+        className={`${baseCell} left-[12px] sm:left-[20px] top-[12px] sm:top-[20px]`}
         borders="border-[2px] sm:border-[3px] border-l-0"
       />
-      <DominoCell
-        className={`${baseCell} left-[24px] sm:left-[40px] top-[18px] sm:top-[30px]`}
+      <DominoCell 
+        className={`${baseCell} left-[24px] sm:left-[40px] top-[12px] sm:top-[20px]`}
         borders="border-[2px] sm:border-[3px] border-l-0"
       />
       {!isTromino && (
-        <DominoCell
-          className={`${baseCell} left-[36px] sm:left-[60px] top-[18px] sm:top-[30px]`}
+        <DominoCell 
+          className={`${baseCell} left-[36px] sm:left-[60px] top-[12px] sm:top-[20px]`}
           borders="border-[2px] sm:border-[3px] border-l-0"
         />
       )}

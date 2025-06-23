@@ -92,22 +92,20 @@ const PUZZLES: PuzzleConfig[] = [
     description: "Place different Tetromino pieces (Straight, T, Square, L, and Skew) on a 4x5 grid. Each piece can only be used once. Pieces can be rotated and reflected.",
     useTetromino: true,
     requiresPassword: true,
-    password: "1732",
+    password: "0693",
     tetrominoTypes: ['straight', 'T', 'square', 'L', 'skew'],
     gridWidth: 5
   },
   {
     gridSize: 5,
-    maxDominoes: 9,  // 8 trominoes + 1 square domino
+    maxDominoes: 9,
     blockedCells: [],
-    description: "Place 8 straight trominoes and 1 square domino on a 5x5 grid. The middle cell can only be used by the square domino.",
+    description: "Place 8 straight trominoes (3 blocks long, only 0° and 90° rotations) and 1 single square piece (1x1) on a 5x5 grid. The middle cell can only be used by the square piece.",
     useTetromino: true,
-    useSquareTetromino: true,
-    maxSquareTetrominoes: 1,
-    tetrominoTypes: ['straight', 'square'],
-    specialMiddleCell: true,  // New property for middle cell restriction
     requiresPassword: true,
-    password: "0693"
+    password: "1234",
+    tetrominoTypes: ['straight', 'square'],
+    specialMiddleCell: true
   }
 ];
 
@@ -154,13 +152,23 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
   
   switch (type) {
     case 'straight':
-      // Base coordinates for horizontal straight piece
-      cells.push(
-        [row, col],
-        [row, col + 1],
-        [row, col + 2],
-        [row, col + 3]
-      );
+      // Check if it's a tromino (3 blocks) or tetromino (4 blocks)
+      if (puzzle?.tetrominoTypes?.length === 2 && puzzle.tetrominoTypes.includes('straight') && puzzle.tetrominoTypes.includes('square')) {
+        // Tromino case - 3 blocks
+        cells.push(
+          [row, col],
+          [row, col + 1],
+          [row, col + 2]
+        );
+      } else {
+        // Tetromino case - 4 blocks
+        cells.push(
+          [row, col],
+          [row, col + 1],
+          [row, col + 2],
+          [row, col + 3]
+        );
+      }
       break;
       
     case 'T':
@@ -174,7 +182,12 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
       break;
       
     case 'square':
-      // Square piece doesn't need transformation
+      // For puzzle 7, square piece is just 1x1
+      if (puzzle?.tetrominoTypes?.length === 2 && puzzle.tetrominoTypes.includes('straight') && puzzle.tetrominoTypes.includes('square')) {
+        cells.push([row, col]);
+        return cells;
+      }
+      // Regular 2x2 square piece
       cells.push(
         [row, col],
         [row, col + 1],
@@ -231,7 +244,7 @@ const TetrominoSelector: FC<{
     <div className="flex flex-col gap-4 items-center p-4 bg-white rounded-lg shadow-sm">
       <div className="grid grid-cols-5 gap-4">
         {availableTypes.map((type) => (
-    <button
+          <button
             key={type}
             onClick={() => onSelect(type)}
             className={`p-2 rounded-lg transition-colors ${
@@ -243,14 +256,14 @@ const TetrominoSelector: FC<{
             {type === 'square' && <SquarePiece />}
             {type === 'L' && <LPiece rotation={selectedType === type ? rotation : 0} isReflected={selectedType === type && isReflected} />}
             {type === 'skew' && <SkewPiece rotation={selectedType === type ? rotation : 0} isReflected={selectedType === type && isReflected} />}
-    </button>
+          </button>
         ))}
       </div>
       
       {selectedType && selectedType !== 'square' && (
         <div className="flex flex-col gap-2 w-full">
           <div className="flex justify-center gap-2">
-            {[0, 90].map((r) => (
+            {(isTromino ? [0, 90] : [0, 90, 180, 270]).map((r) => (
               <button
                 key={r}
                 onClick={() => onRotate(r)}
@@ -261,7 +274,7 @@ const TetrominoSelector: FC<{
                 {r}°
               </button>
             ))}
-    </div>
+          </div>
           
           {(selectedType === 'L' || selectedType === 'skew') && (
             <button
