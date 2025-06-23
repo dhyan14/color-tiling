@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, type FC } from 'react';
+import { FC, useState, useCallback } from 'react';
 import { StraightPiece, TPiece, SquarePiece, LPiece, SkewPiece } from './TetrominoPieces';
 
 type Cell = {
