@@ -771,12 +771,10 @@ export default function GameBoard() {
         </div>
       )}
 
-      <div className={`grid gap-0.5 sm:gap-1 bg-gray-200 p-2 rounded overflow-x-auto max-w-full ${
-        currentPuzzle.gridSize === 8 ? 'grid-cols-8' : 'grid-cols-6'
-      }`}>
-        {currentState.grid.map((row, rowIndex) => (
-          <div key={rowIndex} className="flex">
-            {row.map((cell, colIndex) => (
+      <div className="w-full overflow-x-auto flex justify-center">
+        <div className={`inline-grid ${currentPuzzle.gridSize === 8 ? 'grid-cols-8' : 'grid-cols-6'} gap-0.5 sm:gap-1 bg-gray-200 p-2 rounded`}>
+          {currentState.grid.map((row, rowIndex) => (
+            row.map((cell, colIndex) => (
               <div
                 key={`${rowIndex}-${colIndex}`}
                 onClick={() => handleCellClick(rowIndex, colIndex)}
@@ -792,11 +790,12 @@ export default function GameBoard() {
                   }
                   transition-colors duration-200
                   border border-gray-300
+                  aspect-square
                 `}
               />
-            ))}
-          </div>
-        ))}
+            ))
+          ))}
+        </div>
       </div>
 
       <div className="flex flex-col items-center gap-4">
