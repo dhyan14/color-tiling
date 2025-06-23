@@ -12,16 +12,17 @@ type TetrominoPieceProps = {
 export const StraightPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isSelected = false }) => {
   const cellSize = "w-[15px] h-[15px] sm:w-[20px] sm:h-[20px]";
   const baseCell = `absolute ${cellSize}`;
-  const dotStyle = "absolute w-[4px] h-[4px] sm:w-[6px] sm:h-[6px] rounded-full bg-current left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2";
+  const dotStyle = "absolute w-[6px] h-[6px] sm:w-[8px] sm:h-[8px] rounded-full bg-gradient-to-br from-white/80 to-current left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 shadow-sm";
 
   const DominoCell = ({ className, borders }: { className: string; borders: string }) => (
-    <div className={`${className} bg-white ${borders} border-current`}>
+    <div className={`${className} bg-gradient-to-br from-white to-white/90 ${borders} border-current shadow-inner rounded-sm`}>
       <div className={dotStyle} />
     </div>
   );
 
   return (
-    <div className="relative w-[60px] h-[60px] sm:w-[80px] sm:h-[80px]" style={{ transform: `rotate(${rotation}deg)` }}>
+    <div className="relative w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] transition-transform hover:scale-105" 
+         style={{ transform: `rotate(${rotation}deg)` }}>
       {rotation === 0 ? (
         // Horizontal orientation
         <>
@@ -70,16 +71,17 @@ export const StraightPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isSelecte
 export const TPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isSelected = false }) => {
   const cellSize = "w-[15px] h-[15px] sm:w-[20px] sm:h-[20px]";
   const baseCell = `absolute ${cellSize}`;
-  const dotStyle = "absolute w-[4px] h-[4px] sm:w-[6px] sm:h-[6px] rounded-full bg-current left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2";
+  const dotStyle = "absolute w-[6px] h-[6px] sm:w-[8px] sm:h-[8px] rounded-full bg-gradient-to-br from-white/80 to-current left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 shadow-sm";
 
   const DominoCell = ({ className, borders }: { className: string; borders: string }) => (
-    <div className={`${className} bg-white ${borders} border-current`}>
+    <div className={`${className} bg-gradient-to-br from-white to-white/90 ${borders} border-current shadow-inner rounded-sm`}>
       <div className={dotStyle} />
     </div>
   );
 
   return (
-    <div className="relative w-[45px] h-[45px] sm:w-[60px] sm:h-[60px]" style={{ transform: `rotate(${rotation}deg)` }}>
+    <div className="relative w-[45px] h-[45px] sm:w-[60px] sm:h-[60px] transition-transform hover:scale-105" 
+         style={{ transform: `rotate(${rotation}deg)` }}>
       {/* Top horizontal row */}
       <DominoCell 
         className={`${baseCell} left-[0px] top-[0px]`}
@@ -105,16 +107,16 @@ export const TPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isSelected = fal
 export const SquarePiece: FC<TetrominoPieceProps> = ({ isSelected = false }) => {
   const cellSize = "w-[20px] h-[20px]";
   const baseCell = `absolute ${cellSize}`;
-  const dotStyle = "absolute w-[6px] h-[6px] rounded-full bg-current left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2";
+  const dotStyle = "absolute w-[6px] h-[6px] sm:w-[8px] sm:h-[8px] rounded-full bg-gradient-to-br from-white/80 to-current left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 shadow-sm";
 
   const DominoCell = ({ className, borders }: { className: string; borders: string }) => (
-    <div className={`${className} bg-white ${borders} border-current`}>
+    <div className={`${className} bg-gradient-to-br from-white to-white/90 ${borders} border-current shadow-inner rounded-sm`}>
       <div className={dotStyle} />
     </div>
   );
 
   return (
-    <div className="relative w-[60px] h-[60px]">
+    <div className="relative w-[60px] h-[60px] transition-transform hover:scale-105">
       {/* 2x2 Square */}
       <DominoCell
         className={`${baseCell} left-[10px] top-[10px]`}

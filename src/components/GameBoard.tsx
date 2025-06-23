@@ -876,9 +876,7 @@ export default function GameBoard() {
                     <div className={`absolute inset-0 flex items-center justify-center ${
                       isVertical ? 'flex-col' : 'flex-row'
                     }`}>
-                      <div className="w-1 h-1 bg-current rounded-full" />
-                      <div className={`${isVertical ? 'h-full w-0.5' : 'w-full h-0.5'} bg-current`} />
-                      <div className="w-1 h-1 bg-current rounded-full" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-white/80" />
                     </div>
                   )}
                 </div>
