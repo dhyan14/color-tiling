@@ -60,7 +60,7 @@ const PUZZLES: PuzzleConfig[] = [
     gridSize: 8,
     maxDominoes: 16,
     blockedCells: [],
-    description: "Place T-shaped tetromino pieces on an 8x8 grid",
+    description: "Place 16 T-shaped tetromino pieces on an 8x8 grid",
     useTetromino: true,
     requiresPassword: true,
     password: "1618",
@@ -70,7 +70,7 @@ const PUZZLES: PuzzleConfig[] = [
     gridSize: 6,
     maxDominoes: 9,
     blockedCells: [],
-    description: "Place T-shaped tetromino pieces on a 6x6 grid",
+    description: "Place 9 T-shaped tetromino pieces on a 6x6 grid",
     useTetromino: true,
     requiresPassword: true,
     password: "1414",
@@ -397,7 +397,9 @@ export default function GameBoard() {
   };
 
   const handleNextPuzzle = () => {
-    if (puzzleIndex + 1 < PUZZLES.length) {
+    if (isLastPuzzle) {
+      setPuzzleIndex(PUZZLES.length); // This will show the thank you page
+    } else if (puzzleIndex + 1 < PUZZLES.length) {
       setPuzzleIndex(puzzleIndex + 1);
       const nextPuzzle = PUZZLES[puzzleIndex + 1];
       const newState = {
@@ -519,11 +521,19 @@ export default function GameBoard() {
                                  currentPuzzle.tetrominoTypes.includes('straight') && 
                                  currentPuzzle.tetrominoTypes.includes('square');
                                    
-      if (!isStraightInPuzzle7) {
-      // Check if the piece type has already been used
-      if (currentState.usedTetrominoTypes?.includes(selectedType)) {
-        setErrorMessage(`${selectedType} piece has already been used!`);
-        return;
+      // Check if we've reached the maximum number of T pieces
+      const tPiecesUsed = currentState.usedTetrominoTypes?.filter(t => t === 'T').length || 0;
+      
+      if (selectedType === 'T') {
+        if (tPiecesUsed >= currentPuzzle.maxDominoes) {
+          setErrorMessage("Maximum number of T pieces placed!");
+          return;
+        }
+      } else if (!isStraightInPuzzle7) {
+        // For non-T pieces, check if they've already been used
+        if (currentState.usedTetrominoTypes?.includes(selectedType)) {
+          setErrorMessage(`${selectedType} piece has already been used!`);
+          return;
         }
       } else {
         // For straight pieces in puzzle 7, check if we've used all 8
