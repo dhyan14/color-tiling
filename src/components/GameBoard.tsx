@@ -33,6 +33,7 @@ type PuzzleConfig = {
   maxSquareTetrominoes?: number;
   tetrominoTypes?: TetrominoType[];
   gridWidth?: number;
+  specialMiddleCell?: boolean;
 };
 
 const PUZZLES: PuzzleConfig[] = [
@@ -94,6 +95,19 @@ const PUZZLES: PuzzleConfig[] = [
     password: "1732",
     tetrominoTypes: ['straight', 'T', 'square', 'L', 'skew'],
     gridWidth: 5
+  },
+  {
+    gridSize: 5,
+    maxDominoes: 9,  // 8 trominoes + 1 square domino
+    blockedCells: [],
+    description: "Place 8 straight trominoes and 1 square domino on a 5x5 grid. The middle cell can only be used by the square domino.",
+    useTetromino: true,
+    useSquareTetromino: true,
+    maxSquareTetrominoes: 1,
+    tetrominoTypes: ['straight', 'square'],
+    specialMiddleCell: true,  // New property for middle cell restriction
+    requiresPassword: true,
+    password: "0693"
   }
 ];
 
@@ -119,16 +133,26 @@ const TetrominoOption: FC<TetrominoOptionProps> = ({ rotation, isSelected, onCli
   );
 };
 
-const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType, rotation: number, isReflected: boolean = false): [number, number][] => {
+const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType, rotation: number, isReflected: boolean = false, puzzle?: PuzzleConfig): [number, number][] => {
   const cells: [number, number][] = [];
   
   switch (type) {
     case 'straight':
-      // Only horizontal (0/180) and vertical (90/270)
-      if (rotation === 0 || rotation === 180) {
-        cells.push([row, col], [row, col + 1], [row, col + 2], [row, col + 3]);
+      // For puzzle 7, we use tromino (3 cells) instead of tetromino (4 cells)
+      if (puzzle?.specialMiddleCell) {
+        // Only horizontal (0/180) and vertical (90/270)
+        if (rotation === 0 || rotation === 180) {
+          cells.push([row, col], [row, col + 1], [row, col + 2]);
+        } else {
+          cells.push([row, col], [row + 1, col], [row + 2, col]);
+        }
       } else {
-        cells.push([row, col], [row + 1, col], [row + 2, col], [row + 3, col]);
+        // Original tetromino behavior for other puzzles
+        if (rotation === 0 || rotation === 180) {
+          cells.push([row, col], [row, col + 1], [row, col + 2], [row, col + 3]);
+        } else {
+          cells.push([row, col], [row + 1, col], [row + 2, col], [row + 3, col]);
+        }
       }
       break;
       
@@ -150,55 +174,49 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
       
     case 'L':
       if (rotation === 0) {
-        // Base L shape (⌞)
         cells.push(
-          [row, col],      // Top piece (first piece)
-          [row + 1, col],  // Middle vertical piece
-          [row + 2, col],  // Bottom vertical piece
-          [row + 2, col + (isReflected ? -1 : 1)]  // Horizontal piece
+          [row, col],
+          [row + 1, col],
+          [row + 2, col],
+          [row + 2, col + (isReflected ? -1 : 1)]
         );
       } else if (rotation === 90) {
         if (isReflected) {
-          // 90° normal functionality
           cells.push(
-            [row, col],      // Left piece (first piece)
-            [row, col + 1],  // Middle horizontal piece
-            [row, col + 2],  // Right horizontal piece
-            [row + 1, col]   // Bottom piece
+            [row, col],
+            [row, col + 1],
+            [row, col + 2],
+            [row + 1, col]
           );
         } else {
-          // 90° reflection functionality
           cells.push(
-            [row, col],      // Left piece (first piece)
-            [row, col + 1],  // Middle horizontal piece
-            [row, col + 2],  // Right horizontal piece
-            [row - 1, col]   // Top piece
+            [row, col],
+            [row, col + 1],
+            [row, col + 2],
+            [row - 1, col]
           );
         }
       } else if (rotation === 180) {
-        // Rotated 180°
         cells.push(
-          [row, col],      // Bottom piece (first piece)
-          [row - 1, col],  // Middle vertical piece
-          [row - 2, col],  // Top vertical piece
-          [row - 2, col + (isReflected ? 1 : -1)]  // Horizontal piece
+          [row, col],
+          [row - 1, col],
+          [row - 2, col],
+          [row - 2, col + (isReflected ? 1 : -1)]
         );
-      } else { // 270
+      } else {
         if (isReflected) {
-          // 270° normal functionality
           cells.push(
-            [row, col],      // Left piece (first piece)
-            [row, col + 1],  // Middle horizontal piece
-            [row, col + 2],  // Right horizontal piece
-            [row - 1, col + 2]   // Top piece
+            [row, col],
+            [row, col + 1],
+            [row, col + 2],
+            [row - 1, col + 2]
           );
         } else {
-          // 270° reflection functionality
           cells.push(
-            [row, col],      // Left piece (first piece)
-            [row, col + 1],  // Middle horizontal piece
-            [row, col + 2],  // Right horizontal piece
-            [row + 1, col + 2]   // Bottom piece
+            [row, col],
+            [row, col + 1],
+            [row, col + 2],
+            [row + 1, col + 2]
           );
         }
       }
@@ -207,17 +225,17 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
     case 'skew':
       if (rotation === 0 || rotation === 180) {
         cells.push(
-          [row, col],         // First piece
-          [row, col + 1],     // Second piece
-          [row + 1, col + 1], // Third piece
-          [row + 1, col + 2]  // Fourth piece
+          [row, col],
+          [row, col + 1],
+          [row + 1, col + 1],
+          [row + 1, col + 2]
         );
       } else {
         cells.push(
-          [row, col],         // First piece
-          [row + 1, col],     // Second piece
-          [row + 1, col - 1], // Third piece
-          [row + 2, col - 1]  // Fourth piece
+          [row, col],
+          [row + 1, col],
+          [row + 1, col - 1],
+          [row + 2, col - 1]
         );
       }
       break;
@@ -234,7 +252,8 @@ const TetrominoSelector: FC<{
   isReflected: boolean;
   onReflect: (reflected: boolean) => void;
   availableTypes: TetrominoType[];
-}> = ({ selectedType, onSelect, rotation, onRotate, isReflected, onReflect, availableTypes }) => {
+  isTromino: boolean;
+}> = ({ selectedType, onSelect, rotation, onRotate, isReflected, onReflect, availableTypes, isTromino }) => {
   return (
     <div className="flex flex-col gap-4 items-center p-4 bg-white rounded-lg shadow-sm">
       <div className="grid grid-cols-5 gap-4">
@@ -246,7 +265,7 @@ const TetrominoSelector: FC<{
               selectedType === type ? 'bg-blue-100 border-2 border-blue-500' : 'bg-gray-100 hover:bg-gray-200'
             }`}
           >
-            {type === 'straight' && <StraightPiece rotation={selectedType === type ? rotation : 0} />}
+            {type === 'straight' && <StraightPiece rotation={selectedType === type ? rotation : 0} isTromino={isTromino} />}
             {type === 'T' && <TPiece rotation={selectedType === type ? rotation : 0} />}
             {type === 'square' && <SquarePiece />}
             {type === 'L' && <LPiece rotation={selectedType === type ? rotation : 0} isReflected={selectedType === type && isReflected} />}
@@ -419,12 +438,31 @@ export default function GameBoard() {
       return;
     }
     
-    // For puzzle 6 with different Tetromino types
+    // For puzzle with different piece types
     if (currentPuzzle.tetrominoTypes) {
       const selectedType = selectedTetrominoType;
       if (!selectedType) {
         setErrorMessage("Please select a piece type first!");
         return;
+      }
+
+      // Check special middle cell restriction
+      if (currentPuzzle.specialMiddleCell) {
+        const middleRow = Math.floor(currentPuzzle.gridSize / 2);
+        const middleCol = Math.floor(currentPuzzle.gridSize / 2);
+        const isMiddleCell = (r: number, c: number) => r === middleRow && c === middleCol;
+
+        // If trying to place straight piece that covers middle cell
+        if (selectedType === 'straight' && getTetrominoRequiredCells(row, col, selectedType, selectedRotation).some(([r, c]) => isMiddleCell(r, c))) {
+          setErrorMessage("The middle cell can only be used by the square piece!");
+          return;
+        }
+
+        // If trying to place square piece that doesn't cover middle cell
+        if (selectedType === 'square' && !getTetrominoRequiredCells(row, col, selectedType, selectedRotation).some(([r, c]) => isMiddleCell(r, c))) {
+          setErrorMessage("The square piece must cover the middle cell!");
+          return;
+        }
       }
       
       // Check if the piece type has already been used
@@ -436,7 +474,7 @@ export default function GameBoard() {
       const rotation = selectedRotation;
       const isReflected = selectedIsReflected;
       
-      const requiredCells = getTetrominoRequiredCells(row, col, selectedType, rotation, isReflected);
+      const requiredCells = getTetrominoRequiredCells(row, col, selectedType, rotation, isReflected, currentPuzzle);
       
       // Check if all required cells are within bounds
       const isWithinBounds = requiredCells.every(([r, c]) => {
@@ -874,6 +912,7 @@ export default function GameBoard() {
           isReflected={selectedIsReflected}
           onReflect={(r) => setSelectedIsReflected(r)}
           availableTypes={availableTetrominoTypes}
+          isTromino={currentPuzzle.specialMiddleCell ?? false}
         />
       )}
 
