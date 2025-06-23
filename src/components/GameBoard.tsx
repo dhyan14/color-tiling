@@ -91,26 +91,36 @@ export default function GameBoard() {
 
   return (
     <div className="flex flex-col items-center gap-6">
-      <div className="flex gap-4 mb-4">
+      <div className="flex gap-8 mb-4">
         <button
           onClick={() => setSelectedOrientation('horizontal')}
-          className={`px-4 py-2 rounded ${
+          className={`p-2 rounded transition-all ${
             selectedOrientation === 'horizontal'
-              ? 'bg-blue-500 text-white'
-              : 'bg-gray-200'
+              ? 'bg-blue-100 text-blue-600 scale-110'
+              : 'text-gray-400 hover:text-gray-600'
           }`}
+          title="Place horizontal domino"
         >
-          Horizontal
+          <div className="w-[60px] h-[30px] border-2 border-current rounded-lg relative">
+            <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-current"/>
+            <div className="absolute left-[25%] top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-current"/>
+            <div className="absolute left-[75%] top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-current"/>
+          </div>
         </button>
         <button
           onClick={() => setSelectedOrientation('vertical')}
-          className={`px-4 py-2 rounded ${
+          className={`p-2 rounded transition-all ${
             selectedOrientation === 'vertical'
-              ? 'bg-blue-500 text-white'
-              : 'bg-gray-200'
+              ? 'bg-blue-100 text-blue-600 scale-110'
+              : 'text-gray-400 hover:text-gray-600'
           }`}
+          title="Place vertical domino"
         >
-          Vertical
+          <div className="w-[30px] h-[60px] border-2 border-current rounded-lg relative">
+            <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-current"/>
+            <div className="absolute left-1/2 top-[25%] -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-current"/>
+            <div className="absolute left-1/2 top-[75%] -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-current"/>
+          </div>
         </button>
       </div>
       
