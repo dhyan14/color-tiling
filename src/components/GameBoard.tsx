@@ -7,6 +7,7 @@ type Cell = {
   dominoId: number | null;
   orientation: 'horizontal' | 'vertical' | null;
   isFirst: boolean;
+  isBlocked?: boolean; // For blocked cells in puzzle 2
 };
 
 type GameState = {
@@ -14,16 +15,54 @@ type GameState = {
   dominoesPlaced: number;
 };
 
+type PuzzleConfig = {
+  maxDominoes: number;
+  blockedCells: { row: number; col: number }[];
+  description: string;
+};
+
+const PUZZLES: PuzzleConfig[] = [
+  {
+    maxDominoes: 18,
+    blockedCells: [],
+    description: "Place 18 dominoes on a 6x6 grid"
+  },
+  {
+    maxDominoes: 17,
+    blockedCells: [
+      { row: 0, col: 0 }, // Upper left corner
+      { row: 5, col: 5 }, // Lower right corner
+    ],
+    description: "Place 17 dominoes on a 6x6 grid with blocked corners"
+  }
+];
+
 export default function GameBoard() {
-  const [currentState, setCurrentState] = useState<GameState>({
-    grid: Array(6).fill(null).map(() =>
+  const [puzzleIndex, setPuzzleIndex] = useState(0);
+  const currentPuzzle = PUZZLES[puzzleIndex];
+
+  const createEmptyGrid = (puzzleConfig: PuzzleConfig): Cell[][] => {
+    const grid = Array(6).fill(null).map(() =>
       Array(6).fill(null).map(() => ({
         isOccupied: false,
         dominoId: null,
         orientation: null,
         isFirst: false,
+        isBlocked: false,
       }))
-    ),
+    );
+
+    // Mark blocked cells
+    puzzleConfig.blockedCells.forEach(({row, col}) => {
+      grid[row][col].isBlocked = true;
+      grid[row][col].isOccupied = true;
+    });
+
+    return grid;
+  };
+
+  const [currentState, setCurrentState] = useState<GameState>({
+    grid: createEmptyGrid(currentPuzzle),
     dominoesPlaced: 0
   });
 
@@ -32,6 +71,22 @@ export default function GameBoard() {
   const [selectedOrientation, setSelectedOrientation] = useState<'horizontal' | 'vertical'>('horizontal');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  const handleNextPuzzle = () => {
+    if (puzzleIndex + 1 < PUZZLES.length) {
+      setPuzzleIndex(puzzleIndex + 1);
+      const nextPuzzle = PUZZLES[puzzleIndex + 1];
+      const newState = {
+        grid: createEmptyGrid(nextPuzzle),
+        dominoesPlaced: 0
+      };
+      setCurrentState(newState);
+      setHistory([]);
+      setFuture([]);
+      setShowSuccess(false);
+      setErrorMessage(null);
+    }
+  };
 
   const saveState = (newState: GameState) => {
     setHistory(prev => [...prev, currentState]);
@@ -65,7 +120,7 @@ export default function GameBoard() {
   };
 
   const checkGameCompletion = (grid: Cell[][]) => {
-    // Check if all cells are occupied
+    // Check if all non-blocked cells are occupied
     const allCellsOccupied = grid.every(row => 
       row.every(cell => cell.isOccupied)
     );
@@ -76,17 +131,29 @@ export default function GameBoard() {
   };
 
   const handleCellClick = (row: number, col: number) => {
-    if (currentState.dominoesPlaced >= 18) {
+    if (currentState.dominoesPlaced >= currentPuzzle.maxDominoes) {
       setErrorMessage("Maximum number of dominoes placed!");
       return;
     }
 
     const newGrid = JSON.parse(JSON.stringify(currentState.grid));
+    
+    // Check if clicked cell is blocked
+    if (newGrid[row][col].isBlocked) {
+      setErrorMessage("This cell is blocked!");
+      return;
+    }
+
     let isValidMove = false;
     
     if (selectedOrientation === 'horizontal') {
       if (col >= 5) {
         setErrorMessage("Can't place horizontal domino here - out of bounds!");
+        return;
+      }
+      // Check if next cell is blocked
+      if (newGrid[row][col + 1].isBlocked) {
+        setErrorMessage("Can't place domino here - next cell is blocked!");
         return;
       }
       if (newGrid[row][col].isOccupied || newGrid[row][col + 1].isOccupied) {
@@ -96,12 +163,14 @@ export default function GameBoard() {
       isValidMove = true;
       const dominoId = currentState.dominoesPlaced + 1;
       newGrid[row][col] = {
+        ...newGrid[row][col],
         isOccupied: true,
         dominoId,
         orientation: 'horizontal',
         isFirst: true,
       };
       newGrid[row][col + 1] = {
+        ...newGrid[row][col + 1],
         isOccupied: true,
         dominoId,
         orientation: 'horizontal',
@@ -112,6 +181,11 @@ export default function GameBoard() {
         setErrorMessage("Can't place vertical domino here - out of bounds!");
         return;
       }
+      // Check if next cell is blocked
+      if (newGrid[row + 1][col].isBlocked) {
+        setErrorMessage("Can't place domino here - next cell is blocked!");
+        return;
+      }
       if (newGrid[row][col].isOccupied || newGrid[row + 1][col].isOccupied) {
         setErrorMessage("Can't place domino here - space already occupied!");
         return;
@@ -119,12 +193,14 @@ export default function GameBoard() {
       isValidMove = true;
       const dominoId = currentState.dominoesPlaced + 1;
       newGrid[row][col] = {
+        ...newGrid[row][col],
         isOccupied: true,
         dominoId,
         orientation: 'vertical',
         isFirst: true,
       };
       newGrid[row + 1][col] = {
+        ...newGrid[row + 1][col],
         isOccupied: true,
         dominoId,
         orientation: 'vertical',
@@ -145,14 +221,7 @@ export default function GameBoard() {
 
   const handleReset = () => {
     const newState = {
-      grid: Array(6).fill(null).map(() =>
-        Array(6).fill(null).map(() => ({
-          isOccupied: false,
-          dominoId: null,
-          orientation: null,
-          isFirst: false,
-        }))
-      ),
+      grid: createEmptyGrid(currentPuzzle),
       dominoesPlaced: 0
     };
     saveState(newState);
@@ -170,9 +239,23 @@ export default function GameBoard() {
 
   return (
     <div className="flex flex-col items-center gap-6">
+      <h2 className="text-xl font-bold text-gray-700">
+        Puzzle {puzzleIndex + 1}: {currentPuzzle.description}
+      </h2>
+
       {showSuccess && (
-        <div className="bg-green-100 text-green-700 px-6 py-3 rounded-lg text-lg font-semibold animate-bounce">
-          🎉 Congratulations! You've completed the puzzle! 🎉
+        <div className="flex flex-col items-center gap-4">
+          <div className="bg-green-100 text-green-700 px-6 py-3 rounded-lg text-lg font-semibold animate-bounce">
+            🎉 Congratulations! You've completed the puzzle! 🎉
+          </div>
+          {puzzleIndex + 1 < PUZZLES.length && (
+            <button
+              onClick={handleNextPuzzle}
+              className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+            >
+              Next Puzzle →
+            </button>
+          )}
         </div>
       )}
       
@@ -222,9 +305,11 @@ export default function GameBoard() {
               key={`${rowIndex}-${colIndex}`}
               onClick={() => handleCellClick(rowIndex, colIndex)}
               className={`w-12 h-12 ${
-                cell.isOccupied
-                  ? `${getRandomColor(cell.dominoId!)} cursor-not-allowed`
-                  : 'bg-white cursor-pointer hover:bg-gray-100'
+                cell.isBlocked
+                  ? 'bg-gray-800 cursor-not-allowed'
+                  : cell.isOccupied
+                    ? `${getRandomColor(cell.dominoId!)} cursor-not-allowed`
+                    : 'bg-white cursor-pointer hover:bg-gray-100'
               } transition-colors duration-200`}
             />
           ))
@@ -233,7 +318,7 @@ export default function GameBoard() {
 
       <div className="flex flex-col items-center gap-4">
         <p className="text-lg font-semibold">
-          Dominoes Placed: {currentState.dominoesPlaced} / 18
+          Dominoes Placed: {currentState.dominoesPlaced} / {currentPuzzle.maxDominoes}
         </p>
         
         <div className="flex gap-4">
