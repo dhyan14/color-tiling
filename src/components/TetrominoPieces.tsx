@@ -18,56 +18,30 @@ export const StraightPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isSelecte
     <div className={`${className} bg-white ${borders} border-black`} />
   );
 
-  // Only show horizontal for 0/180 and vertical for 90/270
   const isVertical = rotation === 90 || rotation === 270;
   const cellCount = isTromino ? 3 : 4;
 
   return (
-    <div className="relative w-[48px] h-[48px] sm:w-[80px] sm:h-[80px] transition-transform hover:scale-105">
-      {!isVertical ? (
-        // Horizontal orientation
-        <>
-          <DominoCell
-            className={`${baseCell} left-[0px] top-[18px] sm:top-[20px]`}
-            borders="border-[2px] sm:border-[3px]"
-          />
-          <DominoCell
-            className={`${baseCell} left-[12px] sm:left-[20px] top-[18px] sm:top-[20px]`}
-            borders="border-[2px] sm:border-[3px] border-l-0"
-          />
-          <DominoCell
-            className={`${baseCell} left-[24px] sm:left-[40px] top-[18px] sm:top-[20px]`}
-            borders="border-[2px] sm:border-[3px] border-l-0"
-          />
-          {!isTromino && (
-            <DominoCell
-              className={`${baseCell} left-[36px] sm:left-[60px] top-[18px] sm:top-[20px]`}
-              borders="border-[2px] sm:border-[3px] border-l-0"
-            />
-          )}
-        </>
-      ) : (
-        // Vertical orientation
-        <>
-          <DominoCell
-            className={`${baseCell} left-[18px] sm:left-[20px] top-[0px]`}
-            borders="border-[2px] sm:border-[3px]"
-          />
-          <DominoCell
-            className={`${baseCell} left-[18px] sm:left-[20px] top-[12px] sm:top-[20px]`}
-            borders="border-[2px] sm:border-[3px] border-t-0"
-          />
-          <DominoCell
-            className={`${baseCell} left-[18px] sm:left-[20px] top-[24px] sm:top-[40px]`}
-            borders="border-[2px] sm:border-[3px] border-t-0"
-          />
-          {!isTromino && (
-            <DominoCell
-              className={`${baseCell} left-[18px] sm:left-[20px] top-[36px] sm:top-[60px]`}
-              borders="border-[2px] sm:border-[3px] border-t-0"
-            />
-          )}
-        </>
+    <div className="relative w-[48px] h-[48px] sm:w-[80px] sm:h-[80px] transition-transform hover:scale-105"
+         style={{ transform: `rotate(${rotation}deg)`, transformOrigin: 'center' }}>
+      {/* Always render in horizontal orientation and let CSS rotation handle the rest */}
+      <DominoCell
+        className={`${baseCell} left-[0px] top-[18px] sm:top-[30px]`}
+        borders="border-[2px] sm:border-[3px]"
+      />
+      <DominoCell
+        className={`${baseCell} left-[12px] sm:left-[20px] top-[18px] sm:top-[30px]`}
+        borders="border-[2px] sm:border-[3px] border-l-0"
+      />
+      <DominoCell
+        className={`${baseCell} left-[24px] sm:left-[40px] top-[18px] sm:top-[30px]`}
+        borders="border-[2px] sm:border-[3px] border-l-0"
+      />
+      {!isTromino && (
+        <DominoCell
+          className={`${baseCell} left-[36px] sm:left-[60px] top-[18px] sm:top-[30px]`}
+          borders="border-[2px] sm:border-[3px] border-l-0"
+        />
       )}
     </div>
   );
@@ -145,99 +119,30 @@ export const LPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isReflected = fa
     <div className={`${className} bg-white ${borders} border-black`} />
   );
 
-  let cells: { className: string; borders: string }[] = [];
-
-  if (rotation === 0) {
-    // L-0: ┗
-    // L-0-swap: ┛ (reflected)
-    cells = [
-      { 
-        className: `${baseCell} left-[0px] top-[0px]`,
-        borders: "border-[2px] sm:border-[3px]"
-      },
-      { 
-        className: `${baseCell} left-[0px] top-[12px] sm:top-[20px]`,
-        borders: "border-[2px] sm:border-[3px] border-t-0"
-      },
-      { 
-        className: `${baseCell} left-[0px] top-[24px] sm:top-[40px]`,
-        borders: "border-[2px] sm:border-[3px] border-t-0"
-      },
-      { 
-        className: `${baseCell} ${isReflected ? 'left-[-12px] sm:left-[-20px]' : 'left-[12px] sm:left-[20px]'} top-[24px] sm:top-[40px]`,
-        borders: "border-[2px] sm:border-[3px]"
-      }
-    ];
-  } else if (rotation === 90) {
-    // L-90: ┌
-    // L-90-swap: └ (reflected)
-    cells = [
-      { 
-        className: `${baseCell} left-[24px] sm:left-[40px] top-[0px]`,
-        borders: "border-[2px] sm:border-[3px]"
-      },
-      { 
-        className: `${baseCell} left-[0px] top-[0px]`,
-        borders: "border-[2px] sm:border-[3px]"
-      },
-      { 
-        className: `${baseCell} left-[12px] sm:left-[20px] top-[0px]`,
-        borders: "border-[2px] sm:border-[3px] border-l-0"
-      },
-      { 
-        className: `${baseCell} left-[24px] sm:left-[40px] top-[${isReflected ? '12px' : '-12px'}] sm:top-[${isReflected ? '20px' : '-20px'}]`,
-        borders: "border-[2px] sm:border-[3px]"
-      }
-    ];
-  } else if (rotation === 180) {
-    // L-180: ┏
-    // L-180-swap: ┓ (reflected)
-    cells = [
-      { 
-        className: `${baseCell} left-[0px] top-[24px] sm:top-[40px]`,
-        borders: "border-[2px] sm:border-[3px]"
-      },
-      { 
-        className: `${baseCell} left-[0px] top-[12px] sm:top-[20px]`,
-        borders: "border-[2px] sm:border-[3px] border-b-0"
-      },
-      { 
-        className: `${baseCell} left-[0px] top-[0px]`,
-        borders: "border-[2px] sm:border-[3px] border-b-0"
-      },
-      { 
-        className: `${baseCell} ${isReflected ? 'left-[12px] sm:left-[20px]' : 'left-[-12px] sm:left-[-20px]'} top-[0px]`,
-        borders: "border-[2px] sm:border-[3px]"
-      }
-    ];
-  } else { // 270
-    // L-270: ┐
-    // L-270-swap: ┘ (reflected)
-    cells = [
-      { 
-        className: `${baseCell} left-[0px] top-[0px]`,
-        borders: "border-[2px] sm:border-[3px]"
-      },
-      { 
-        className: `${baseCell} left-[12px] sm:left-[20px] top-[0px]`,
-        borders: "border-[2px] sm:border-[3px] border-l-0"
-      },
-      { 
-        className: `${baseCell} left-[24px] sm:left-[40px] top-[0px]`,
-        borders: "border-[2px] sm:border-[3px] border-l-0"
-      },
-      { 
-        className: `${baseCell} left-[0px] top-[${isReflected ? '12px' : '-12px'}] sm:top-[${isReflected ? '20px' : '-20px'}]`,
-        borders: "border-[2px] sm:border-[3px]"
-      }
-    ];
-  }
-
   return (
-    <div className="relative w-[48px] h-[48px] sm:w-[80px] sm:h-[80px] transition-transform hover:scale-105">
-      {cells.map((cell, index) => (
-        <DominoCell key={index} {...cell} />
-      ))}
+    <div className="relative w-[48px] h-[48px] sm:w-[80px] sm:h-[80px] transition-transform hover:scale-105"
+         style={{ 
+           transform: `rotate(${rotation}deg) scaleX(${isReflected ? -1 : 1})`,
+           transformOrigin: 'center'
+         }}>
+      {/* Base vertical line */}
+      <DominoCell
+        className={`${baseCell} left-[18px] sm:left-[30px] top-[0px]`}
+        borders="border-[2px] sm:border-[3px]"
+      />
+      <DominoCell
+        className={`${baseCell} left-[18px] sm:left-[30px] top-[12px] sm:top-[20px]`}
+        borders="border-[2px] sm:border-[3px] border-t-0"
+      />
+      <DominoCell
+        className={`${baseCell} left-[18px] sm:left-[30px] top-[24px] sm:top-[40px]`}
+        borders="border-[2px] sm:border-[3px] border-t-0"
+      />
+      {/* Horizontal piece */}
+      <DominoCell
+        className={`${baseCell} left-[30px] sm:left-[50px] top-[24px] sm:top-[40px]`}
+        borders="border-[2px] sm:border-[3px] border-l-0"
+      />
     </div>
   );
 };
@@ -250,58 +155,30 @@ export const SkewPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isReflected =
     <div className={`${className} bg-white ${borders} border-black`} />
   );
 
-  let cells: { className: string; borders: string }[] = [];
-
-  if (rotation === 0 || rotation === 180) {
-    cells = [
-      {
-        className: `${baseCell} left-[12px] sm:left-[20px] top-[0px]`,
-        borders: "border-[2px] sm:border-[3px]"
-      },
-      {
-        className: `${baseCell} left-[24px] sm:left-[40px] top-[0px]`,
-        borders: "border-[2px] sm:border-[3px] border-l-0"
-      },
-      {
-        className: `${baseCell} left-[0px] top-[12px] sm:top-[20px]`,
-        borders: "border-[2px] sm:border-[3px]"
-      },
-      {
-        className: `${baseCell} left-[12px] sm:left-[20px] top-[12px] sm:top-[20px]`,
-        borders: "border-[2px] sm:border-[3px] border-l-0"
-      }
-    ];
-  } else { // 90 or 270
-    cells = [
-      {
-        className: `${baseCell} left-[12px] sm:left-[20px] top-[0px]`,
-        borders: "border-[2px] sm:border-[3px]"
-      },
-      {
-        className: `${baseCell} left-[12px] sm:left-[20px] top-[12px] sm:top-[20px]`,
-        borders: "border-[2px] sm:border-[3px] border-t-0"
-      },
-      {
-        className: `${baseCell} left-[0px] top-[12px] sm:top-[20px]`,
-        borders: "border-[2px] sm:border-[3px]"
-      },
-      {
-        className: `${baseCell} left-[0px] top-[24px] sm:top-[40px]`,
-        borders: "border-[2px] sm:border-[3px] border-t-0"
-      }
-    ];
-  }
-
-  const containerStyle = {
-    transform: `${isReflected ? 'scaleX(-1) ' : ''}rotate(${rotation}deg)`,
-  };
-
   return (
-    <div className="relative w-[48px] h-[48px] sm:w-[80px] sm:h-[80px] transition-transform hover:scale-105" 
-         style={containerStyle}>
-      {cells.map((cell, index) => (
-        <DominoCell key={index} {...cell} />
-      ))}
+    <div className="relative w-[48px] h-[48px] sm:w-[80px] sm:h-[80px] transition-transform hover:scale-105"
+         style={{ 
+           transform: `rotate(${rotation}deg) scaleX(${isReflected ? -1 : 1})`,
+           transformOrigin: 'center'
+         }}>
+      {/* Base horizontal line */}
+      <DominoCell
+        className={`${baseCell} left-[6px] sm:left-[10px] top-[18px] sm:top-[30px]`}
+        borders="border-[2px] sm:border-[3px]"
+      />
+      <DominoCell
+        className={`${baseCell} left-[18px] sm:left-[30px] top-[18px] sm:top-[30px]`}
+        borders="border-[2px] sm:border-[3px] border-l-0"
+      />
+      {/* Offset horizontal line */}
+      <DominoCell
+        className={`${baseCell} left-[18px] sm:left-[30px] top-[30px] sm:top-[50px]`}
+        borders="border-[2px] sm:border-[3px]"
+      />
+      <DominoCell
+        className={`${baseCell} left-[30px] sm:left-[50px] top-[30px] sm:top-[50px]`}
+        borders="border-[2px] sm:border-[3px] border-l-0"
+      />
     </div>
   );
 };

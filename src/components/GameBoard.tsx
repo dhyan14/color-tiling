@@ -89,7 +89,7 @@ const PUZZLES: PuzzleConfig[] = [
     gridSize: 4,
     maxDominoes: 5,
     blockedCells: [],
-    description: "Place different Tetromino pieces (Straight, T, Square, L, and Skew) on a 4x5 grid. Each piece can only be used once. Pieces can be rotated and reflected to fit the grid.",
+    description: "Place different Tetromino pieces (Straight, T, Square, L, and Skew) on a 4x5 grid. Each piece can only be used once. Pieces can be rotated and reflected.",
     useTetromino: true,
     requiresPassword: true,
     password: "1732",
@@ -136,109 +136,82 @@ const TetrominoOption: FC<TetrominoOptionProps> = ({ rotation, isSelected, onCli
 const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType, rotation: number, isReflected: boolean = false, puzzle?: PuzzleConfig): [number, number][] => {
   const cells: [number, number][] = [];
   
+  // Helper function to apply reflection and rotation to coordinates
+  const transformCoords = (x: number, y: number, centerX: number, centerY: number): [number, number] => {
+    // First apply reflection if needed
+    const reflectedX = isReflected ? centerX - (x - centerX) : x;
+    
+    // Then apply rotation
+    const rad = (rotation * Math.PI) / 180;
+    const cos = Math.cos(rad);
+    const sin = Math.sin(rad);
+    
+    const rotatedX = centerX + (reflectedX - centerX) * cos - (y - centerY) * sin;
+    const rotatedY = centerY + (reflectedX - centerX) * sin + (y - centerY) * cos;
+    
+    return [Math.round(rotatedY), Math.round(rotatedX)];
+  };
+  
   switch (type) {
     case 'straight':
-      // For puzzle 7, we use tromino (3 cells) instead of tetromino (4 cells)
-      if (puzzle?.specialMiddleCell) {
-        // Only horizontal (0/180) and vertical (90/270)
-        if (rotation === 0 || rotation === 180) {
-          cells.push([row, col], [row, col + 1], [row, col + 2]);
-        } else {
-          cells.push([row, col], [row + 1, col], [row + 2, col]);
-        }
-      } else {
-        // Original tetromino behavior for other puzzles
-        if (rotation === 0 || rotation === 180) {
-          cells.push([row, col], [row, col + 1], [row, col + 2], [row, col + 3]);
-        } else {
-          cells.push([row, col], [row + 1, col], [row + 2, col], [row + 3, col]);
-        }
-      }
+      // Base coordinates for horizontal straight piece
+      cells.push(
+        [row, col],
+        [row, col + 1],
+        [row, col + 2],
+        [row, col + 3]
+      );
       break;
       
     case 'T':
-      if (rotation === 0) {
-        cells.push([row, col], [row, col + 1], [row, col + 2], [row + 1, col + 1]);
-      } else if (rotation === 90) {
-        cells.push([row - 1, col], [row, col], [row + 1, col], [row, col + 1]);
-      } else if (rotation === 180) {
-        cells.push([row - 1, col + 1], [row, col], [row, col + 1], [row, col + 2]);
-      } else { // 270
-        cells.push([row - 1, col], [row, col - 1], [row, col], [row + 1, col]);
-      }
+      // Base coordinates for T piece (stem down)
+      cells.push(
+        [row, col + 1], // center
+        [row, col],     // left
+        [row, col + 2], // right
+        [row + 1, col + 1] // bottom
+      );
       break;
       
     case 'square':
-      cells.push([row, col], [row, col + 1], [row + 1, col], [row + 1, col + 1]);
-      break;
+      // Square piece doesn't need transformation
+      cells.push(
+        [row, col],
+        [row, col + 1],
+        [row + 1, col],
+        [row + 1, col + 1]
+      );
+      return cells;
       
     case 'L':
-      if (rotation === 0) {
-        cells.push(
-          [row, col],
-          [row + 1, col],
-          [row + 2, col],
-          [row + 2, col + (isReflected ? -1 : 1)]
-        );
-      } else if (rotation === 90) {
-        if (isReflected) {
-          cells.push(
-            [row, col],
-            [row, col + 1],
-            [row, col + 2],
-            [row + 1, col]
-          );
-        } else {
-          cells.push(
-            [row, col],
-            [row, col + 1],
-            [row, col + 2],
-            [row - 1, col]
-          );
-        }
-      } else if (rotation === 180) {
-        cells.push(
-          [row, col],
-          [row - 1, col],
-          [row - 2, col],
-          [row - 2, col + (isReflected ? 1 : -1)]
-        );
-      } else {
-        if (isReflected) {
-          cells.push(
-            [row, col],
-            [row, col + 1],
-            [row, col + 2],
-            [row - 1, col + 2]
-          );
-        } else {
-          cells.push(
-            [row, col],
-            [row, col + 1],
-            [row, col + 2],
-            [row + 1, col + 2]
-          );
-        }
-      }
+      // Base coordinates for L piece
+      cells.push(
+        [row, col],     // top of vertical
+        [row + 1, col], // middle of vertical
+        [row + 2, col], // bottom of vertical
+        [row + 2, col + 1] // horizontal piece
+      );
       break;
       
     case 'skew':
-      if (rotation === 0 || rotation === 180) {
-        cells.push(
-          [row, col],
-          [row, col + 1],
-          [row + 1, col + 1],
-          [row + 1, col + 2]
-        );
-      } else {
-        cells.push(
-          [row, col],
-          [row + 1, col],
-          [row + 1, col - 1],
-          [row + 2, col - 1]
-        );
-      }
+      // Base coordinates for skew piece
+      cells.push(
+        [row, col],
+        [row, col + 1],
+        [row + 1, col + 1],
+        [row + 1, col + 2]
+      );
       break;
+  }
+  
+  // Don't transform square piece
+  if (type !== 'square') {
+    // Find center point for rotation
+    const centerX = col + 1;
+    const centerY = row + 1;
+    
+    // Transform all coordinates
+    return cells.map(([y, x]) => transformCoords(x, y, centerX, centerY));
   }
   
   return cells;
