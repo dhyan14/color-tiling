@@ -76,7 +76,7 @@ const TPieceRotations: React.FC = () => (
 );
 
 const TetrominoOption: React.FC<{ rotation: number; isSelected: boolean; onClick: () => void }> = ({ rotation, isSelected, onClick }) => {
-  const baseStyle = "w-[80px] h-[80px] relative transition-all hover:scale-105";
+  const baseStyle = "w-[80px] h-[100px] relative transition-all hover:scale-105";
   const colorStyle = isSelected ? "text-blue-600" : "text-gray-500";
   
   const getTetrominoCells = () => {
@@ -95,37 +95,37 @@ const TetrominoOption: React.FC<{ rotation: number; isSelected: boolean; onClick
       case 180: // First piece - T pointing up
         return (
           <>
-            <DominoCell className={`${cellStyle} left-[24px] top-[42px]`} />
-            <DominoCell className={`${cellStyle} left-[4px] top-[22px]`} />
-            <DominoCell className={`${cellStyle} left-[24px] top-[22px]`} />
-            <DominoCell className={`${cellStyle} left-[44px] top-[22px]`} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[62px]`} />
+            <DominoCell className={`${cellStyle} left-[4px] top-[32px]`} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[32px]`} />
+            <DominoCell className={`${cellStyle} left-[44px] top-[32px]`} />
           </>
         );
       case 90: // Second piece - T pointing left
         return (
           <>
             <DominoCell className={`${cellStyle} left-[24px] top-[2px]`} />
-            <DominoCell className={`${cellStyle} left-[24px] top-[22px]`} />
-            <DominoCell className={`${cellStyle} left-[24px] top-[42px]`} />
-            <DominoCell className={`${cellStyle} left-[4px] top-[22px]`} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[32px]`} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[62px]`} />
+            <DominoCell className={`${cellStyle} left-[4px] top-[32px]`} />
           </>
         );
       case 0: // Third piece - T pointing down
         return (
           <>
             <DominoCell className={`${cellStyle} left-[24px] top-[2px]`} />
-            <DominoCell className={`${cellStyle} left-[4px] top-[22px]`} />
-            <DominoCell className={`${cellStyle} left-[24px] top-[22px]`} />
-            <DominoCell className={`${cellStyle} left-[44px] top-[22px]`} />
+            <DominoCell className={`${cellStyle} left-[4px] top-[32px]`} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[32px]`} />
+            <DominoCell className={`${cellStyle} left-[44px] top-[32px]`} />
           </>
         );
       case 270: // Fourth piece - T pointing right
         return (
           <>
             <DominoCell className={`${cellStyle} left-[24px] top-[2px]`} />
-            <DominoCell className={`${cellStyle} left-[24px] top-[22px]`} />
-            <DominoCell className={`${cellStyle} left-[24px] top-[42px]`} />
-            <DominoCell className={`${cellStyle} left-[44px] top-[22px]`} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[32px]`} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[62px]`} />
+            <DominoCell className={`${cellStyle} left-[44px] top-[32px]`} />
           </>
         );
       default:
