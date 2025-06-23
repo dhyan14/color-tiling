@@ -125,23 +125,32 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
   // Map visual rotation to actual rotation for placement
   const visualToActualRotation = {
     0: 0,
-    90: 270,    // When user clicks 90, we use 270 placement
+    90: 90,
     180: 180,
-    270: 90     // When user clicks 270, we use 90 placement
+    270: 270
   };
   
   const actualRotation = visualToActualRotation[rotation as keyof typeof visualToActualRotation];
   
   switch (type) {
     case 'straight':
-      if (actualRotation === 0) {
-        cells.push([row, col], [row, col + 1], [row, col + 2], [row, col + 3]);
-      } else if (actualRotation === 90) {
-        cells.push([row, col], [row + 1, col], [row + 2, col], [row + 3, col]);
-      } else if (actualRotation === 180) {
-        cells.push([row, col - 3], [row, col - 2], [row, col - 1], [row, col]);
-      } else { // 270
-        cells.push([row - 3, col], [row - 2, col], [row - 1, col], [row, col]);
+      // Only horizontal (0 degrees) and vertical (90 degrees)
+      if (actualRotation === 0 || actualRotation === 180) {
+        // Horizontal
+        cells.push(
+          [row, col],
+          [row, col + 1],
+          [row, col + 2],
+          [row, col + 3]
+        );
+      } else {
+        // Vertical
+        cells.push(
+          [row, col],
+          [row + 1, col],
+          [row + 2, col],
+          [row + 3, col]
+        );
       }
       break;
       
@@ -164,13 +173,25 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
     case 'L':
       let baseL: [number, number][];
       if (actualRotation === 0) {
-        baseL = [[row, col], [row + 1, col], [row + 2, col], [row + 2, col + (isReflected ? -1 : 1)]];
+        // Base L shape (⌞)
+        baseL = isReflected ? 
+          [[row, col + 2], [row + 1, col + 2], [row + 2, col + 2], [row + 2, col + 1]] :  // Reflected (⌜)
+          [[row, col], [row + 1, col], [row + 2, col], [row + 2, col + 1]];               // Normal (⌞)
       } else if (actualRotation === 90) {
-        baseL = [[row, col], [row, col + 1], [row, col + 2], [row + (isReflected ? -1 : 1), col]];
+        // Rotated 90° clockwise
+        baseL = isReflected ?
+          [[row + 1, col], [row + 1, col + 1], [row + 1, col + 2], [row, col + 2]] :     // Reflected (⌝_)
+          [[row, col], [row, col + 1], [row, col + 2], [row + 1, col]];                  // Normal (_⌟)
       } else if (actualRotation === 180) {
-        baseL = [[row, col], [row - 1, col], [row - 2, col], [row - 2, col + (isReflected ? -1 : 1)]];
+        // Rotated 180°
+        baseL = isReflected ?
+          [[row - 2, col + 1], [row - 2, col + 2], [row - 1, col + 2], [row, col + 2]] : // Reflected (⌝)
+          [[row - 2, col], [row - 2, col + 1], [row - 1, col], [row, col]];              // Normal (⌜)
       } else { // 270
-        baseL = [[row, col], [row, col - 1], [row, col - 2], [row + (isReflected ? -1 : 1), col]];
+        // Rotated 270° clockwise
+        baseL = isReflected ?
+          [[row - 1, col], [row, col], [row, col + 1], [row, col + 2]] :                 // Reflected (⌞_)
+          [[row, col], [row - 1, col + 2], [row, col + 1], [row, col + 2]];             // Normal (_⌝)
       }
       cells.push(...baseL);
       break;

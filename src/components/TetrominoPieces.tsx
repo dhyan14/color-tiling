@@ -17,10 +17,12 @@ export const StraightPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isSelecte
     <div className={`${className} bg-white ${borders} border-black`} />
   );
 
+  // Only show horizontal for 0/180 and vertical for 90/270
+  const isVertical = rotation === 90 || rotation === 270;
+
   return (
-    <div className="relative w-[48px] h-[48px] sm:w-[80px] sm:h-[80px] transition-transform hover:scale-105" 
-         style={{ transform: `rotate(${rotation}deg)` }}>
-      {rotation === 0 ? (
+    <div className="relative w-[48px] h-[48px] sm:w-[80px] sm:h-[80px] transition-transform hover:scale-105">
+      {!isVertical ? (
         // Horizontal orientation
         <>
           <DominoCell
@@ -144,6 +146,7 @@ export const LPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isReflected = fa
   return (
     <div className="relative w-[36px] h-[36px] sm:w-[60px] sm:h-[60px] transition-transform hover:scale-105" 
          style={containerStyle}>
+      {/* Base vertical line */}
       <DominoCell
         className={`${baseCell} left-[0px] top-[0px]`}
         borders="border-[2px] sm:border-[3px]"
@@ -156,6 +159,7 @@ export const LPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isReflected = fa
         className={`${baseCell} left-[0px] top-[24px] sm:top-[40px]`}
         borders="border-[2px] sm:border-[3px] border-t-0"
       />
+      {/* Horizontal piece */}
       <DominoCell
         className={`${baseCell} left-[12px] sm:left-[20px] top-[24px] sm:top-[40px]`}
         borders="border-[2px] sm:border-[3px] border-l-0"
