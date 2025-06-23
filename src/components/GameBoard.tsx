@@ -75,58 +75,70 @@ const TPieceRotations: React.FC = () => (
   </div>
 );
 
-const TetrominoOption: React.FC<{ rotation: number; isSelected: boolean; onClick: () => void }> = ({ rotation, isSelected, onClick }) => {
+interface TetrominoOptionProps {
+  rotation: number;
+  isSelected: boolean;
+  onClick: () => void;
+}
+
+const TetrominoOption: React.FC<TetrominoOptionProps> = ({ rotation, isSelected, onClick }) => {
   const baseStyle = "w-[80px] h-[140px] relative transition-all hover:scale-105";
   const colorStyle = isSelected ? "text-blue-600" : "text-gray-500";
   
   const getTetrominoCells = () => {
-    // Create a domino-style piece with two connected squares
-    const dominoContainer = "w-[64px] h-[32px] absolute rounded-lg border-[3px] flex";
-    const containerStyle = `${dominoContainer} ${isSelected ? "border-blue-600" : "border-gray-500"}`;
-    const dotStyle = `absolute w-[8px] h-[8px] rounded-full ${isSelected ? "bg-blue-600" : "bg-gray-500"}`;
+    const dominoStyle = `w-[64px] h-[32px] absolute rounded-lg border-[3px] flex ${isSelected ? "border-blue-600" : "border-gray-500"}`;
+    const dotStyle = `w-[8px] h-[8px] rounded-full ${isSelected ? "bg-blue-600" : "bg-gray-500"}`;
     
-    const DominoPiece = ({ className, vertical = false }: { className: string, vertical?: boolean }) => (
-      <div className={`${containerStyle} ${className} ${vertical ? 'flex-col h-[64px] w-[32px]' : ''}`}>
-        <div className="relative flex-1 border-r-[3px] border-inherit">
-          <div className={dotStyle} style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }} />
+    const DominoPiece: React.FC<{ top: number; left: number; vertical?: boolean }> = ({ top, left, vertical = false }) => (
+      <div 
+        className={`${dominoStyle} ${vertical ? 'flex-col h-[64px] w-[32px]' : ''}`} 
+        style={{ left: `${left}px`, top: `${top}px` }}
+      >
+        <div className={`relative flex-1 ${vertical ? 'border-b-[3px]' : 'border-r-[3px]'} border-inherit flex items-center justify-center`}>
+          <div className={dotStyle} />
         </div>
-        <div className="relative flex-1">
-          <div className={dotStyle} style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }} />
+        <div className="relative flex-1 flex items-center justify-center">
+          <div className={dotStyle} />
         </div>
       </div>
     );
-    
+
+    // Arrange domino pieces based on rotation
     switch(rotation) {
-      case 180: // First piece - T pointing up
+      case 180: // T pointing up
         return (
           <>
-            <DominoPiece className="left-[8px] top-[0px]" />
-            <DominoPiece className="left-[8px] top-[40px]" />
-            <DominoPiece className="left-[8px] top-[80px]" />
+            <DominoPiece top={0} left={24} />
+            <DominoPiece top={40} left={8} />
+            <DominoPiece top={40} left={24} />
+            <DominoPiece top={40} left={40} />
           </>
         );
-      case 90: // Second piece - T pointing left
+      case 90: // T pointing left
         return (
           <>
-            <DominoPiece className="left-[8px] top-[0px]" />
-            <DominoPiece className="left-[8px] top-[40px]" />
-            <DominoPiece className="left-[8px] top-[80px]" />
+            <DominoPiece top={0} left={24} vertical />
+            <DominoPiece top={40} left={24} vertical />
+            <DominoPiece top={80} left={24} vertical />
+            <DominoPiece top={40} left={0} />
           </>
         );
-      case 0: // Third piece - T pointing down
+      case 0: // T pointing down
         return (
           <>
-            <DominoPiece className="left-[8px] top-[0px]" />
-            <DominoPiece className="left-[8px] top-[40px]" />
-            <DominoPiece className="left-[8px] top-[80px]" />
+            <DominoPiece top={80} left={24} />
+            <DominoPiece top={40} left={8} />
+            <DominoPiece top={40} left={24} />
+            <DominoPiece top={40} left={40} />
           </>
         );
-      case 270: // Fourth piece - T pointing right
+      case 270: // T pointing right
         return (
           <>
-            <DominoPiece className="left-[8px] top-[0px]" />
-            <DominoPiece className="left-[8px] top-[40px]" />
-            <DominoPiece className="left-[8px] top-[80px]" />
+            <DominoPiece top={0} left={24} vertical />
+            <DominoPiece top={40} left={24} vertical />
+            <DominoPiece top={80} left={24} vertical />
+            <DominoPiece top={40} left={32} />
           </>
         );
       default:
