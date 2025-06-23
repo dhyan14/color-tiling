@@ -637,123 +637,215 @@ export default function GameBoard() {
   };
 
   return (
-    <div className="flex flex-col items-center space-y-4 w-full max-w-lg px-2 sm:px-4">
-      {!showPasswordModal && currentPuzzle.requiresPassword ? (
-        <div className="w-full max-w-sm p-4 bg-white rounded-lg shadow-md">
-          <h2 className="text-lg sm:text-xl font-semibold mb-4">Enter Password</h2>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter password"
-          />
-          <button
-            onClick={handlePasswordSubmit}
-            className="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
-            Submit
-          </button>
+    <div className="flex flex-col items-center gap-6 px-2 sm:px-0 max-w-full overflow-x-hidden">
+      <h2 className="text-lg sm:text-xl font-bold text-gray-700 text-center">
+        Puzzle {puzzleIndex + 1}: {currentPuzzle.description}
+      </h2>
+
+      {showSuccess && (
+        <div className="flex flex-col items-center gap-4">
+          <div className="bg-green-100 text-green-700 px-4 sm:px-6 py-3 rounded-lg text-base sm:text-lg font-semibold animate-bounce text-center">
+            🎉 Congratulations! You've completed the puzzle! 🎉
+          </div>
+          {puzzleIndex + 1 < PUZZLES.length && !currentPuzzle.requiresPassword && (
+            <button
+              onClick={handleNextPuzzle}
+              className="px-4 sm:px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+            >
+              Next Puzzle →
+            </button>
+          )}
         </div>
-      ) : (
-        <>
-          <div className="w-full bg-white rounded-lg shadow-md p-4">
-            <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-              <div className="text-sm sm:text-base mb-2 sm:mb-0">
-                {currentPuzzle.useTetromino
-                  ? `T-Pieces placed: ${currentState.dominoesPlaced}/${currentPuzzle.maxDominoes}`
-                  : `Dominoes placed: ${currentState.dominoesPlaced}/${currentPuzzle.maxDominoes}`}
-              </div>
-              <div className="flex space-x-2">
-                <button
-                  onClick={handleUndo}
-                  disabled={history.length === 0}
-                  className="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
-                >
-                  Undo
-                </button>
-                <button
-                  onClick={handleRedo}
-                  disabled={future.length === 0}
-                  className="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
-                >
-                  Redo
-                </button>
-                <button
-                  onClick={handleReset}
-                  className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
-                >
-                  Reset
-                </button>
-              </div>
-            </div>
+      )}
 
-            {currentPuzzle.useTetromino && (
-              <div className="mb-4">
-                <h3 className="text-sm sm:text-base font-medium mb-2">Select T-Piece Rotation:</h3>
-                <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
-                  {[0, 90, 180, 270].map((rot) => (
-                    <TetrominoOption
-                      key={rot}
-                      rotation={rot}
-                      isSelected={selectedRotation === rot}
-                      onClick={() => setSelectedRotation(rot)}
-                    />
-                  ))}
-                </div>
-              </div>
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow-xl w-full max-w-sm">
+            <h3 className="text-lg font-semibold mb-4">Enter Password</h3>
+            <input
+              type="text"
+              maxLength={4}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setPasswordError(false);
+              }}
+              className="border-2 border-gray-300 rounded px-3 py-2 mb-4 w-full focus:border-blue-500 outline-none"
+              placeholder="Enter 4-digit password"
+            />
+            {passwordError && (
+              <p className="text-red-500 text-sm mb-4">Incorrect password. Please try again.</p>
             )}
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowPasswordModal(false);
+                  setPassword('');
+                  setPasswordError(false);
+                }}
+                className="px-3 sm:px-4 py-2 text-gray-600 hover:text-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handlePasswordSubmit}
+                className="px-3 sm:px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
-            <div className="grid gap-0.5 sm:gap-1 p-2 bg-gray-100 rounded-lg overflow-x-auto">
-              {currentState.grid.map((row, rowIndex) => (
-                <div key={rowIndex} className="flex">
-                  {row.map((cell, colIndex) => {
-                    const cellSize = currentPuzzle.gridSize === 8
-                      ? "w-[30px] h-[30px] sm:w-[40px] sm:h-[40px]"
-                      : "w-[35px] h-[35px] sm:w-[50px] sm:h-[50px]";
-                    return (
-                      <div
-                        key={colIndex}
-                        onClick={() => handleCellClick(rowIndex, colIndex)}
-                        className={`
-                          ${cellSize}
-                          ${cell.isBlocked ? 'bg-gray-400' : cell.isOccupied ? getRandomColor(cell.dominoId!) : 'bg-white hover:bg-gray-100'}
-                          border border-gray-300
-                          flex items-center justify-center
-                          cursor-pointer
-                          transition-colors
-                          relative
-                        `}
-                      >
-                        {cell.isOccupied && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-2 h-2 rounded-full bg-white opacity-60" />
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+      {errorMessage && (
+        <div className="bg-red-100 text-red-700 px-4 sm:px-6 py-3 rounded-lg text-center">
+          {errorMessage}
+        </div>
+      )}
+
+      {currentPuzzle.useTetromino ? (
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+            <span className="text-gray-700 text-sm sm:text-base">Select T-piece rotation:</span>
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
+              {[0, 90, 180, 270].map((rotation) => (
+                <TetrominoOption
+                  key={rotation}
+                  rotation={rotation}
+                  isSelected={selectedRotation === rotation}
+                  onClick={() => setSelectedRotation(rotation)}
+                />
               ))}
             </div>
           </div>
-
-          {showSuccess && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-              <div className="bg-white p-4 rounded-lg shadow-lg text-center">
-                <h2 className="text-xl font-bold mb-4">Congratulations!</h2>
-                <p className="mb-4">You've completed the puzzle!</p>
-                <button
-                  onClick={handleNextPuzzle}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                  Next Puzzle
-                </button>
-              </div>
+          {currentPuzzle.useSquareTetromino && (
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+              <span className="text-gray-700 text-sm sm:text-base">Square piece (one-time use):</span>
+              <button
+                onClick={() => setSelectedRotation(-1)}
+                className={`w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] relative transition-all hover:scale-105 ${
+                  selectedRotation === -1 ? "text-blue-600" : "text-gray-500"
+                } transform hover:shadow-xl ${
+                  squareTetrominoUsed ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={squareTetrominoUsed}
+              >
+                <SquarePiece />
+              </button>
             </div>
           )}
-        </>
+        </div>
+      ) : (
+        <div className="flex gap-4 sm:gap-8 mb-4 justify-center">
+          <button
+            onClick={() => setSelectedOrientation('horizontal')}
+            className={`p-2 rounded transition-all ${
+              selectedOrientation === 'horizontal'
+                ? 'bg-blue-100 text-blue-600 scale-110'
+                : 'text-gray-400 hover:text-gray-600'
+            }`}
+            title="Place horizontal domino"
+          >
+            <div className="w-[45px] h-[25px] sm:w-[60px] sm:h-[30px] border-2 border-current rounded-lg relative">
+              <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-current"/>
+              <div className="absolute left-[25%] top-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-current"/>
+              <div className="absolute left-[75%] top-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-current"/>
+            </div>
+          </button>
+          <button
+            onClick={() => setSelectedOrientation('vertical')}
+            className={`p-2 rounded transition-all ${
+              selectedOrientation === 'vertical'
+                ? 'bg-blue-100 text-blue-600 scale-110'
+                : 'text-gray-400 hover:text-gray-600'
+            }`}
+            title="Place vertical domino"
+          >
+            <div className="w-[25px] h-[45px] sm:w-[30px] sm:h-[60px] border-2 border-current rounded-lg relative">
+              <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-current"/>
+              <div className="absolute left-1/2 top-[25%] -translate-x-1/2 -translate-y-1/2 w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-current"/>
+              <div className="absolute left-1/2 top-[75%] -translate-x-1/2 -translate-y-1/2 w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-current"/>
+            </div>
+          </button>
+        </div>
       )}
+
+      <div className={`grid gap-0.5 sm:gap-1 bg-gray-200 p-2 rounded overflow-x-auto max-w-full ${
+        currentPuzzle.gridSize === 8 ? 'grid-cols-8' : 'grid-cols-6'
+      }`}>
+        {currentState.grid.map((row, rowIndex) => (
+          <div key={rowIndex} className="flex">
+            {row.map((cell, colIndex) => (
+              <div
+                key={`${rowIndex}-${colIndex}`}
+                onClick={() => handleCellClick(rowIndex, colIndex)}
+                className={`
+                  ${currentPuzzle.gridSize === 8 
+                    ? 'w-[30px] h-[30px] sm:w-[40px] sm:h-[40px]' 
+                    : 'w-[35px] h-[35px] sm:w-[48px] sm:h-[48px]'}
+                  ${cell.isBlocked
+                    ? 'bg-gray-800 cursor-not-allowed'
+                    : cell.isOccupied
+                      ? `${getRandomColor(cell.dominoId!)} cursor-not-allowed`
+                      : 'bg-white cursor-pointer hover:bg-gray-100'
+                  }
+                  transition-colors duration-200
+                  border border-gray-300
+                `}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+
+      <div className="flex flex-col items-center gap-4">
+        <p className="text-base sm:text-lg font-semibold text-center">
+          {currentPuzzle.useTetromino ? 'T-Pieces' : 'Dominoes'} Placed: {currentState.dominoesPlaced} / {currentPuzzle.maxDominoes}
+        </p>
+
+        <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
+          <button
+            onClick={handleUndo}
+            disabled={history.length === 0}
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded text-sm sm:text-base ${
+              history.length === 0
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-blue-500 text-white hover:bg-blue-600'
+            } transition-colors`}
+          >
+            ↩ Undo
+          </button>
+
+          <button
+            onClick={handleRedo}
+            disabled={future.length === 0}
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded text-sm sm:text-base ${
+              future.length === 0
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-blue-500 text-white hover:bg-blue-600'
+            } transition-colors`}
+          >
+            Redo ↪
+          </button>
+
+          <button
+            onClick={handleReset}
+            className="px-4 sm:px-6 py-1.5 sm:py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm sm:text-base"
+          >
+            Reset Game
+          </button>
+
+          {currentPuzzle.requiresPassword && (
+            <button
+              onClick={() => setShowPasswordModal(true)}
+              className="px-4 sm:px-6 py-1.5 sm:py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors text-sm sm:text-base"
+            >
+              I Completed the Puzzle
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 } 
