@@ -464,10 +464,25 @@ export default function GameBoard() {
         }
       }
       
-      // Check if the piece type has already been used
-      if (currentState.usedTetrominoTypes?.includes(selectedType)) {
-        setErrorMessage(`${selectedType} piece has already been used!`);
-        return;
+      // Only check for single use if it's not a straight piece in puzzle 7
+      const isStraightInPuzzle7 = selectedType === 'straight' && 
+                                 currentPuzzle.tetrominoTypes?.length === 2 && 
+                                 currentPuzzle.tetrominoTypes.includes('straight') && 
+                                 currentPuzzle.tetrominoTypes.includes('square');
+                                   
+      if (!isStraightInPuzzle7) {
+        // Check if the piece type has already been used
+        if (currentState.usedTetrominoTypes?.includes(selectedType)) {
+          setErrorMessage(`${selectedType} piece has already been used!`);
+          return;
+        }
+      } else {
+        // For straight pieces in puzzle 7, check if we've used all 8
+        const straightPiecesUsed = currentState.usedTetrominoTypes?.filter(t => t === 'straight').length || 0;
+        if (straightPiecesUsed >= 8) {
+          setErrorMessage("All straight pieces have been used!");
+          return;
+        }
       }
       
       const rotation = selectedRotation;
@@ -519,8 +534,16 @@ export default function GameBoard() {
         usedTetrominoTypes: newUsedTypes
       });
       
-      // Update available types
-      setAvailableTetrominoTypes(prev => prev.filter(t => !newUsedTypes.includes(t)));
+      // Only remove straight piece from available types if we've used all 8
+      if (isStraightInPuzzle7) {
+        const straightPiecesUsed = newUsedTypes.filter(t => t === 'straight').length;
+        if (straightPiecesUsed >= 8) {
+          setAvailableTetrominoTypes(prev => prev.filter(t => t !== 'straight'));
+        }
+      } else {
+        // For other pieces, remove them after first use
+        setAvailableTetrominoTypes(prev => prev.filter(t => !newUsedTypes.includes(t)));
+      }
       
       // Reset selection after placing a piece
       setSelectedTetrominoType(null);
@@ -759,7 +782,9 @@ export default function GameBoard() {
     setSelectedTetrominoType(null);
     setSelectedRotation(0);
     setSelectedIsReflected(false);
-    setAvailableTetrominoTypes(['straight', 'T', 'square', 'L', 'skew']);
+    setSquareTetrominoUsed(false);
+    // Only reset to available piece types for the current puzzle
+    setAvailableTetrominoTypes(currentPuzzle.tetrominoTypes || ['straight', 'T', 'square', 'L', 'skew']);
     setErrorMessage('');
   };
 
