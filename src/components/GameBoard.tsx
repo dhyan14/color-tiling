@@ -105,12 +105,12 @@ interface TetrominoOptionProps {
 
 const TetrominoOption: FC<TetrominoOptionProps> = ({ rotation, isSelected, onClick }) => {
   const baseStyle = "w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] relative transition-all hover:scale-105";
-  const colorStyle = isSelected ? "text-blue-600" : "text-gray-500";
+  const colorStyle = isSelected ? "text-blue-600 ring-2 ring-blue-500" : "text-gray-500";
   
   return (
     <button
       onClick={onClick}
-      className={`${baseStyle} ${colorStyle} flex items-center justify-center p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+      className={`${baseStyle} ${colorStyle} flex items-center justify-center p-2 rounded-lg focus:outline-none`}
     >
       <div className="relative w-full h-full">
         <TPiece rotation={rotation} isSelected={isSelected} />
@@ -139,11 +139,11 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
       if (rotation === 0) {
         cells.push([row, col], [row, col + 1], [row, col + 2], [row + 1, col + 1]);
       } else if (rotation === 90) {
-        cells.push([row - 1, col + 1], [row, col], [row, col + 1], [row + 1, col + 1]);
+        cells.push([row, col], [row + 1, col], [row + 2, col], [row + 1, col + 1]);
       } else if (rotation === 180) {
-        cells.push([row - 1, col + 1], [row, col], [row, col + 1], [row, col + 2]);
+        cells.push([row, col], [row, col + 1], [row, col + 2], [row - 1, col + 1]);
       } else { // 270
-        cells.push([row - 1, col], [row, col], [row, col + 1], [row + 1, col]);
+        cells.push([row, col], [row + 1, col], [row + 2, col], [row + 1, col - 1]);
       }
       break;
       
@@ -155,31 +155,49 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
       const baseL: [number, number][] = rotation === 0 ? [
         [row, col], [row + 1, col], [row + 2, col], [row + 2, col + 1]
       ] : rotation === 90 ? [
-        [row, col], [row, col + 1], [row, col + 2], [row - 1, col]
+        [row, col], [row, col + 1], [row, col + 2], [row + 1, col]
       ] : rotation === 180 ? [
-        [row - 2, col], [row - 2, col + 1], [row - 1, col + 1], [row, col + 1]
+        [row, col], [row - 1, col], [row - 2, col], [row - 2, col + 1]
       ] : [ // 270
-        [row, col], [row, col + 1], [row, col + 2], [row + 1, col + 2]
+        [row, col], [row, col + 1], [row, col + 2], [row - 1, col + 2]
       ];
       
-      if (isReflected) {
-        cells.push(...baseL.map(([r, c]): [number, number] => [r, 2 * col + 1 - c]));
+      // For 90-degree rotation, swap the reflection logic
+      if (rotation === 90) {
+        if (isReflected) {
+          cells.push(...baseL);
+        } else {
+          cells.push(...baseL.map(([r, c]): [number, number] => [r, 2 * col + 2 - c]));
+        }
       } else {
-        cells.push(...baseL);
+        if (isReflected) {
+          cells.push(...baseL.map(([r, c]): [number, number] => [r, 2 * col + 1 - c]));
+        } else {
+          cells.push(...baseL);
+        }
       }
       break;
       
     case 'skew':
       const baseSkew: [number, number][] = rotation === 0 || rotation === 180 ? [
-        [row, col + 1], [row, col + 2], [row + 1, col], [row + 1, col + 1]
+        [row, col], [row, col + 1], [row + 1, col + 1], [row + 1, col + 2]
       ] : [ // 90 or 270
-        [row - 1, col], [row, col], [row, col + 1], [row + 1, col + 1]
+        [row, col], [row + 1, col], [row + 1, col - 1], [row + 2, col - 1]
       ];
       
-      if (isReflected) {
-        cells.push(...baseSkew.map(([r, c]): [number, number] => [r, 2 * col + 1 - c]));
+      // For 90-degree rotation, swap the reflection logic
+      if (rotation === 90 || rotation === 270) {
+        if (isReflected) {
+          cells.push(...baseSkew);
+        } else {
+          cells.push(...baseSkew.map(([r, c]): [number, number] => [r, 2 * col - c]));
+        }
       } else {
-        cells.push(...baseSkew);
+        if (isReflected) {
+          cells.push(...baseSkew.map(([r, c]): [number, number] => [r, 2 * col + 2 - c]));
+        } else {
+          cells.push(...baseSkew);
+        }
       }
       break;
   }
@@ -763,7 +781,6 @@ export default function GameBoard() {
       {currentPuzzle.useTetromino ? (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-            <span className="text-gray-700 text-sm sm:text-base">Select T-piece rotation:</span>
             <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
               {[0, 90, 180, 270].map((rotation) => (
                 <TetrominoOption
@@ -781,7 +798,7 @@ export default function GameBoard() {
               <button
                 onClick={() => setSelectedRotation(-1)}
                 className={`w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] relative transition-all hover:scale-105 ${
-                  selectedRotation === -1 ? "text-blue-600" : "text-gray-500"
+                  selectedRotation === -1 ? "text-blue-600 ring-2 ring-blue-500" : "text-gray-500"
                 } transform hover:shadow-xl ${
                   squareTetrominoUsed ? "opacity-50 cursor-not-allowed" : ""
                 }`}
