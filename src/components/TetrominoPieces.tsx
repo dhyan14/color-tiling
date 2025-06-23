@@ -148,6 +148,8 @@ export const LPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isReflected = fa
   let cells: { className: string; borders: string }[] = [];
 
   if (rotation === 0) {
+    // L-0: ┗
+    // L-0-swap: ┛ (reflected)
     cells = [
       { 
         className: `${baseCell} left-[0px] top-[0px]`,
@@ -167,25 +169,29 @@ export const LPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isReflected = fa
       }
     ];
   } else if (rotation === 90) {
+    // L-90: ┌
+    // L-90-swap: └ (reflected)
     cells = [
       { 
-        className: `${baseCell} left-[0px] top-[12px] sm:top-[20px]`,
+        className: `${baseCell} left-[24px] sm:left-[40px] top-[0px]`,
         borders: "border-[2px] sm:border-[3px]"
       },
       { 
-        className: `${baseCell} left-[12px] sm:left-[20px] top-[12px] sm:top-[20px]`,
+        className: `${baseCell} left-[0px] top-[0px]`,
+        borders: "border-[2px] sm:border-[3px]"
+      },
+      { 
+        className: `${baseCell} left-[12px] sm:left-[20px] top-[0px]`,
         borders: "border-[2px] sm:border-[3px] border-l-0"
       },
       { 
-        className: `${baseCell} left-[24px] sm:left-[40px] top-[12px] sm:top-[20px]`,
-        borders: "border-[2px] sm:border-[3px] border-l-0"
-      },
-      { 
-        className: `${baseCell} left-[0px] top-[${isReflected ? '0px' : '24px'} sm:top-[${isReflected ? '0px' : '40px'}]`,
+        className: `${baseCell} left-[24px] sm:left-[40px] top-[${isReflected ? '12px' : '-12px'}] sm:top-[${isReflected ? '20px' : '-20px'}]`,
         borders: "border-[2px] sm:border-[3px]"
       }
     ];
   } else if (rotation === 180) {
+    // L-180: ┏
+    // L-180-swap: ┓ (reflected)
     cells = [
       { 
         className: `${baseCell} left-[0px] top-[24px] sm:top-[40px]`,
@@ -205,21 +211,23 @@ export const LPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isReflected = fa
       }
     ];
   } else { // 270
+    // L-270: ┐
+    // L-270-swap: ┘ (reflected)
     cells = [
       { 
-        className: `${baseCell} left-[0px] top-[12px] sm:top-[20px]`,
+        className: `${baseCell} left-[0px] top-[0px]`,
         borders: "border-[2px] sm:border-[3px]"
       },
       { 
-        className: `${baseCell} left-[12px] sm:left-[20px] top-[12px] sm:top-[20px]`,
+        className: `${baseCell} left-[12px] sm:left-[20px] top-[0px]`,
         borders: "border-[2px] sm:border-[3px] border-l-0"
       },
       { 
-        className: `${baseCell} left-[24px] sm:left-[40px] top-[12px] sm:top-[20px]`,
+        className: `${baseCell} left-[24px] sm:left-[40px] top-[0px]`,
         borders: "border-[2px] sm:border-[3px] border-l-0"
       },
       { 
-        className: `${baseCell} left-[24px] sm:left-[40px] top-[${isReflected ? '24px' : '0px'} sm:top-[${isReflected ? '40px' : '0px'}]`,
+        className: `${baseCell} left-[0px] top-[${isReflected ? '12px' : '-12px'}] sm:top-[${isReflected ? '20px' : '-20px'}]`,
         borders: "border-[2px] sm:border-[3px]"
       }
     ];
