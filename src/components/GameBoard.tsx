@@ -126,8 +126,12 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
     case 'straight':
       if (rotation === 0) {
         cells.push([row, col], [row, col + 1], [row, col + 2], [row, col + 3]);
-      } else {
+      } else if (rotation === 90) {
         cells.push([row, col], [row + 1, col], [row + 2, col], [row + 3, col]);
+      } else if (rotation === 180) {
+        cells.push([row, col], [row, col - 1], [row, col - 2], [row, col - 3]);
+      } else { // 270
+        cells.push([row, col], [row - 1, col], [row - 2, col], [row - 3, col]);
       }
       break;
       
@@ -135,11 +139,11 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
       if (rotation === 0) {
         cells.push([row, col], [row, col + 1], [row, col + 2], [row + 1, col + 1]);
       } else if (rotation === 90) {
-        cells.push([row, col + 1], [row + 1, col], [row + 1, col + 1], [row + 2, col + 1]);
+        cells.push([row - 1, col + 1], [row, col], [row, col + 1], [row + 1, col + 1]);
       } else if (rotation === 180) {
-        cells.push([row + 1, col], [row + 1, col + 1], [row + 1, col + 2], [row, col + 1]);
-      } else {
-        cells.push([row, col], [row + 1, col], [row + 2, col], [row + 1, col + 1]);
+        cells.push([row - 1, col + 1], [row, col], [row, col + 1], [row, col + 2]);
+      } else { // 270
+        cells.push([row - 1, col], [row, col], [row, col + 1], [row + 1, col]);
       }
       break;
       
@@ -151,11 +155,11 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
       const baseL: [number, number][] = rotation === 0 ? [
         [row, col], [row + 1, col], [row + 2, col], [row + 2, col + 1]
       ] : rotation === 90 ? [
-        [row + 1, col], [row + 1, col + 1], [row + 1, col + 2], [row, col]
+        [row, col], [row, col + 1], [row, col + 2], [row - 1, col]
       ] : rotation === 180 ? [
-        [row, col], [row, col + 1], [row + 1, col + 1], [row + 2, col + 1]
-      ] : [
-        [row + 1, col], [row, col + 2], [row + 1, col + 1], [row + 1, col + 2]
+        [row - 2, col], [row - 2, col + 1], [row - 1, col + 1], [row, col + 1]
+      ] : [ // 270
+        [row, col], [row, col + 1], [row, col + 2], [row + 1, col + 2]
       ];
       
       if (isReflected) {
@@ -166,10 +170,10 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
       break;
       
     case 'skew':
-      const baseSkew: [number, number][] = rotation === 0 ? [
+      const baseSkew: [number, number][] = rotation === 0 || rotation === 180 ? [
         [row, col + 1], [row, col + 2], [row + 1, col], [row + 1, col + 1]
-      ] : [
-        [row, col], [row + 1, col], [row + 1, col + 1], [row + 2, col + 1]
+      ] : [ // 90 or 270
+        [row - 1, col], [row, col], [row, col + 1], [row + 1, col + 1]
       ];
       
       if (isReflected) {
