@@ -54,11 +54,24 @@ const PUZZLES: PuzzleConfig[] = [
   }
 ];
 
-const TPiece = () => (
-  <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-80">
+const TPiece: React.FC<{ rotation?: number }> = ({ rotation = 0 }) => (
+  <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-80" style={{ transform: `rotate(${rotation}deg)` }}>
     <rect x="20" y="0" width="20" height="60" className="fill-current" />
     <rect x="0" y="20" width="60" height="20" className="fill-current" />
   </svg>
+);
+
+const TPieceRotations: React.FC = () => (
+  <div className="flex gap-8 items-center justify-center bg-gray-50 p-4 rounded-lg">
+    {[0, 90, 180, 270].map((rotation) => (
+      <div key={rotation} className="flex flex-col items-center">
+        <div className="text-blue-600">
+          <TPiece rotation={rotation} />
+        </div>
+        <span className="text-sm text-gray-600 mt-2">{rotation}°</span>
+      </div>
+    ))}
+  </div>
 );
 
 export default function GameBoard() {
@@ -370,9 +383,7 @@ export default function GameBoard() {
       {currentPuzzle.useTetromino ? (
         <div className="flex flex-col items-center gap-4">
           <p className="text-gray-600">Click on a cell to place the center of the T-piece</p>
-          <div className="text-blue-600">
-            <TPiece />
-          </div>
+          <TPieceRotations />
         </div>
       ) : (
         <div className="flex gap-8 mb-4">
