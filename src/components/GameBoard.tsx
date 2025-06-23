@@ -63,7 +63,8 @@ const PUZZLES: PuzzleConfig[] = [
     description: "Place T-shaped tetromino pieces on an 8x8 grid",
     useTetromino: true,
     requiresPassword: true,
-    password: "1618"
+    password: "1618",
+    tetrominoTypes: ['T']
   },
   {
     gridSize: 6,
@@ -72,7 +73,8 @@ const PUZZLES: PuzzleConfig[] = [
     description: "Place T-shaped tetromino pieces on a 6x6 grid",
     useTetromino: true,
     requiresPassword: true,
-    password: "1414"
+    password: "1414",
+    tetrominoTypes: ['T']
   },
   {
     gridSize: 8,
@@ -83,7 +85,8 @@ const PUZZLES: PuzzleConfig[] = [
     useSquareTetromino: true,
     maxSquareTetrominoes: 1,
     requiresPassword: true,
-    password: "1732"
+    password: "1732",
+    tetrominoTypes: ['T', 'square']
   },
   {
     gridSize: 4,
@@ -400,7 +403,17 @@ export default function GameBoard() {
       setSelectedRotation(0);
       setSelectedIsReflected(false);
       setSquareTetrominoUsed(false);
-      setAvailableTetrominoTypes(nextPuzzle.tetrominoTypes || ['straight', 'T', 'square', 'L', 'skew']);
+      if (nextPuzzle.tetrominoTypes) {
+        setAvailableTetrominoTypes(nextPuzzle.tetrominoTypes);
+      } else if (nextPuzzle.useTetromino) {
+        if (nextPuzzle.useSquareTetromino) {
+          setAvailableTetrominoTypes(['T', 'square']);
+        } else {
+          setAvailableTetrominoTypes(['T']);
+        }
+      } else {
+        setAvailableTetrominoTypes(['straight', 'T', 'square', 'L', 'skew']);
+      }
     } else {
       setPuzzleIndex(PUZZLES.length); // triggers thank you page
     }
@@ -813,8 +826,17 @@ export default function GameBoard() {
     setSelectedRotation(0);
     setSelectedIsReflected(false);
     setSquareTetrominoUsed(false);
-    // Only reset to available piece types for the current puzzle
-    setAvailableTetrominoTypes(currentPuzzle.tetrominoTypes || ['straight', 'T', 'square', 'L', 'skew']);
+    if (currentPuzzle.tetrominoTypes) {
+      setAvailableTetrominoTypes(currentPuzzle.tetrominoTypes);
+    } else if (currentPuzzle.useTetromino) {
+      if (currentPuzzle.useSquareTetromino) {
+        setAvailableTetrominoTypes(['T', 'square']);
+      } else {
+        setAvailableTetrominoTypes(['T']);
+      }
+    } else {
+      setAvailableTetrominoTypes(['straight', 'T', 'square', 'L', 'skew']);
+    }
     setErrorMessage('');
   };
 
