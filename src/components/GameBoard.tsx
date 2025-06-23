@@ -82,63 +82,56 @@ interface TetrominoOptionProps {
 }
 
 const TetrominoOption: React.FC<TetrominoOptionProps> = ({ rotation, isSelected, onClick }) => {
-  const baseStyle = "w-[80px] h-[140px] relative transition-all hover:scale-105";
+  const baseStyle = "w-[80px] h-[80px] relative transition-all hover:scale-105";
   const colorStyle = isSelected ? "text-blue-600" : "text-gray-500";
   
   const getTetrominoCells = () => {
-    const dominoStyle = `w-[64px] h-[32px] absolute rounded-lg border-[3px] flex ${isSelected ? "border-blue-600" : "border-gray-500"}`;
-    const dotStyle = `w-[8px] h-[8px] rounded-full ${isSelected ? "bg-blue-600" : "bg-gray-500"}`;
+    const cellSize = "w-[32px] h-[32px] rounded-xl";
+    const baseCell = `absolute ${cellSize}`;
+    const cellStyle = `${baseCell} bg-white border-[3px] ${isSelected ? "border-blue-600" : "border-gray-500"}`;
+    const dotStyle = `absolute w-[8px] h-[8px] rounded-full ${isSelected ? "bg-blue-600" : "bg-gray-500"}`;
     
-    const DominoPiece: React.FC<{ top: number; left: number; vertical?: boolean }> = ({ top, left, vertical = false }) => (
-      <div 
-        className={`${dominoStyle} ${vertical ? 'flex-col h-[64px] w-[32px]' : ''}`} 
-        style={{ left: `${left}px`, top: `${top}px` }}
-      >
-        <div className={`relative flex-1 ${vertical ? 'border-b-[3px]' : 'border-r-[3px]'} border-inherit flex items-center justify-center`}>
-          <div className={dotStyle} />
-        </div>
-        <div className="relative flex-1 flex items-center justify-center">
-          <div className={dotStyle} />
-        </div>
+    const DominoCell = ({ className }: { className: string }) => (
+      <div className={className}>
+        <div className={dotStyle} style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }} />
       </div>
     );
-
-    // Arrange domino pieces based on rotation
+    
     switch(rotation) {
-      case 180: // T pointing up
+      case 180: // First piece - T pointing up
         return (
           <>
-            <DominoPiece top={0} left={24} />
-            <DominoPiece top={40} left={8} />
-            <DominoPiece top={40} left={24} />
-            <DominoPiece top={40} left={40} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[42px]`} />
+            <DominoCell className={`${cellStyle} left-[4px] top-[22px]`} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[22px]`} />
+            <DominoCell className={`${cellStyle} left-[44px] top-[22px]`} />
           </>
         );
-      case 90: // T pointing left
+      case 90: // Second piece - T pointing left
         return (
           <>
-            <DominoPiece top={0} left={24} vertical />
-            <DominoPiece top={40} left={24} vertical />
-            <DominoPiece top={80} left={24} vertical />
-            <DominoPiece top={40} left={0} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[2px]`} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[22px]`} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[42px]`} />
+            <DominoCell className={`${cellStyle} left-[4px] top-[22px]`} />
           </>
         );
-      case 0: // T pointing down
+      case 0: // Third piece - T pointing down
         return (
           <>
-            <DominoPiece top={80} left={24} />
-            <DominoPiece top={40} left={8} />
-            <DominoPiece top={40} left={24} />
-            <DominoPiece top={40} left={40} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[2px]`} />
+            <DominoCell className={`${cellStyle} left-[4px] top-[22px]`} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[22px]`} />
+            <DominoCell className={`${cellStyle} left-[44px] top-[22px]`} />
           </>
         );
-      case 270: // T pointing right
+      case 270: // Fourth piece - T pointing right
         return (
           <>
-            <DominoPiece top={0} left={24} vertical />
-            <DominoPiece top={40} left={24} vertical />
-            <DominoPiece top={80} left={24} vertical />
-            <DominoPiece top={40} left={32} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[2px]`} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[22px]`} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[42px]`} />
+            <DominoCell className={`${cellStyle} left-[44px] top-[22px]`} />
           </>
         );
       default:
