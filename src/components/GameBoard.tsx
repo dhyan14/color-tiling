@@ -361,7 +361,8 @@ export default function GameBoard() {
   const [showSuccess, setShowSuccess] = useState(false);
 
   const handlePasswordSubmit = () => {
-    if (password === currentPuzzle.password) {
+    const cleanPassword = password.trim();
+    if (cleanPassword === currentPuzzle.password) {
       setShowPasswordModal(false);
       setPassword('');
       setPasswordError(false);
@@ -815,8 +816,13 @@ export default function GameBoard() {
               maxLength={4}
               value={password}
               onChange={(e) => {
-                setPassword(e.target.value);
+                setPassword(e.target.value.trim());
                 setPasswordError(false);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handlePasswordSubmit();
+                }
               }}
               className="border-2 border-gray-300 rounded px-3 py-2 mb-4 w-full focus:border-blue-500 outline-none"
               placeholder="Enter 4-digit password"
