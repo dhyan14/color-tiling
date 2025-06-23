@@ -1,20 +1,23 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
-import type { FC } from 'react';
+import React, { useState, useCallback, type FC } from 'react';
 
 type Cell = {
   isOccupied: boolean;
   dominoId: number | null;
-  orientation: 'horizontal' | 'vertical' | 'T' | 'square' | null;
+  orientation: 'horizontal' | 'vertical' | 'T' | 'square' | 'straight' | 'L' | 'skew' | null;
   isFirst: boolean;
   isBlocked?: boolean; // For blocked cells in puzzle 2
   rotation?: number; // Add rotation for T pieces
+  isReflected?: boolean;
 };
+
+type TetrominoType = 'straight' | 'T' | 'square' | 'L' | 'skew';
 
 type GameState = {
   grid: Cell[][];
   dominoesPlaced: number;
+  usedTetrominoTypes?: TetrominoType[];
 };
 
 type PuzzleConfig = {
@@ -27,6 +30,7 @@ type PuzzleConfig = {
   useTetromino?: boolean;
   useSquareTetromino?: boolean;
   maxSquareTetrominoes?: number;
+  tetrominoTypes?: TetrominoType[];
 };
 
 const PUZZLES: PuzzleConfig[] = [
@@ -77,6 +81,16 @@ const PUZZLES: PuzzleConfig[] = [
     maxSquareTetrominoes: 1,
     requiresPassword: true,
     password: "2236"
+  },
+  {
+    gridSize: 6,
+    maxDominoes: 5,
+    blockedCells: [],
+    description: "Place different Tetromino pieces (Straight, T, Square, L, and Skew) on a 6x6 grid",
+    useTetromino: true,
+    requiresPassword: true,
+    password: "1732",
+    tetrominoTypes: ['straight', 'T', 'square', 'L', 'skew']
   }
 ];
 
@@ -297,6 +311,271 @@ const SquarePiece: React.FC = () => {
   );
 };
 
+const StraightPiece: React.FC<{ rotation?: number }> = ({ rotation = 0 }) => {
+  const cellSize = "w-[15px] h-[15px] sm:w-[20px] sm:h-[20px]";
+  const baseCell = `absolute ${cellSize}`;
+  const dotStyle = "absolute w-[4px] h-[4px] sm:w-[6px] sm:h-[6px] rounded-full bg-current left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2";
+
+  const DominoCell = ({ className, borders }: { className: string; borders: string }) => (
+    <div className={`${className} bg-white ${borders} border-current`}>
+      <div className={dotStyle} />
+    </div>
+  );
+
+  return (
+    <div className="relative w-[60px] h-[60px] sm:w-[80px] sm:h-[80px]" style={{ transform: `rotate(${rotation}deg)` }}>
+      {rotation === 0 ? (
+        // Horizontal orientation
+        <>
+          <DominoCell 
+            className={`${baseCell} left-[0px] top-[20px]`}
+            borders="border-l-[2px] border-y-[2px] sm:border-l-[3px] sm:border-y-[3px]"
+          />
+          <DominoCell 
+            className={`${baseCell} left-[15px] sm:left-[20px] top-[20px]`}
+            borders="border-y-[2px] sm:border-y-[3px]"
+          />
+          <DominoCell 
+            className={`${baseCell} left-[30px] sm:left-[40px] top-[20px]`}
+            borders="border-y-[2px] sm:border-y-[3px]"
+          />
+          <DominoCell 
+            className={`${baseCell} left-[45px] sm:left-[60px] top-[20px]`}
+            borders="border-r-[2px] border-y-[2px] sm:border-r-[3px] sm:border-y-[3px]"
+          />
+        </>
+      ) : (
+        // Vertical orientation
+        <>
+          <DominoCell 
+            className={`${baseCell} left-[20px] top-[0px]`}
+            borders="border-t-[2px] border-x-[2px] sm:border-t-[3px] sm:border-x-[3px]"
+          />
+          <DominoCell 
+            className={`${baseCell} left-[20px] top-[15px] sm:top-[20px]`}
+            borders="border-x-[2px] sm:border-x-[3px]"
+          />
+          <DominoCell 
+            className={`${baseCell} left-[20px] top-[30px] sm:top-[40px]`}
+            borders="border-x-[2px] sm:border-x-[3px]"
+          />
+          <DominoCell 
+            className={`${baseCell} left-[20px] top-[45px] sm:top-[60px]`}
+            borders="border-b-[2px] border-x-[2px] sm:border-b-[3px] sm:border-x-[3px]"
+          />
+        </>
+      )}
+    </div>
+  );
+};
+
+const LPiece: React.FC<{ rotation?: number; isReflected?: boolean }> = ({ rotation = 0, isReflected = false }) => {
+  const cellSize = "w-[15px] h-[15px] sm:w-[20px] sm:h-[20px]";
+  const baseCell = `absolute ${cellSize}`;
+  const dotStyle = "absolute w-[4px] h-[4px] sm:w-[6px] sm:h-[6px] rounded-full bg-current left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2";
+
+  const DominoCell = ({ className, borders }: { className: string; borders: string }) => (
+    <div className={`${className} bg-white ${borders} border-current`}>
+      <div className={dotStyle} />
+    </div>
+  );
+
+  const style = {
+    transform: `rotate(${rotation}deg) ${isReflected ? 'scaleX(-1)' : ''}`
+  };
+
+  return (
+    <div className="relative w-[60px] h-[60px] sm:w-[80px] sm:h-[80px]" style={style}>
+      {/* Vertical part */}
+      <DominoCell 
+        className={`${baseCell} left-[20px] top-[0px]`}
+        borders="border-t-[2px] border-x-[2px] sm:border-t-[3px] sm:border-x-[3px]"
+      />
+      <DominoCell 
+        className={`${baseCell} left-[20px] top-[15px] sm:top-[20px]`}
+        borders="border-x-[2px] sm:border-x-[3px]"
+      />
+      <DominoCell 
+        className={`${baseCell} left-[20px] top-[30px] sm:top-[40px]`}
+        borders="border-x-[2px] sm:border-x-[3px]"
+      />
+      {/* Horizontal part */}
+      <DominoCell 
+        className={`${baseCell} left-[20px] top-[45px] sm:top-[60px]`}
+        borders="border-b-[2px] border-x-[2px] sm:border-b-[3px] sm:border-x-[3px]"
+      />
+      <DominoCell 
+        className={`${baseCell} left-[35px] sm:left-[40px] top-[45px] sm:top-[60px]`}
+        borders="border-b-[2px] border-r-[2px] sm:border-b-[3px] sm:border-r-[3px]"
+      />
+    </div>
+  );
+};
+
+const SkewPiece: React.FC<{ rotation?: number; isReflected?: boolean }> = ({ rotation = 0, isReflected = false }) => {
+  const cellSize = "w-[15px] h-[15px] sm:w-[20px] sm:h-[20px]";
+  const baseCell = `absolute ${cellSize}`;
+  const dotStyle = "absolute w-[4px] h-[4px] sm:w-[6px] sm:h-[6px] rounded-full bg-current left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2";
+
+  const DominoCell = ({ className, borders }: { className: string; borders: string }) => (
+    <div className={`${className} bg-white ${borders} border-current`}>
+      <div className={dotStyle} />
+    </div>
+  );
+
+  const style = {
+    transform: `rotate(${rotation}deg) ${isReflected ? 'scaleX(-1)' : ''}`
+  };
+
+  return (
+    <div className="relative w-[60px] h-[60px] sm:w-[80px] sm:h-[80px]" style={style}>
+      {/* Top part */}
+      <DominoCell 
+        className={`${baseCell} left-[20px] top-[15px] sm:top-[20px]`}
+        borders="border-t-[2px] border-x-[2px] sm:border-t-[3px] sm:border-x-[3px]"
+      />
+      <DominoCell 
+        className={`${baseCell} left-[35px] sm:left-[40px] top-[15px] sm:top-[20px]`}
+        borders="border-t-[2px] border-r-[2px] sm:border-t-[3px] sm:border-r-[3px]"
+      />
+      {/* Bottom part */}
+      <DominoCell 
+        className={`${baseCell} left-[5px] sm:left-[0px] top-[30px] sm:top-[40px]`}
+        borders="border-l-[2px] border-b-[2px] sm:border-l-[3px] sm:border-b-[3px]"
+      />
+      <DominoCell 
+        className={`${baseCell} left-[20px] top-[30px] sm:top-[40px]`}
+        borders="border-b-[2px] border-x-[2px] sm:border-b-[3px] sm:border-x-[3px]"
+      />
+    </div>
+  );
+};
+
+const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType, rotation: number, isReflected: boolean = false): [number, number][] => {
+  const cells: [number, number][] = [];
+  
+  switch (type) {
+    case 'straight':
+      if (rotation === 0) {
+        cells.push([row, col], [row, col + 1], [row, col + 2], [row, col + 3]);
+      } else {
+        cells.push([row, col], [row + 1, col], [row + 2, col], [row + 3, col]);
+      }
+      break;
+      
+    case 'T':
+      if (rotation === 0) {
+        cells.push([row, col], [row, col + 1], [row, col + 2], [row + 1, col + 1]);
+      } else if (rotation === 90) {
+        cells.push([row, col + 1], [row + 1, col], [row + 1, col + 1], [row + 2, col + 1]);
+      } else if (rotation === 180) {
+        cells.push([row + 1, col], [row + 1, col + 1], [row + 1, col + 2], [row, col + 1]);
+      } else {
+        cells.push([row, col], [row + 1, col], [row + 2, col], [row + 1, col + 1]);
+      }
+      break;
+      
+    case 'square':
+      cells.push([row, col], [row, col + 1], [row + 1, col], [row + 1, col + 1]);
+      break;
+      
+    case 'L':
+      const baseL = rotation === 0 ? [
+        [row, col], [row + 1, col], [row + 2, col], [row + 2, col + 1]
+      ] : rotation === 90 ? [
+        [row + 1, col], [row + 1, col + 1], [row + 1, col + 2], [row, col]
+      ] : rotation === 180 ? [
+        [row, col], [row, col + 1], [row + 1, col + 1], [row + 2, col + 1]
+      ] : [
+        [row + 1, col], [row, col + 2], [row + 1, col + 1], [row + 1, col + 2]
+      ];
+      
+      if (isReflected) {
+        cells.push(...baseL.map(([r, c]) => [r, 2 * col + 1 - c] as [number, number]));
+      } else {
+        cells.push(...baseL);
+      }
+      break;
+      
+    case 'skew':
+      const baseSkew = rotation === 0 ? [
+        [row, col + 1], [row, col + 2], [row + 1, col], [row + 1, col + 1]
+      ] : [
+        [row, col], [row + 1, col], [row + 1, col + 1], [row + 2, col + 1]
+      ];
+      
+      if (isReflected) {
+        cells.push(...baseSkew.map(([r, c]) => [r, 2 * col + 1 - c] as [number, number]));
+      } else {
+        cells.push(...baseSkew);
+      }
+      break;
+  }
+  
+  return cells;
+};
+
+const TetrominoSelector: React.FC<{
+  selectedType: TetrominoType | null;
+  onSelect: (type: TetrominoType) => void;
+  rotation: number;
+  onRotate: (rotation: number) => void;
+  isReflected: boolean;
+  onReflect: (reflected: boolean) => void;
+  availableTypes: TetrominoType[];
+}> = ({ selectedType, onSelect, rotation, onRotate, isReflected, onReflect, availableTypes }) => {
+  return (
+    <div className="flex flex-col gap-4 items-center p-4 bg-white rounded-lg shadow-sm">
+      <div className="grid grid-cols-5 gap-4">
+        {availableTypes.map((type) => (
+          <button
+            key={type}
+            onClick={() => onSelect(type)}
+            className={`p-2 rounded-lg transition-colors ${
+              selectedType === type ? 'bg-blue-100 border-2 border-blue-500' : 'bg-gray-100 hover:bg-gray-200'
+            }`}
+          >
+            {type === 'straight' && <StraightPiece rotation={0} />}
+            {type === 'T' && <TPiece rotation={0} />}
+            {type === 'square' && <SquarePiece />}
+            {type === 'L' && <LPiece rotation={0} />}
+            {type === 'skew' && <SkewPiece rotation={0} />}
+          </button>
+        ))}
+      </div>
+      
+      {selectedType && selectedType !== 'square' && (
+        <div className="flex flex-col gap-2 w-full">
+          <div className="flex justify-center gap-2">
+            {[0, 90, 180, 270].map((r) => (
+              <button
+                key={r}
+                onClick={() => onRotate(r)}
+                className={`p-2 rounded-lg transition-colors ${
+                  rotation === r ? 'bg-blue-100 border-2 border-blue-500' : 'bg-gray-100 hover:bg-gray-200'
+                }`}
+              >
+                {r}°
+              </button>
+            ))}
+          </div>
+          
+          {(selectedType === 'L' || selectedType === 'skew') && (
+            <button
+              onClick={() => onReflect(!isReflected)}
+              className={`mt-2 p-2 rounded-lg transition-colors ${
+                isReflected ? 'bg-blue-100 border-2 border-blue-500' : 'bg-gray-100 hover:bg-gray-200'
+              }`}
+            >
+              Reflect
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function GameBoard() {
   const [puzzleIndex, setPuzzleIndex] = useState(0);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -305,7 +584,13 @@ export default function GameBoard() {
   const [selectedOrientation, setSelectedOrientation] = useState<'horizontal' | 'vertical'>('horizontal');
   const [selectedRotation, setSelectedRotation] = useState<number>(0);
   const [squareTetrominoUsed, setSquareTetrominoUsed] = useState(false);
+  const [selectedTetrominoType, setSelectedTetrominoType] = useState<TetrominoType | null>(null);
+  const [selectedIsReflected, setSelectedIsReflected] = useState<boolean>(false);
   const currentPuzzle = PUZZLES[puzzleIndex];
+
+  const [availableTetrominoTypes, setAvailableTetrominoTypes] = useState<TetrominoType[]>([
+    'straight', 'T', 'square', 'L', 'skew'
+  ]);
 
   const createEmptyGrid = (puzzleConfig: PuzzleConfig): Cell[][] => {
     const grid = Array(puzzleConfig.gridSize).fill(null).map(() =>
@@ -315,13 +600,14 @@ export default function GameBoard() {
         orientation: null,
         isFirst: false,
         isBlocked: false,
+        rotation: 0,
+        isReflected: false
       }))
     );
 
     // Mark blocked cells
-    puzzleConfig.blockedCells.forEach(({row, col}) => {
+    puzzleConfig.blockedCells.forEach(({ row, col }) => {
       grid[row][col].isBlocked = true;
-      grid[row][col].isOccupied = true;
     });
 
     return grid;
@@ -407,6 +693,75 @@ export default function GameBoard() {
   };
 
   const handleCellClick = (row: number, col: number) => {
+    if (!currentPuzzle || !currentState) return;
+    
+    // Check if the cell is blocked
+    if (currentState.grid[row][col].isBlocked) return;
+    
+    // For puzzle 6 with different Tetromino types
+    if (currentPuzzle.tetrominoTypes) {
+      const selectedType = selectedTetrominoType;
+      if (!selectedType) return;
+      
+      // Check if the piece type has already been used
+      if (currentState.usedTetrominoTypes?.includes(selectedType)) {
+        setErrorMessage(`${selectedType} piece has already been used!`);
+        return;
+      }
+      
+      const rotation = selectedRotation;
+      const isReflected = selectedIsReflected;
+      
+      const requiredCells = getTetrominoRequiredCells(row, col, selectedType, rotation, isReflected);
+      
+      // Check if all required cells are within bounds and empty
+      if (!requiredCells.every(([r, c]) => 
+        r >= 0 && r < currentPuzzle.gridSize && 
+        c >= 0 && c < currentPuzzle.gridSize &&
+        !currentState.grid[r][c].isOccupied
+      )) {
+        setErrorMessage("Invalid placement! Pieces must be within bounds and not overlap.");
+        return;
+      }
+      
+      const newGrid = JSON.parse(JSON.stringify(currentState.grid));
+      const dominoId = currentState.dominoesPlaced + 1;
+      
+      requiredCells.forEach(([r, c], index) => {
+        newGrid[r][c] = {
+          isOccupied: true,
+          dominoId,
+          orientation: selectedType,
+          isFirst: index === 0,
+          rotation,
+          isReflected
+        };
+      });
+      
+      // Update used Tetromino types
+      const newUsedTypes = [...(currentState.usedTetrominoTypes || []), selectedType];
+      
+      saveState({
+        grid: newGrid,
+        dominoesPlaced: dominoId,
+        usedTetrominoTypes: newUsedTypes
+      });
+      
+      // Update available types
+      setAvailableTetrominoTypes(prev => prev.filter(t => !newUsedTypes.includes(t)));
+      
+      // Reset selection after placing a piece
+      setSelectedTetrominoType(null);
+      setSelectedRotation(0);
+      setSelectedIsReflected(false);
+      
+      // Check if the game is complete
+      if (dominoId === currentPuzzle.maxDominoes) {
+        checkGameCompletion(newGrid);
+      }
+      return;
+    }
+    
     if (currentState.dominoesPlaced >= currentPuzzle.maxDominoes) {
       setErrorMessage("Maximum number of pieces placed!");
       return;
@@ -621,11 +976,15 @@ export default function GameBoard() {
   const handleReset = () => {
     const newState = {
       grid: createEmptyGrid(currentPuzzle),
-      dominoesPlaced: 0
+      dominoesPlaced: 0,
+      usedTetrominoTypes: []
     };
     saveState(newState);
-    setErrorMessage(null);
-    setShowSuccess(false);
+    setSelectedTetrominoType(null);
+    setSelectedRotation(0);
+    setSelectedIsReflected(false);
+    setAvailableTetrominoTypes(['straight', 'T', 'square', 'L', 'skew']);
+    setErrorMessage('');
   };
 
   const getRandomColor = (id: number) => {
@@ -637,7 +996,7 @@ export default function GameBoard() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-6 px-2 sm:px-0 max-w-full overflow-x-hidden">
+    <div className="w-full max-w-4xl mx-auto flex flex-col items-center gap-8">
       <h2 className="text-lg sm:text-xl font-bold text-gray-700 text-center">
         Puzzle {puzzleIndex + 1}: {currentPuzzle.description}
       </h2>
@@ -699,7 +1058,7 @@ export default function GameBoard() {
       )}
 
       {errorMessage && (
-        <div className="bg-red-100 text-red-700 px-4 sm:px-6 py-3 rounded-lg text-center">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded">
           {errorMessage}
         </div>
       )}
@@ -771,6 +1130,18 @@ export default function GameBoard() {
         </div>
       )}
 
+      {currentPuzzle?.tetrominoTypes && (
+        <TetrominoSelector
+          selectedType={selectedTetrominoType}
+          onSelect={(type) => setSelectedTetrominoType(type)}
+          rotation={selectedRotation}
+          onRotate={(r) => setSelectedRotation(r)}
+          isReflected={selectedIsReflected}
+          onReflect={(r) => setSelectedIsReflected(r)}
+          availableTypes={availableTetrominoTypes}
+        />
+      )}
+
       <div className="w-full overflow-x-auto flex justify-center">
         <div className={`inline-grid ${currentPuzzle.gridSize === 8 ? 'grid-cols-8' : 'grid-cols-6'} gap-0.5 sm:gap-1 bg-gray-200 p-2 rounded`}>
           {currentState.grid.map((row, rowIndex) => (
@@ -800,7 +1171,7 @@ export default function GameBoard() {
 
       <div className="flex flex-col items-center gap-4">
         <p className="text-base sm:text-lg font-semibold text-center">
-          {currentPuzzle.useTetromino ? 'T-Pieces' : 'Dominoes'} Placed: {currentState.dominoesPlaced} / {currentPuzzle.maxDominoes}
+          {currentPuzzle.useTetromino ? 'Pieces' : 'Dominoes'} Placed: {currentState.dominoesPlaced} / {currentPuzzle.maxDominoes}
         </p>
 
         <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
@@ -847,4 +1218,4 @@ export default function GameBoard() {
       </div>
     </div>
   );
-} 
+}
