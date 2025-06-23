@@ -66,29 +66,28 @@ const TPiece: React.FC<{ rotation?: number }> = ({ rotation = 0 }) => {
     </div>
   );
 
+  // For 0° rotation, we want:
+  // [■][■][■]  Top row
+  //    [■]     Bottom stem
   return (
     <div className="relative w-[60px] h-[60px]" style={{ transform: `rotate(${rotation}deg)` }}>
-      {/* Vertical piece */}
+      {/* Top horizontal row */}
       <DominoCell 
-        className={`${baseCell} left-[20px] top-[0px]`}
-        borders="border-t-[3px] border-l-[3px] border-r-[3px]"
-      />
-      <DominoCell 
-        className={`${baseCell} left-[20px] top-[20px]`}
-        borders="border-y-[3px]"
-      />
-      <DominoCell 
-        className={`${baseCell} left-[20px] top-[40px]`}
-        borders="border-b-[3px] border-l-[3px] border-r-[3px]"
-      />
-      {/* Horizontal piece */}
-      <DominoCell 
-        className={`${baseCell} left-[0px] top-[20px]`}
+        className={`${baseCell} left-[0px] top-[0px]`}
         borders="border-t-[3px] border-l-[3px] border-b-[3px]"
       />
       <DominoCell 
-        className={`${baseCell} left-[40px] top-[20px]`}
+        className={`${baseCell} left-[20px] top-[0px]`}
+        borders="border-t-[3px] border-b-[3px]"
+      />
+      <DominoCell 
+        className={`${baseCell} left-[40px] top-[0px]`}
         borders="border-t-[3px] border-r-[3px] border-b-[3px]"
+      />
+      {/* Bottom stem */}
+      <DominoCell 
+        className={`${baseCell} left-[20px] top-[20px]`}
+        borders="border-l-[3px] border-r-[3px] border-b-[3px]"
       />
     </div>
   );
