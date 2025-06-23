@@ -153,43 +153,43 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
         if (!isReflected) {
           // Normal L: ⌞
           cells.push(
-            [row, col],     // Top of vertical line
+            [row, col],     // Top of vertical line (first piece)
             [row + 1, col], // Middle of vertical line
             [row + 2, col], // Bottom of vertical line
             [row + 2, col + 1]  // Horizontal piece
           );
         } else {
-          // Reflected: ⌜ (swapped with 180°)
+          // Reflected: ⌜
           cells.push(
-            [row + 2, col - 1], // Bottom left
-            [row + 2, col],     // Bottom right
-            [row + 1, col],     // Middle
-            [row, col]          // Top
+            [row, col],     // Top of vertical line (first piece)
+            [row + 1, col], // Middle of vertical line
+            [row + 2, col], // Bottom of vertical line
+            [row + 2, col - 1]  // Horizontal piece
           );
         }
       } else if (rotation === 90) {
         if (!isReflected) {
-          // Normal: _⌟
+          // Using 270° reflection functionality
           cells.push(
-            [row, col],         // Left piece
-            [row, col + 1],     // Middle piece
-            [row, col + 2],     // Right piece
-            [row + 1, col]      // Bottom piece
-          );
-        } else {
-          // Reflected: ⌝_ (swapped with 270°)
-          cells.push(
-            [row, col],         // Left piece
+            [row, col],         // Left piece (first piece)
             [row, col + 1],     // Middle piece
             [row, col + 2],     // Right piece
             [row - 1, col + 2]  // Top piece
           );
+        } else {
+          // Using 90° normal functionality
+          cells.push(
+            [row, col],         // Left piece (first piece)
+            [row, col + 1],     // Middle piece
+            [row, col + 2],     // Right piece
+            [row + 1, col]      // Bottom piece
+          );
         }
       } else if (rotation === 180) {
         if (!isReflected) {
-          // Normal: ⌜ (swapped with 0° reflected)
+          // Normal: ⌜
           cells.push(
-            [row, col],         // Bottom right
+            [row, col],         // Bottom (first piece)
             [row - 1, col],     // Middle
             [row - 2, col],     // Top
             [row - 2, col - 1]  // Left piece
@@ -197,28 +197,28 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
         } else {
           // Reflected: ⌝
           cells.push(
-            [row - 2, col],     // Top left
-            [row - 2, col + 1], // Top right
+            [row, col],         // Bottom (first piece)
             [row - 1, col],     // Middle
-            [row, col]          // Bottom
+            [row - 2, col],     // Top
+            [row - 2, col + 1]  // Right piece
           );
         }
       } else { // 270
         if (!isReflected) {
-          // Normal: _⌝ (swapped with 90° reflected)
+          // Using 90° reflection functionality
           cells.push(
-            [row, col],         // Left piece
-            [row, col + 1],     // Middle piece
-            [row, col + 2],     // Right piece
-            [row - 1, col + 2]  // Top piece
-          );
-        } else {
-          // Reflected: ⌞_
-          cells.push(
-            [row, col],         // Left piece
+            [row, col],         // Left piece (first piece)
             [row, col + 1],     // Middle piece
             [row, col + 2],     // Right piece
             [row + 1, col]      // Bottom piece
+          );
+        } else {
+          // Using 270° normal functionality
+          cells.push(
+            [row, col],         // Left piece (first piece)
+            [row, col + 1],     // Middle piece
+            [row, col + 2],     // Right piece
+            [row - 1, col + 2]  // Top piece
           );
         }
       }
@@ -227,17 +227,17 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
     case 'skew':
       if (rotation === 0 || rotation === 180) {
         cells.push(
-          [row, col],
-          [row, col + 1],
-          [row + 1, col + 1],
-          [row + 1, col + 2]
+          [row, col],         // First piece
+          [row, col + 1],     // Second piece
+          [row + 1, col + 1], // Third piece
+          [row + 1, col + 2]  // Fourth piece
         );
       } else {
         cells.push(
-          [row, col],
-          [row + 1, col],
-          [row + 1, col - 1],
-          [row + 2, col - 1]
+          [row, col],         // First piece
+          [row + 1, col],     // Second piece
+          [row + 1, col - 1], // Third piece
+          [row + 2, col - 1]  // Fourth piece
         );
       }
       break;
