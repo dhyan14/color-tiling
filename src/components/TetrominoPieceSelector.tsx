@@ -28,6 +28,8 @@ const TetrominoPieceSelector: FC<TetrominoPieceSelectorProps> = ({
   allowRotation = true,
   allowReflection = true,
 }) => {
+  const rotations = selectedType === 'straight' ? [0, 90] : [0, 90, 180, 270];
+
   const TetrominoPieceButton: FC<{
     type: TetrominoType;
     isDisabled?: boolean;
@@ -58,7 +60,7 @@ const TetrominoPieceSelector: FC<TetrominoPieceSelectorProps> = ({
     <div className="flex flex-col gap-4 p-4 bg-white rounded-xl shadow-md">
       {/* Piece Selection */}
       <div className="grid grid-cols-5 gap-4">
-        {['straight', 'T', 'square', 'L', 'skew'].map((type) => (
+        {availableTypes.map((type) => (
           <TetrominoPieceButton
             key={type}
             type={type as TetrominoType}
@@ -72,26 +74,18 @@ const TetrominoPieceSelector: FC<TetrominoPieceSelectorProps> = ({
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           {/* Rotation Controls */}
           {allowRotation && selectedType !== 'square' && (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => onRotate((rotation - 90 + 360) % 360)}
-                className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
-                title="Rotate counterclockwise"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-              </button>
-              <span className="min-w-[3rem] text-center">{rotation}°</span>
-              <button
-                onClick={() => onRotate((rotation + 90) % 360)}
-                className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
-                title="Rotate clockwise"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </button>
+            <div className="flex flex-wrap gap-4 justify-center">
+              {rotations.map((r) => (
+                <button
+                  key={r}
+                  onClick={() => onRotate(r)}
+                  className={`p-2 rounded-lg transition-colors ${
+                    rotation === r ? 'bg-blue-100 border-2 border-blue-500' : 'bg-gray-100 hover:bg-gray-200'
+                  }`}
+                >
+                  {selectedType === 'straight' && <StraightPiece rotation={r} />}
+                </button>
+              ))}
             </div>
           )}
 

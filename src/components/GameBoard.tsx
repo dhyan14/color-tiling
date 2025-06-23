@@ -42,54 +42,6 @@ type PuzzleConfig = {
 
 const PUZZLES: PuzzleConfig[] = [
   {
-    gridSize: 6,
-    maxDominoes: 18,
-    blockedCells: [],
-    description: "Place 18 dominoes on a 6x6 grid",
-    requiresPassword: true,
-    password: "3141"
-  },
-  {
-    gridSize: 6,
-    maxDominoes: 17,
-    blockedCells: [
-      { row: 0, col: 0 },
-      { row: 5, col: 5 },
-    ],
-    description: "Place 17 dominoes on a 6x6 grid with blocked corners",
-    requiresPassword: true,
-    password: "2718"
-  },
-  {
-    gridSize: 8,
-    maxDominoes: 16,
-    blockedCells: [],
-    description: "Place T-shaped tetromino pieces on an 8x8 grid",
-    useTetromino: true,
-    requiresPassword: true,
-    password: "1618"
-  },
-  {
-    gridSize: 6,
-    maxDominoes: 9,
-    blockedCells: [],
-    description: "Place T-shaped tetromino pieces on a 6x6 grid",
-    useTetromino: true,
-    requiresPassword: true,
-    password: "1414"
-  },
-  {
-    gridSize: 8,
-    maxDominoes: 16,
-    blockedCells: [],
-    description: "Place 15 T-tetrominoes and 1 square tetromino on an 8x8 grid",
-    useTetromino: true,
-    useSquareTetromino: true,
-    maxSquareTetrominoes: 1,
-    requiresPassword: true,
-    password: "1732"
-  },
-  {
     gridSize: 4,
     maxDominoes: 5,
     blockedCells: [],
@@ -101,19 +53,6 @@ const PUZZLES: PuzzleConfig[] = [
     gridWidth: 5,
     allowRotation: true,
     allowReflection: true
-  },
-  {
-    gridSize: 5,
-    maxDominoes: 9,
-    blockedCells: [],
-    description: "Place 8 straight trominoes and 1 square domino on a 5x5 grid. The middle cell can only be used by the square domino.",
-    useTetromino: true,
-    useSquareTetromino: true,
-    maxSquareTetrominoes: 1,
-    tetrominoTypes: ['straight', 'square'],
-    specialMiddleCell: true,
-    requiresPassword: true,
-    password: "0693"
   }
 ];
 
@@ -313,16 +252,21 @@ const TetrominoSelector: FC<{
 };
 
 export default function GameBoard() {
-  const [puzzleIndex, setPuzzleIndex] = useState(0);
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [currentPuzzle, setCurrentPuzzle] = useState(0);
+  const [gameState, setGameState] = useState<GameState | null>(null);
   const [password, setPassword] = useState('');
-  const [passwordError, setPasswordError] = useState(false);
-  const [selectedTetrominoType, setSelectedTetrominoType] = useState<TetrominoType | null>(null);
-  const [selectedRotation, setSelectedRotation] = useState<number>(0);
-  const [selectedIsReflected, setSelectedIsReflected] = useState<boolean>(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showPasswordError, setShowPasswordError] = useState(false);
+  const [history, setHistory] = useState<GameState[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [selectedType, setSelectedType] = useState<TetrominoType | null>(null);
+  const [rotation, setRotation] = useState(0);
+  const [isReflected, setIsReflected] = useState(false);
+  const [isDominoMode, setIsDominoMode] = useState(false);
+  const [showCompletionMessage, setShowCompletionMessage] = useState(false);
   const [previewCells, setPreviewCells] = useState<[number, number][]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const currentPuzzle = PUZZLES[puzzleIndex];
+  const currentPuzzleConfig = PUZZLES[currentPuzzle];
 
   const [availableTetrominoTypes, setAvailableTetrominoTypes] = useState<TetrominoType[]>([
     'straight', 'T', 'square', 'L', 'skew'
@@ -358,46 +302,45 @@ export default function GameBoard() {
   };
 
   const [currentState, setCurrentState] = useState<GameState>({
-    grid: createEmptyGrid(currentPuzzle),
+    grid: createEmptyGrid(currentPuzzleConfig),
     dominoesPlaced: 0
   });
 
-  const [history, setHistory] = useState<GameState[]>([]);
   const [future, setFuture] = useState<GameState[]>([]);
   const [showSuccess, setShowSuccess] = useState(false);
 
   const handlePasswordSubmit = () => {
     const cleanPassword = password.trim();
-    if (cleanPassword === currentPuzzle.password) {
+    if (cleanPassword === currentPuzzleConfig.password) {
       setShowPasswordModal(false);
       setPassword('');
-      setPasswordError(false);
+      setShowPasswordError(false);
       handleNextPuzzle();
     } else {
-      setPasswordError(true);
+      setShowPasswordError(true);
     }
   };
 
   const handleNextPuzzle = () => {
-    if (puzzleIndex + 1 < PUZZLES.length) {
-      setPuzzleIndex(puzzleIndex + 1);
-      const nextPuzzle = PUZZLES[puzzleIndex + 1];
+    if (currentPuzzle + 1 < PUZZLES.length) {
+      setCurrentPuzzle(currentPuzzle + 1);
+      const nextPuzzle = PUZZLES[currentPuzzle + 1];
       const newState = {
         grid: createEmptyGrid(nextPuzzle),
         dominoesPlaced: 0,
         usedTetrominoTypes: []
       };
-      setCurrentState(newState);
+      setGameState(newState);
       setHistory([]);
       setFuture([]);
       setShowSuccess(false);
       setErrorMessage(null);
       setShowPasswordModal(false);
       setPassword('');
-      setPasswordError(false);
-      setSelectedTetrominoType(null);
-      setSelectedRotation(0);
-      setSelectedIsReflected(false);
+      setShowPasswordError(false);
+      setSelectedType(null);
+      setRotation(0);
+      setIsReflected(false);
       setPreviewCells([]);
       setAvailableTetrominoTypes(nextPuzzle.tetrominoTypes || ['straight', 'T', 'square', 'L', 'skew']);
     }
@@ -405,7 +348,7 @@ export default function GameBoard() {
 
   const saveState = (newState: GameState) => {
     setHistory(prev => [...prev, currentState]);
-    setCurrentState(newState);
+    setGameState(newState);
     setFuture([]);
   };
 
@@ -417,7 +360,7 @@ export default function GameBoard() {
     
     setFuture(prev => [currentState, ...prev]);
     setHistory(newHistory);
-    setCurrentState(previousState);
+    setGameState(previousState);
     setErrorMessage(null);
     setShowSuccess(false);
   };
@@ -430,7 +373,7 @@ export default function GameBoard() {
     
     setHistory(prev => [...prev, currentState]);
     setFuture(newFuture);
-    setCurrentState(nextState);
+    setGameState(nextState);
     setErrorMessage(null);
   };
 
@@ -441,21 +384,21 @@ export default function GameBoard() {
     
     if (allCellsOccupied) {
       setShowSuccess(true);
-      if (currentPuzzle.requiresPassword) {
+      if (currentPuzzleConfig.requiresPassword) {
         setShowPasswordModal(true);
       }
     }
   };
 
   const isValidPlacement = (row: number, col: number, type: TetrominoType, rotation: number, isReflected: boolean): boolean => {
-    if (!currentPuzzle || !currentState) return false;
+    if (!currentPuzzleConfig || !currentState) return false;
     
-    const requiredCells = getTetrominoRequiredCells(row, col, type, rotation, isReflected, currentPuzzle);
+    const requiredCells = getTetrominoRequiredCells(row, col, type, rotation, isReflected, currentPuzzleConfig);
     
     // Check bounds
     const isWithinBounds = requiredCells.every(([r, c]) => {
-      const maxRow = currentPuzzle.gridSize - 1;
-      const maxCol = (currentPuzzle.gridWidth || currentPuzzle.gridSize) - 1;
+      const maxRow = currentPuzzleConfig.gridSize - 1;
+      const maxCol = (currentPuzzleConfig.gridWidth || currentPuzzleConfig.gridSize) - 1;
       return r >= 0 && r <= maxRow && c >= 0 && c <= maxCol;
     });
     
@@ -470,9 +413,9 @@ export default function GameBoard() {
     if (!areAllCellsValid) return false;
 
     // Check special middle cell restriction
-    if (currentPuzzle.specialMiddleCell) {
-      const middleRow = Math.floor(currentPuzzle.gridSize / 2);
-      const middleCol = Math.floor(currentPuzzle.gridSize / 2);
+    if (currentPuzzleConfig.specialMiddleCell) {
+      const middleRow = Math.floor(currentPuzzleConfig.gridSize / 2);
+      const middleCol = Math.floor(currentPuzzleConfig.gridSize / 2);
       const isMiddleCell = (r: number, c: number) => r === middleRow && c === middleCol;
 
       if (type === 'straight' && requiredCells.some(([r, c]) => isMiddleCell(r, c))) {
@@ -488,55 +431,55 @@ export default function GameBoard() {
   };
 
   const handleCellHover = (row: number, col: number) => {
-    if (!selectedTetrominoType || !currentPuzzle.tetrominoTypes) {
+    if (!selectedType || !currentPuzzleConfig.tetrominoTypes) {
       setPreviewCells([]);
       return;
     }
 
-    const requiredCells = getTetrominoRequiredCells(row, col, selectedTetrominoType, selectedRotation, selectedIsReflected, currentPuzzle);
-    setPreviewCells(isValidPlacement(row, col, selectedTetrominoType, selectedRotation, selectedIsReflected) ? requiredCells : []);
+    const requiredCells = getTetrominoRequiredCells(row, col, selectedType, rotation, isReflected, currentPuzzleConfig);
+    setPreviewCells(isValidPlacement(row, col, selectedType, rotation, isReflected) ? requiredCells : []);
   };
 
   const handleCellClick = (row: number, col: number) => {
-    if (!currentPuzzle || !currentState) return;
+    if (!currentPuzzleConfig || !currentState) return;
     
     if (currentState.grid[row][col].isBlocked) {
       setErrorMessage("This cell is blocked!");
       return;
     }
     
-    if (currentPuzzle.tetrominoTypes) {
-      if (!selectedTetrominoType) {
+    if (currentPuzzleConfig.tetrominoTypes) {
+      if (!selectedType) {
         setErrorMessage("Please select a piece type first!");
         return;
       }
 
-      if (currentState.usedTetrominoTypes?.includes(selectedTetrominoType)) {
-        setErrorMessage(`${selectedTetrominoType} piece has already been used!`);
+      if (currentState.usedTetrominoTypes?.includes(selectedType)) {
+        setErrorMessage(`${selectedType} piece has already been used!`);
         return;
       }
 
-      if (!isValidPlacement(row, col, selectedTetrominoType, selectedRotation, selectedIsReflected)) {
+      if (!isValidPlacement(row, col, selectedType, rotation, isReflected)) {
         setErrorMessage("Invalid placement! Check the piece position and orientation.");
         return;
       }
 
       const newGrid = JSON.parse(JSON.stringify(currentState.grid));
       const dominoId = currentState.dominoesPlaced + 1;
-      const requiredCells = getTetrominoRequiredCells(row, col, selectedTetrominoType, selectedRotation, selectedIsReflected, currentPuzzle);
+      const requiredCells = getTetrominoRequiredCells(row, col, selectedType, rotation, isReflected, currentPuzzleConfig);
       
       requiredCells.forEach(([r, c], index) => {
         newGrid[r][c] = {
           isOccupied: true,
           dominoId,
-          orientation: selectedTetrominoType,
+          orientation: selectedType,
           isFirst: index === 0,
-          rotation: selectedRotation,
-          isReflected: selectedIsReflected
+          rotation: rotation,
+          isReflected: isReflected
         };
       });
       
-      const newUsedTypes = [...(currentState.usedTetrominoTypes || []), selectedTetrominoType];
+      const newUsedTypes = [...(currentState.usedTetrominoTypes || []), selectedType];
       
       saveState({
         grid: newGrid,
@@ -553,14 +496,14 @@ export default function GameBoard() {
 
   const handleReset = () => {
     const newState = {
-      grid: createEmptyGrid(currentPuzzle),
+      grid: createEmptyGrid(currentPuzzleConfig),
       dominoesPlaced: 0,
       usedTetrominoTypes: []
     };
     saveState(newState);
-    setSelectedTetrominoType(null);
-    setSelectedRotation(0);
-    setSelectedIsReflected(false);
+    setSelectedType(null);
+    setRotation(0);
+    setIsReflected(false);
     setAvailableTetrominoTypes(['straight', 'T', 'square', 'L', 'skew']);
     setErrorMessage(null);
     setPreviewCells([]);
@@ -580,29 +523,100 @@ export default function GameBoard() {
     return colors[id % colors.length];
   };
 
+  const handleModeToggle = () => {
+    setIsDominoMode(!isDominoMode);
+    setSelectedType(null);
+    setRotation(0);
+    setIsReflected(false);
+  };
+
+  const handleCompletionCheck = () => {
+    if (!gameState) return;
+    
+    // Check if all cells are occupied
+    const isComplete = gameState.grid.every(row => 
+      row.every(cell => cell.isOccupied || cell.isBlocked)
+    );
+    
+    setShowCompletionMessage(true);
+    setTimeout(() => setShowCompletionMessage(false), 3000);
+    
+    if (isComplete) {
+      if (currentPuzzleConfig.requiresPassword) {
+        setShowPasswordModal(true);
+      } else {
+        alert("Congratulations! You've completed the puzzle!");
+      }
+    } else {
+      alert("Not quite there yet. Keep trying!");
+    }
+  };
+
   return (
-    <div className="flex flex-col items-center gap-6 p-4">
-      <div className="flex flex-col items-center gap-2">
-        <h2 className="text-xl font-semibold text-gray-800">Puzzle {puzzleIndex + 1}</h2>
-        <p className="text-gray-600 text-center">{currentPuzzle.description}</p>
-        {errorMessage && (
-          <p className="text-red-500 text-sm">{errorMessage}</p>
+    <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-4">Color Tiling Puzzle {currentPuzzle + 1}</h1>
+      <p className="mb-4">{PUZZLES[currentPuzzle].description}</p>
+      
+      <div className="flex gap-4 mb-4">
+        <button
+          onClick={handleReset}
+          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+        >
+          Reset
+        </button>
+        <button
+          onClick={handleUndo}
+          disabled={historyIndex <= 0}
+          className={`px-4 py-2 bg-gray-500 text-white rounded ${
+            historyIndex <= 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-600'
+          }`}
+        >
+          Undo
+        </button>
+        <button
+          onClick={handleRedo}
+          disabled={historyIndex >= history.length - 1}
+          className={`px-4 py-2 bg-gray-500 text-white rounded ${
+            historyIndex >= history.length - 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-600'
+          }`}
+        >
+          Redo
+        </button>
+        {PUZZLES[currentPuzzle].useTetromino && (
+          <button
+            onClick={handleModeToggle}
+            className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
+          >
+            {isDominoMode ? 'Switch to Tetromino' : 'Switch to Domino'}
+          </button>
         )}
+        <button
+          onClick={handleCompletionCheck}
+          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+        >
+          I Completed It!
+        </button>
       </div>
+
+      {showCompletionMessage && (
+        <div className="fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+          Checking completion...
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-6 items-start">
         <div className="flex flex-col gap-4">
-          {currentPuzzle.tetrominoTypes && (
+          {currentPuzzleConfig.tetrominoTypes && (
             <TetrominoPieceSelector
-              selectedType={selectedTetrominoType}
-              onSelect={setSelectedTetrominoType}
-              rotation={selectedRotation}
-              onRotate={setSelectedRotation}
-              isReflected={selectedIsReflected}
-              onReflect={setSelectedIsReflected}
+              selectedType={selectedType}
+              onSelect={setSelectedType}
+              rotation={rotation}
+              onRotate={setRotation}
+              isReflected={isReflected}
+              onReflect={setIsReflected}
               availableTypes={availableTetrominoTypes}
-              allowRotation={currentPuzzle.allowRotation}
-              allowReflection={currentPuzzle.allowReflection}
+              allowRotation={currentPuzzleConfig.allowRotation}
+              allowReflection={currentPuzzleConfig.allowReflection}
             />
           )}
 
@@ -632,10 +646,10 @@ export default function GameBoard() {
 
         <div className="w-full overflow-x-auto flex justify-center">
           <div className={`inline-grid ${
-            currentPuzzle.gridWidth === 5 ? 'grid-cols-5' :
-            currentPuzzle.gridSize === 8 ? 'grid-cols-8' :
-            currentPuzzle.gridSize === 6 ? 'grid-cols-6' :
-            currentPuzzle.gridSize === 4 ? 'grid-cols-4' : ''
+            currentPuzzleConfig.gridWidth === 5 ? 'grid-cols-5' :
+            currentPuzzleConfig.gridSize === 8 ? 'grid-cols-8' :
+            currentPuzzleConfig.gridSize === 6 ? 'grid-cols-6' :
+            currentPuzzleConfig.gridSize === 4 ? 'grid-cols-4' : ''
           } gap-0.5 sm:gap-1 bg-gray-200 p-2 rounded`}>
             {currentState.grid.map((row, rowIndex) => (
               row.map((cell, colIndex) => {
@@ -651,7 +665,7 @@ export default function GameBoard() {
                     onMouseEnter={() => handleCellHover(rowIndex, colIndex)}
                     onMouseLeave={() => setPreviewCells([])}
                     className={`
-                      ${currentPuzzle.gridSize === 8 
+                      ${currentPuzzleConfig.gridSize === 8 
                         ? 'w-[30px] h-[30px] sm:w-[40px] sm:h-[40px]' 
                         : 'w-[35px] h-[35px] sm:w-[48px] sm:h-[48px]'}
                       ${cell.isBlocked
@@ -680,7 +694,7 @@ export default function GameBoard() {
           <div className="bg-green-100 text-green-700 px-4 sm:px-6 py-3 rounded-lg text-base sm:text-lg font-semibold animate-bounce text-center">
             🎉 Congratulations! You've completed the puzzle! 🎉
           </div>
-          {puzzleIndex + 1 < PUZZLES.length && !currentPuzzle.requiresPassword && (
+          {currentPuzzle + 1 < PUZZLES.length && !currentPuzzleConfig.requiresPassword && (
             <button
               onClick={handleNextPuzzle}
               className="px-4 sm:px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
@@ -692,34 +706,36 @@ export default function GameBoard() {
       )}
 
       {showPasswordModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white p-4 sm:p-6 rounded-lg shadow-xl w-full max-w-sm">
-            <h3 className="text-lg font-semibold mb-4">Enter Password</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <h3 className="text-xl font-semibold mb-4">Enter Password</h3>
+            <p className="text-gray-600 mb-4">
+              Congratulations! You've completed the puzzle. Enter the password to verify:
+            </p>
             <input
               type="text"
-              maxLength={4}
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value.trim());
-                setPasswordError(false);
+                setShowPasswordError(false);
               }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   handlePasswordSubmit();
                 }
               }}
-              className="border-2 border-gray-300 rounded px-3 py-2 mb-4 w-full focus:border-blue-500 outline-none"
+              className="w-full px-3 py-2 border rounded mb-4"
               placeholder="Enter 4-digit password"
             />
-            {passwordError && (
+            {showPasswordError && (
               <p className="text-red-500 text-sm mb-4">Incorrect password. Please try again.</p>
             )}
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end gap-2">
               <button
                 onClick={() => {
                   setShowPasswordModal(false);
                   setPassword('');
-                  setPasswordError(false);
+                  setShowPasswordError(false);
                 }}
                 className="px-3 sm:px-4 py-2 text-gray-600 hover:text-gray-800"
               >
