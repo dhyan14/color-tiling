@@ -27,17 +27,19 @@ const PUZZLES: PuzzleConfig[] = [
   {
     maxDominoes: 18,
     blockedCells: [],
-    description: "Place 18 dominoes on a 6x6 grid"
+    description: "Place 18 dominoes on a 6x6 grid",
+    requiresPassword: true,
+    password: "3141"
   },
   {
     maxDominoes: 17,
     blockedCells: [
-      { row: 0, col: 0 }, // Upper left corner
-      { row: 5, col: 5 }, // Lower right corner
+      { row: 0, col: 0 },
+      { row: 5, col: 5 },
     ],
     description: "Place 17 dominoes on a 6x6 grid with blocked corners",
     requiresPassword: true,
-    password: "9910"
+    password: "2718"
   },
   {
     maxDominoes: 18,
