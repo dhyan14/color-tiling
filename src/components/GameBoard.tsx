@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, type FC } from 'react';
+import { StraightPiece, TPiece, SquarePiece, LPiece, SkewPiece } from './TetrominoPieces';
 
 type Cell = {
   isOccupied: boolean;
@@ -31,6 +32,7 @@ type PuzzleConfig = {
   useSquareTetromino?: boolean;
   maxSquareTetrominoes?: number;
   tetrominoTypes?: TetrominoType[];
+  gridWidth?: number; // Added for rectangular grids
 };
 
 const PUZZLES: PuzzleConfig[] = [
@@ -83,14 +85,15 @@ const PUZZLES: PuzzleConfig[] = [
     password: "2236"
   },
   {
-    gridSize: 6,
+    gridSize: 4,
     maxDominoes: 5,
     blockedCells: [],
-    description: "Place different Tetromino pieces (Straight, T, Square, L, and Skew) on a 6x6 grid",
+    description: "Place different Tetromino pieces (Straight, T, Square, L, and Skew) on a 4x5 grid",
     useTetromino: true,
     requiresPassword: true,
     password: "1732",
-    tetrominoTypes: ['straight', 'T', 'square', 'L', 'skew']
+    tetrominoTypes: ['straight', 'T', 'square', 'L', 'skew'],
+    gridWidth: 5
   }
 ];
 
@@ -535,11 +538,11 @@ const TetrominoSelector: React.FC<{
               selectedType === type ? 'bg-blue-100 border-2 border-blue-500' : 'bg-gray-100 hover:bg-gray-200'
             }`}
           >
-            {type === 'straight' && <StraightPiece rotation={0} />}
-            {type === 'T' && <TPiece rotation={0} />}
+            {type === 'straight' && <StraightPiece rotation={selectedType === type ? rotation : 0} />}
+            {type === 'T' && <TPiece rotation={selectedType === type ? rotation : 0} />}
             {type === 'square' && <SquarePiece />}
-            {type === 'L' && <LPiece rotation={0} />}
-            {type === 'skew' && <SkewPiece rotation={0} />}
+            {type === 'L' && <LPiece rotation={selectedType === type ? rotation : 0} isReflected={selectedType === type && isReflected} />}
+            {type === 'skew' && <SkewPiece rotation={selectedType === type ? rotation : 0} isReflected={selectedType === type && isReflected} />}
           </button>
         ))}
       </div>
@@ -593,8 +596,11 @@ export default function GameBoard() {
   ]);
 
   const createEmptyGrid = (puzzleConfig: PuzzleConfig): Cell[][] => {
-    const grid = Array(puzzleConfig.gridSize).fill(null).map(() =>
-      Array(puzzleConfig.gridSize).fill(null).map(() => ({
+    const height = puzzleConfig.gridSize;
+    const width = puzzleConfig.gridWidth || puzzleConfig.gridSize;
+    
+    const grid = Array(height).fill(null).map(() =>
+      Array(width).fill(null).map(() => ({
         isOccupied: false,
         dominoId: null,
         orientation: null,
@@ -605,7 +611,6 @@ export default function GameBoard() {
       }))
     );
 
-    // Mark blocked cells
     puzzleConfig.blockedCells.forEach(({ row, col }) => {
       grid[row][col].isBlocked = true;
     });
@@ -1143,7 +1148,7 @@ export default function GameBoard() {
       )}
 
       <div className="w-full overflow-x-auto flex justify-center">
-        <div className={`inline-grid ${currentPuzzle.gridSize === 8 ? 'grid-cols-8' : 'grid-cols-6'} gap-0.5 sm:gap-1 bg-gray-200 p-2 rounded`}>
+        <div className={`inline-grid grid-cols-${currentPuzzle.gridWidth || currentPuzzle.gridSize} gap-0.5 sm:gap-1 bg-gray-200 p-2 rounded`}>
           {currentState.grid.map((row, rowIndex) => (
             row.map((cell, colIndex) => (
               <div
