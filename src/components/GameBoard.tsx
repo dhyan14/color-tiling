@@ -8,6 +8,7 @@ type Cell = {
   orientation: 'horizontal' | 'vertical' | 'T' | null;
   isFirst: boolean;
   isBlocked?: boolean; // For blocked cells in puzzle 2
+  rotation?: number; // Add rotation for T pieces
 };
 
 type GameState = {
@@ -79,6 +80,8 @@ export default function GameBoard() {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState(false);
+  const [selectedOrientation, setSelectedOrientation] = useState<'horizontal' | 'vertical'>('horizontal');
+  const [selectedRotation, setSelectedRotation] = useState<number>(0); // Add state for T-piece rotation
   const currentPuzzle = PUZZLES[puzzleIndex];
 
   const createEmptyGrid = (puzzleConfig: PuzzleConfig): Cell[][] => {
@@ -108,7 +111,6 @@ export default function GameBoard() {
 
   const [history, setHistory] = useState<GameState[]>([]);
   const [future, setFuture] = useState<GameState[]>([]);
-  const [selectedOrientation, setSelectedOrientation] = useState<'horizontal' | 'vertical'>('horizontal');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -197,20 +199,18 @@ export default function GameBoard() {
     let isValidMove = false;
     
     if (currentPuzzle.useTetromino) {
-      // T-piece placement logic
-      if (row >= currentPuzzle.gridSize - 2 || col >= currentPuzzle.gridSize - 1 || col === 0) {
+      // Get required cells based on rotation
+      const requiredCells = getTRequiredCells(row, col, selectedRotation);
+      
+      // Check if all cells are within bounds
+      if (!requiredCells.every(([r, c]) => 
+        r >= 0 && r < currentPuzzle.gridSize && 
+        c >= 0 && c < currentPuzzle.gridSize)) {
         setErrorMessage("Can't place T-piece here - out of bounds!");
         return;
       }
       
-      // Check if all required cells are free for T-piece
-      const requiredCells = [
-        [row, col],     // Center
-        [row + 1, col], // Bottom
-        [row, col - 1], // Left
-        [row, col + 1]  // Right
-      ];
-      
+      // Check if all required cells are free
       if (requiredCells.some(([r, c]) => newGrid[r][c].isOccupied)) {
         setErrorMessage("Can't place T-piece here - space already occupied!");
         return;
@@ -225,7 +225,8 @@ export default function GameBoard() {
           isOccupied: true,
           dominoId: pieceId,
           orientation: 'T',
-          isFirst: index === 0, // Center piece is the first
+          isFirst: index === 0,
+          rotation: selectedRotation
         };
       });
     } else {
@@ -291,6 +292,42 @@ export default function GameBoard() {
       saveState(newState);
       setErrorMessage(null);
       checkGameCompletion(newGrid);
+    }
+  };
+
+  // Helper function to get required cells for T piece based on rotation
+  const getTRequiredCells = (row: number, col: number, rotation: number): [number, number][] => {
+    switch (rotation) {
+      case 0: // T pointing down
+        return [
+          [row, col],     // center
+          [row + 1, col], // bottom
+          [row, col - 1], // left
+          [row, col + 1]  // right
+        ];
+      case 90: // T pointing left
+        return [
+          [row, col],     // center
+          [row, col - 1], // left
+          [row - 1, col], // top
+          [row + 1, col]  // bottom
+        ];
+      case 180: // T pointing up
+        return [
+          [row, col],     // center
+          [row - 1, col], // top
+          [row, col - 1], // left
+          [row, col + 1]  // right
+        ];
+      case 270: // T pointing right
+        return [
+          [row, col],     // center
+          [row, col + 1], // right
+          [row - 1, col], // top
+          [row + 1, col]  // bottom
+        ];
+      default:
+        return [[row, col]];
     }
   };
 
@@ -382,8 +419,24 @@ export default function GameBoard() {
 
       {currentPuzzle.useTetromino ? (
         <div className="flex flex-col items-center gap-4">
-          <p className="text-gray-600">Click on a cell to place the center of the T-piece</p>
-          <TPieceRotations />
+          <p className="text-gray-600">Select a T-piece rotation and click on a cell to place it</p>
+          <div className="flex gap-8 items-center justify-center bg-gray-50 p-4 rounded-lg">
+            {[0, 90, 180, 270].map((rotation) => (
+              <button
+                key={rotation}
+                onClick={() => setSelectedRotation(rotation)}
+                className={`p-2 rounded transition-all ${
+                  selectedRotation === rotation
+                    ? 'bg-purple-100 text-purple-600 scale-110'
+                    : 'text-gray-400 hover:text-gray-600'
+                }`}
+              >
+                <div className="text-purple-600">
+                  <TPiece rotation={rotation} />
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
       ) : (
         <div className="flex gap-8 mb-4">
