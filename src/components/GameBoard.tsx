@@ -22,6 +22,7 @@ type PuzzleConfig = {
   description: string;
   requiresPassword?: boolean;
   password?: string;
+  useTetromino?: boolean;
 };
 
 const PUZZLES: PuzzleConfig[] = [
@@ -48,12 +49,13 @@ const PUZZLES: PuzzleConfig[] = [
     gridSize: 8,
     maxDominoes: 16,
     blockedCells: [],
-    description: "Place T-shaped pieces on an 8x8 grid"
+    description: "Place T-shaped tetromino pieces on an 8x8 grid",
+    useTetromino: true
   }
 ];
 
 const TPiece = () => (
-  <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-80">
     <rect x="20" y="0" width="20" height="60" className="fill-current" />
     <rect x="0" y="20" width="60" height="20" className="fill-current" />
   </svg>
@@ -181,13 +183,14 @@ export default function GameBoard() {
 
     let isValidMove = false;
     
-    if (puzzleIndex === 2) { // T-piece placement logic for puzzle 3
+    if (currentPuzzle.useTetromino) {
+      // T-piece placement logic
       if (row >= currentPuzzle.gridSize - 2 || col >= currentPuzzle.gridSize - 1 || col === 0) {
         setErrorMessage("Can't place T-piece here - out of bounds!");
         return;
       }
       
-      // Check if all required cells are free
+      // Check if all required cells are free for T-piece
       const requiredCells = [
         [row, col],     // Center
         [row + 1, col], // Bottom
@@ -213,14 +216,10 @@ export default function GameBoard() {
         };
       });
     } else {
+      // Existing domino placement logic
       if (selectedOrientation === 'horizontal') {
-        if (col >= 5) {
+        if (col >= currentPuzzle.gridSize - 1) {
           setErrorMessage("Can't place horizontal domino here - out of bounds!");
-          return;
-        }
-        // Check if next cell is blocked
-        if (newGrid[row][col + 1].isBlocked) {
-          setErrorMessage("Can't place domino here - next cell is blocked!");
           return;
         }
         if (newGrid[row][col].isOccupied || newGrid[row][col + 1].isOccupied) {
@@ -244,13 +243,8 @@ export default function GameBoard() {
           isFirst: false,
         };
       } else {
-        if (row >= 5) {
+        if (row >= currentPuzzle.gridSize - 1) {
           setErrorMessage("Can't place vertical domino here - out of bounds!");
-          return;
-        }
-        // Check if next cell is blocked
-        if (newGrid[row + 1][col].isBlocked) {
-          setErrorMessage("Can't place domino here - next cell is blocked!");
           return;
         }
         if (newGrid[row][col].isOccupied || newGrid[row + 1][col].isOccupied) {
@@ -267,7 +261,7 @@ export default function GameBoard() {
           isFirst: true,
         };
         newGrid[row + 1][col] = {
-          ...newGrid[row + 1][col],
+          ...newGrid[row][col + 1],
           isOccupied: true,
           dominoId,
           orientation: 'vertical',
@@ -373,8 +367,9 @@ export default function GameBoard() {
         </div>
       )}
 
-      {puzzleIndex === 2 ? (
-        <div className="flex gap-8 mb-4 items-center">
+      {currentPuzzle.useTetromino ? (
+        <div className="flex flex-col items-center gap-4">
+          <p className="text-gray-600">Click on a cell to place the center of the T-piece</p>
           <div className="text-blue-600">
             <TPiece />
           </div>
