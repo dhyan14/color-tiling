@@ -24,6 +24,8 @@ type PuzzleConfig = {
   requiresPassword?: boolean;
   password?: string;
   useTetromino?: boolean;
+  useSquareTetromino?: boolean;
+  maxSquareTetrominoes?: number;
 };
 
 const PUZZLES: PuzzleConfig[] = [
@@ -61,6 +63,17 @@ const PUZZLES: PuzzleConfig[] = [
     blockedCells: [],
     description: "Place T-shaped tetromino pieces on a 6x6 grid",
     useTetromino: true,
+    requiresPassword: true,
+    password: "1414"
+  },
+  {
+    gridSize: 8,
+    maxDominoes: 16,
+    blockedCells: [],
+    description: "Place 15 T-tetrominoes and 1 square tetromino on an 8x8 grid",
+    useTetromino: true,
+    useSquareTetromino: true,
+    maxSquareTetrominoes: 1,
     requiresPassword: true,
     password: "2236"
   }
@@ -247,6 +260,40 @@ const TetrominoOption: React.FC<TetrominoOptionProps> = ({ rotation, isSelected,
     >
       {getTetrominoCells()}
     </button>
+  );
+};
+
+const SquarePiece: React.FC = () => {
+  const cellSize = "w-[20px] h-[20px]";
+  const baseCell = `absolute ${cellSize}`;
+  const dotStyle = "absolute w-[6px] h-[6px] rounded-full bg-current left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2";
+
+  const DominoCell = ({ className, borders }: { className: string; borders: string }) => (
+    <div className={`${className} bg-white ${borders} border-current`}>
+      <div className={dotStyle} />
+    </div>
+  );
+
+  return (
+    <div className="relative w-[60px] h-[60px]">
+      {/* 2x2 Square */}
+      <DominoCell 
+        className={`${baseCell} left-[10px] top-[10px]`}
+        borders="border-t-[3px] border-l-[3px]"
+      />
+      <DominoCell 
+        className={`${baseCell} left-[30px] top-[10px]`}
+        borders="border-t-[3px] border-r-[3px]"
+      />
+      <DominoCell 
+        className={`${baseCell} left-[10px] top-[30px]`}
+        borders="border-l-[3px] border-b-[3px]"
+      />
+      <DominoCell 
+        className={`${baseCell} left-[30px] top-[30px]`}
+        borders="border-r-[3px] border-b-[3px]"
+      />
+    </div>
   );
 };
 
@@ -603,52 +650,34 @@ export default function GameBoard() {
         </div>
       )}
 
-      {currentPuzzle.useTetromino ? (
-        <div className="flex flex-col items-center gap-4">
-          <p className="text-gray-600">Select a T-piece type to place</p>
-          <div className="flex gap-8 items-center justify-center p-4">
-            {[180, 90, 0, 270].map((rotation) => (
-              <TetrominoOption
-                key={rotation}
-                rotation={rotation}
-                isSelected={selectedRotation === rotation}
-                onClick={() => setSelectedRotation(rotation)}
-              />
-            ))}
+      {currentPuzzle.useTetromino && (
+        <div className="flex flex-col gap-4">
+          <div className="flex gap-4 items-center">
+            <span className="text-gray-700">Select T-piece rotation:</span>
+            <div className="flex gap-4">
+              {[0, 90, 180, 270].map((rotation) => (
+                <TetrominoOption
+                  key={rotation}
+                  rotation={rotation}
+                  isSelected={selectedRotation === rotation}
+                  onClick={() => setSelectedRotation(rotation)}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="flex gap-8 mb-4">
-          <button
-            onClick={() => setSelectedOrientation('horizontal')}
-            className={`p-2 rounded transition-all ${
-              selectedOrientation === 'horizontal'
-                ? 'bg-blue-100 text-blue-600 scale-110'
-                : 'text-gray-400 hover:text-gray-600'
-            }`}
-            title="Place horizontal domino"
-          >
-            <div className="w-[60px] h-[30px] border-2 border-current rounded-lg relative">
-              <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-current"/>
-              <div className="absolute left-[25%] top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-current"/>
-              <div className="absolute left-[75%] top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-current"/>
+          {currentPuzzle.useSquareTetromino && (
+            <div className="flex gap-4 items-center">
+              <span className="text-gray-700">Square piece (one-time use):</span>
+              <button 
+                onClick={() => setSelectedRotation(-1)} 
+                className={`w-[80px] h-[80px] relative transition-all hover:scale-105 ${
+                  selectedRotation === -1 ? "text-blue-600" : "text-gray-500"
+                } transform hover:shadow-xl`}
+              >
+                <SquarePiece />
+              </button>
             </div>
-          </button>
-          <button
-            onClick={() => setSelectedOrientation('vertical')}
-            className={`p-2 rounded transition-all ${
-              selectedOrientation === 'vertical'
-                ? 'bg-blue-100 text-blue-600 scale-110'
-                : 'text-gray-400 hover:text-gray-600'
-            }`}
-            title="Place vertical domino"
-          >
-            <div className="w-[30px] h-[60px] border-2 border-current rounded-lg relative">
-              <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-current"/>
-              <div className="absolute left-1/2 top-[25%] -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-current"/>
-              <div className="absolute left-1/2 top-[75%] -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-current"/>
-            </div>
-          </button>
+          )}
         </div>
       )}
       
