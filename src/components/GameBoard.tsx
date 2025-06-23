@@ -55,20 +55,17 @@ const PUZZLES: PuzzleConfig[] = [
 ];
 
 const TPiece: React.FC<{ rotation?: number }> = ({ rotation = 0 }) => (
-  <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-80" style={{ transform: `rotate(${rotation}deg)` }}>
-    <rect x="20" y="0" width="20" height="60" className="fill-current" />
-    <rect x="0" y="20" width="60" height="20" className="fill-current" />
-  </svg>
+  <div className="w-[120px] h-[120px] relative" style={{ transform: `rotate(${rotation}deg)` }}>
+    <div className="absolute left-1/3 right-1/3 top-0 bottom-0 bg-purple-500"></div>
+    <div className="absolute top-1/3 bottom-1/3 left-0 right-0 bg-purple-500"></div>
+  </div>
 );
 
 const TPieceRotations: React.FC = () => (
-  <div className="flex gap-8 items-center justify-center bg-gray-50 p-4 rounded-lg">
+  <div className="flex flex-col gap-8 items-center justify-center p-4">
     {[0, 90, 180, 270].map((rotation) => (
-      <div key={rotation} className="flex flex-col items-center">
-        <div className="text-blue-600">
-          <TPiece rotation={rotation} />
-        </div>
-        <span className="text-sm text-gray-600 mt-2">{rotation}°</span>
+      <div key={rotation} className="w-[120px] h-[120px] flex items-center justify-center">
+        <TPiece rotation={rotation} />
       </div>
     ))}
   </div>
