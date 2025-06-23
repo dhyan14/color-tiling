@@ -80,14 +80,19 @@ const TetrominoOption: React.FC<{ rotation: number; isSelected: boolean; onClick
   const colorStyle = isSelected ? "text-blue-600" : "text-gray-500";
   
   const getTetrominoCells = () => {
-    const cellSize = "w-[32px] h-[32px] rounded-xl";
-    const baseCell = `absolute ${cellSize}`;
-    const cellStyle = `${baseCell} bg-white border-[3px] ${isSelected ? "border-blue-600" : "border-gray-500"}`;
+    // Create a domino-style piece with two connected squares
+    const dominoContainer = "w-[64px] h-[32px] absolute rounded-lg border-[3px] flex";
+    const containerStyle = `${dominoContainer} ${isSelected ? "border-blue-600" : "border-gray-500"}`;
     const dotStyle = `absolute w-[8px] h-[8px] rounded-full ${isSelected ? "bg-blue-600" : "bg-gray-500"}`;
     
-    const DominoCell = ({ className }: { className: string }) => (
-      <div className={className}>
-        <div className={dotStyle} style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }} />
+    const DominoPiece = ({ className, vertical = false }: { className: string, vertical?: boolean }) => (
+      <div className={`${containerStyle} ${className} ${vertical ? 'flex-col h-[64px] w-[32px]' : ''}`}>
+        <div className="relative flex-1 border-r-[3px] border-inherit">
+          <div className={dotStyle} style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }} />
+        </div>
+        <div className="relative flex-1">
+          <div className={dotStyle} style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }} />
+        </div>
       </div>
     );
     
@@ -95,37 +100,33 @@ const TetrominoOption: React.FC<{ rotation: number; isSelected: boolean; onClick
       case 180: // First piece - T pointing up
         return (
           <>
-            <DominoCell className={`${cellStyle} left-[24px] top-[92px]`} />
-            <DominoCell className={`${cellStyle} left-[4px] top-[47px]`} />
-            <DominoCell className={`${cellStyle} left-[24px] top-[47px]`} />
-            <DominoCell className={`${cellStyle} left-[44px] top-[47px]`} />
+            <DominoPiece className="left-[8px] top-[0px]" />
+            <DominoPiece className="left-[8px] top-[40px]" />
+            <DominoPiece className="left-[8px] top-[80px]" />
           </>
         );
       case 90: // Second piece - T pointing left
         return (
           <>
-            <DominoCell className={`${cellStyle} left-[24px] top-[2px]`} />
-            <DominoCell className={`${cellStyle} left-[24px] top-[47px]`} />
-            <DominoCell className={`${cellStyle} left-[24px] top-[92px]`} />
-            <DominoCell className={`${cellStyle} left-[4px] top-[47px]`} />
+            <DominoPiece className="left-[8px] top-[0px]" />
+            <DominoPiece className="left-[8px] top-[40px]" />
+            <DominoPiece className="left-[8px] top-[80px]" />
           </>
         );
       case 0: // Third piece - T pointing down
         return (
           <>
-            <DominoCell className={`${cellStyle} left-[24px] top-[2px]`} />
-            <DominoCell className={`${cellStyle} left-[4px] top-[47px]`} />
-            <DominoCell className={`${cellStyle} left-[24px] top-[47px]`} />
-            <DominoCell className={`${cellStyle} left-[44px] top-[47px]`} />
+            <DominoPiece className="left-[8px] top-[0px]" />
+            <DominoPiece className="left-[8px] top-[40px]" />
+            <DominoPiece className="left-[8px] top-[80px]" />
           </>
         );
       case 270: // Fourth piece - T pointing right
         return (
           <>
-            <DominoCell className={`${cellStyle} left-[24px] top-[2px]`} />
-            <DominoCell className={`${cellStyle} left-[24px] top-[47px]`} />
-            <DominoCell className={`${cellStyle} left-[24px] top-[92px]`} />
-            <DominoCell className={`${cellStyle} left-[44px] top-[47px]`} />
+            <DominoPiece className="left-[8px] top-[0px]" />
+            <DominoPiece className="left-[8px] top-[40px]" />
+            <DominoPiece className="left-[8px] top-[80px]" />
           </>
         );
       default:
