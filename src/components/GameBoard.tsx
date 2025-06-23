@@ -238,7 +238,6 @@ export default function GameBoard() {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState(false);
-  const [selectedPuzzleIndex, setSelectedPuzzleIndex] = useState<number | null>(null);
   const [selectedOrientation, setSelectedOrientation] = useState<'horizontal' | 'vertical'>('horizontal');
   const [selectedRotation, setSelectedRotation] = useState<number>(0);
   const currentPuzzle = PUZZLES[puzzleIndex];
@@ -274,46 +273,13 @@ export default function GameBoard() {
   const [showSuccess, setShowSuccess] = useState(false);
 
   const handlePasswordSubmit = () => {
-    if (selectedPuzzleIndex !== null && password === PUZZLES[selectedPuzzleIndex].password) {
+    if (password === currentPuzzle.password) {
       setShowPasswordModal(false);
       setPassword('');
       setPasswordError(false);
-      setPuzzleIndex(selectedPuzzleIndex);
-      setSelectedPuzzleIndex(null);
-      const newState = {
-        grid: createEmptyGrid(PUZZLES[selectedPuzzleIndex]),
-        dominoesPlaced: 0
-      };
-      setCurrentState(newState);
-      setHistory([]);
-      setFuture([]);
-      setShowSuccess(false);
-      setErrorMessage(null);
+      handleNextPuzzle();
     } else {
       setPasswordError(true);
-    }
-  };
-
-  const handlePuzzleSelect = (index: number) => {
-    if (index === puzzleIndex) return;
-    
-    const targetPuzzle = PUZZLES[index];
-    if (targetPuzzle.requiresPassword) {
-      setSelectedPuzzleIndex(index);
-      setShowPasswordModal(true);
-      setPasswordError(false);
-      setPassword('');
-    } else {
-      setPuzzleIndex(index);
-      const newState = {
-        grid: createEmptyGrid(targetPuzzle),
-        dominoesPlaced: 0
-      };
-      setCurrentState(newState);
-      setHistory([]);
-      setFuture([]);
-      setShowSuccess(false);
-      setErrorMessage(null);
     }
   };
 
@@ -554,20 +520,6 @@ export default function GameBoard() {
 
   return (
     <div className="flex flex-col items-center gap-6">
-      <div className="w-full max-w-md">
-        <select
-          value={puzzleIndex}
-          onChange={(e) => handlePuzzleSelect(Number(e.target.value))}
-          className="w-full p-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 outline-none"
-        >
-          {PUZZLES.map((puzzle, index) => (
-            <option key={index} value={index}>
-              Puzzle {index + 1}: {puzzle.description}
-            </option>
-          ))}
-        </select>
-      </div>
-
       <h2 className="text-xl font-bold text-gray-700">
         Puzzle {puzzleIndex + 1}: {currentPuzzle.description}
       </h2>
