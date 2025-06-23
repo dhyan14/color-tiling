@@ -55,12 +55,28 @@ const PUZZLES: PuzzleConfig[] = [
   }
 ];
 
-const TPiece: React.FC<{ rotation?: number }> = ({ rotation = 0 }) => (
-  <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-80" style={{ transform: `rotate(${rotation}deg)` }}>
-    <rect x="20" y="0" width="20" height="60" className="fill-current" />
-    <rect x="0" y="20" width="60" height="20" className="fill-current" />
-  </svg>
-);
+const TPiece: React.FC<{ rotation?: number }> = ({ rotation = 0 }) => {
+  const cellStyle = "w-[32px] h-[32px] absolute rounded-xl bg-white border-[3px] border-current";
+  const dotStyle = "absolute w-[8px] h-[8px] rounded-full bg-current left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2";
+
+  const DominoCell = ({ className }: { className: string }) => (
+    <div className={className}>
+      <div className={dotStyle} />
+    </div>
+  );
+
+  return (
+    <div className="relative w-[60px] h-[60px]" style={{ transform: `rotate(${rotation}deg)` }}>
+      {/* Center vertical piece */}
+      <DominoCell className={`${cellStyle} left-[14px] top-[0px]`} />
+      <DominoCell className={`${cellStyle} left-[14px] top-[14px]`} />
+      <DominoCell className={`${cellStyle} left-[14px] top-[28px]`} />
+      {/* Horizontal piece */}
+      <DominoCell className={`${cellStyle} left-[-2px] top-[14px]`} />
+      <DominoCell className={`${cellStyle} left-[30px] top-[14px]`} />
+    </div>
+  );
+};
 
 const TPieceRotations: React.FC = () => (
   <div className="flex gap-8 items-center justify-center bg-gray-50 p-4 rounded-lg">
