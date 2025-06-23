@@ -1,11 +1,11 @@
 'use client';
 
-import { FC, useState, useCallback } from 'react';
+import React, { FC, useState, useCallback } from 'react';
 import { StraightPiece, TPiece, SquarePiece, LPiece, SkewPiece } from '@/components/TetrominoPieces';
 
 type TetrominoType = 'straight' | 'T' | 'square' | 'L' | 'skew';
 
-type Cell = {
+interface Cell {
   isOccupied: boolean;
   dominoId: number | null;
   orientation: TetrominoType | null;
@@ -13,27 +13,55 @@ type Cell = {
   isBlocked?: boolean;
   rotation?: number;
   isReflected?: boolean;
-};
+}
 
-type GameState = {
+interface GameState {
   grid: Cell[][];
   dominoesPlaced: number;
   usedTetrominoTypes?: TetrominoType[];
-};
+}
 
-type PuzzleConfig = {
+interface PuzzleConfig {
   gridSize: number;
+  gridWidth?: number;
   maxDominoes: number;
-  blockedCells: { row: number; col: number }[];
+  blockedCells: { row: number; col: number; }[];
   description: string;
   requiresPassword?: boolean;
   password?: string;
   useTetromino?: boolean;
   useSquareTetromino?: boolean;
-  maxSquareTetrominoes?: number;
   tetrominoTypes?: TetrominoType[];
-  gridWidth?: number;
+  maxSquareTetrominoes?: number;
   specialMiddleCell?: boolean;
+}
+
+const createEmptyGrid = (puzzleConfig: PuzzleConfig): Cell[][] => {
+  const rows = puzzleConfig.gridSize;
+  const cols = puzzleConfig.gridWidth || puzzleConfig.gridSize;
+  const grid: Cell[][] = Array(rows).fill(null).map(() =>
+    Array(cols).fill(null).map(() => ({
+      isOccupied: false,
+      dominoId: null,
+      orientation: null,
+      isFirst: false
+    }))
+  );
+
+  // Mark blocked cells
+  puzzleConfig.blockedCells.forEach(({ row, col }) => {
+    if (row < rows && col < cols) {
+      grid[row][col] = {
+        isOccupied: false,
+        dominoId: null,
+        orientation: null,
+        isFirst: false,
+        isBlocked: true
+      };
+    }
+  });
+
+  return grid;
 };
 
 const PUZZLES: PuzzleConfig[] = [
@@ -328,34 +356,6 @@ export default function GameBoard() {
   const isThankYouPage = puzzleIndex === PUZZLES.length;
   const currentPuzzle = isThankYouPage ? null : PUZZLES[puzzleIndex];
 
-  const createEmptyGrid = (puzzleConfig: PuzzleConfig): Cell[][] => {
-    const rows = puzzleConfig.gridSize;
-    const cols = puzzleConfig.gridWidth || puzzleConfig.gridSize;
-    const grid: Cell[][] = Array(rows).fill(null).map(() =>
-      Array(cols).fill(null).map(() => ({
-        isOccupied: false,
-        dominoId: null,
-        orientation: null,
-        isFirst: false
-      }))
-    );
-
-    // Mark blocked cells
-    puzzleConfig.blockedCells.forEach(({ row, col }) => {
-      if (row < rows && col < cols) {
-        grid[row][col] = {
-          isOccupied: false,
-          dominoId: null,
-          orientation: null,
-          isFirst: false,
-          isBlocked: true
-        };
-      }
-    });
-
-    return grid;
-  };
-
   if (isThankYouPage) {
     return (
       <div className="w-full max-w-2xl mx-auto flex flex-col items-center gap-8 mt-16">
@@ -368,7 +368,8 @@ export default function GameBoard() {
 
   const [currentState, setCurrentState] = useState<GameState>({
     grid: createEmptyGrid(PUZZLES[0]),
-    dominoesPlaced: 0
+    dominoesPlaced: 0,
+    usedTetrominoTypes: []
   });
 
   const [availableTetrominoTypes, setAvailableTetrominoTypes] = useState<TetrominoType[]>([
