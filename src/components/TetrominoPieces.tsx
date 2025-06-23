@@ -12,10 +12,10 @@ type TetrominoPieceProps = {
 export const StraightPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isSelected = false }) => {
   const cellSize = "w-[15px] h-[15px] sm:w-[20px] sm:h-[20px]";
   const baseCell = `absolute ${cellSize}`;
-  const dotStyle = "absolute w-[6px] h-[6px] sm:w-[8px] sm:h-[8px] rounded-full bg-gradient-to-br from-white/80 to-current left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 shadow-sm";
+  const dotStyle = "absolute w-[6px] h-[6px] sm:w-[8px] sm:h-[8px] rounded-full bg-black left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2";
 
   const DominoCell = ({ className, borders }: { className: string; borders: string }) => (
-    <div className={`${className} bg-gradient-to-br from-white to-white/90 ${borders} border-current shadow-inner rounded-sm`}>
+    <div className={`${className} bg-white ${borders} border-black`}>
       <div className={dotStyle} />
     </div>
   );
@@ -28,19 +28,19 @@ export const StraightPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isSelecte
         <>
           <DominoCell
             className={`${baseCell} left-[0px] top-[20px]`}
-            borders="border-l-[2px] border-y-[2px] sm:border-l-[3px] sm:border-y-[3px]"
+            borders="border-[2px] sm:border-[3px]"
           />
           <DominoCell
             className={`${baseCell} left-[15px] sm:left-[20px] top-[20px]`}
-            borders="border-y-[2px] sm:border-y-[3px]"
+            borders="border-[2px] sm:border-[3px] border-l-0"
           />
           <DominoCell
             className={`${baseCell} left-[30px] sm:left-[40px] top-[20px]`}
-            borders="border-y-[2px] sm:border-y-[3px]"
+            borders="border-[2px] sm:border-[3px] border-l-0"
           />
           <DominoCell
             className={`${baseCell} left-[45px] sm:left-[60px] top-[20px]`}
-            borders="border-r-[2px] border-y-[2px] sm:border-r-[3px] sm:border-y-[3px]"
+            borders="border-[2px] sm:border-[3px] border-l-0"
           />
         </>
       ) : (
@@ -48,19 +48,19 @@ export const StraightPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isSelecte
         <>
           <DominoCell
             className={`${baseCell} left-[20px] top-[0px]`}
-            borders="border-t-[2px] border-x-[2px] sm:border-t-[3px] sm:border-x-[3px]"
+            borders="border-[2px] sm:border-[3px]"
           />
           <DominoCell
             className={`${baseCell} left-[20px] top-[15px] sm:top-[20px]`}
-            borders="border-x-[2px] sm:border-x-[3px]"
+            borders="border-[2px] sm:border-[3px] border-t-0"
           />
           <DominoCell
             className={`${baseCell} left-[20px] top-[30px] sm:top-[40px]`}
-            borders="border-x-[2px] sm:border-x-[3px]"
+            borders="border-[2px] sm:border-[3px] border-t-0"
           />
           <DominoCell
             className={`${baseCell} left-[20px] top-[45px] sm:top-[60px]`}
-            borders="border-b-[2px] border-x-[2px] sm:border-b-[3px] sm:border-x-[3px]"
+            borders="border-[2px] sm:border-[3px] border-t-0"
           />
         </>
       )}
@@ -71,10 +71,10 @@ export const StraightPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isSelecte
 export const TPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isSelected = false }) => {
   const cellSize = "w-[15px] h-[15px] sm:w-[20px] sm:h-[20px]";
   const baseCell = `absolute ${cellSize}`;
-  const dotStyle = "absolute w-[6px] h-[6px] sm:w-[8px] sm:h-[8px] rounded-full bg-gradient-to-br from-white/80 to-current left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 shadow-sm";
+  const dotStyle = "absolute w-[6px] h-[6px] sm:w-[8px] sm:h-[8px] rounded-full bg-black left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2";
 
   const DominoCell = ({ className, borders }: { className: string; borders: string }) => (
-    <div className={`${className} bg-gradient-to-br from-white to-white/90 ${borders} border-current shadow-inner rounded-sm`}>
+    <div className={`${className} bg-white ${borders} border-black`}>
       <div className={dotStyle} />
     </div>
   );
@@ -85,20 +85,20 @@ export const TPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isSelected = fal
       {/* Top horizontal row */}
       <DominoCell 
         className={`${baseCell} left-[0px] top-[0px]`}
-        borders="border-t-[2px] border-l-[2px] sm:border-t-[3px] sm:border-l-[3px]"
+        borders="border-[2px] sm:border-[3px]"
       />
       <DominoCell 
         className={`${baseCell} left-[15px] sm:left-[20px] top-[0px]`}
-        borders="border-t-[2px] sm:border-t-[3px]"
+        borders="border-[2px] sm:border-[3px] border-l-0"
       />
       <DominoCell 
         className={`${baseCell} left-[30px] sm:left-[40px] top-[0px]`}
-        borders="border-t-[2px] border-r-[2px] sm:border-t-[3px] sm:border-r-[3px]"
+        borders="border-[2px] sm:border-[3px] border-l-0"
       />
       {/* Bottom stem */}
       <DominoCell 
         className={`${baseCell} left-[15px] sm:left-[20px] top-[15px] sm:top-[20px]`}
-        borders="border-l-[2px] border-r-[2px] border-b-[2px] sm:border-l-[3px] sm:border-r-[3px] sm:border-b-[3px]"
+        borders="border-[2px] sm:border-[3px]"
       />
     </div>
   );
@@ -107,10 +107,10 @@ export const TPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isSelected = fal
 export const SquarePiece: FC<TetrominoPieceProps> = ({ isSelected = false }) => {
   const cellSize = "w-[20px] h-[20px]";
   const baseCell = `absolute ${cellSize}`;
-  const dotStyle = "absolute w-[6px] h-[6px] sm:w-[8px] sm:h-[8px] rounded-full bg-gradient-to-br from-white/80 to-current left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 shadow-sm";
+  const dotStyle = "absolute w-[6px] h-[6px] sm:w-[8px] sm:h-[8px] rounded-full bg-black left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2";
 
   const DominoCell = ({ className, borders }: { className: string; borders: string }) => (
-    <div className={`${className} bg-gradient-to-br from-white to-white/90 ${borders} border-current shadow-inner rounded-sm`}>
+    <div className={`${className} bg-white ${borders} border-black`}>
       <div className={dotStyle} />
     </div>
   );
@@ -120,19 +120,19 @@ export const SquarePiece: FC<TetrominoPieceProps> = ({ isSelected = false }) => 
       {/* 2x2 Square */}
       <DominoCell
         className={`${baseCell} left-[10px] top-[10px]`}
-        borders="border-t-[3px] border-l-[3px]"
+        borders="border-[3px]"
       />
       <DominoCell
         className={`${baseCell} left-[30px] top-[10px]`}
-        borders="border-t-[3px] border-r-[3px]"
+        borders="border-[3px] border-l-0"
       />
       <DominoCell
         className={`${baseCell} left-[10px] top-[30px]`}
-        borders="border-l-[3px] border-b-[3px]"
+        borders="border-[3px] border-t-0"
       />
       <DominoCell
         className={`${baseCell} left-[30px] top-[30px]`}
-        borders="border-r-[3px] border-b-[3px]"
+        borders="border-[3px] border-l-0 border-t-0"
       />
     </div>
   );
