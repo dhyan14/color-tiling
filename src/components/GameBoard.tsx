@@ -5,7 +5,7 @@ import React, { useState, useCallback } from 'react';
 type Cell = {
   isOccupied: boolean;
   dominoId: number | null;
-  orientation: 'horizontal' | 'vertical' | null;
+  orientation: 'horizontal' | 'vertical' | 'T' | null;
   isFirst: boolean;
   isBlocked?: boolean; // For blocked cells in puzzle 2
 };
@@ -16,6 +16,7 @@ type GameState = {
 };
 
 type PuzzleConfig = {
+  gridSize: number;
   maxDominoes: number;
   blockedCells: { row: number; col: number }[];
   description: string;
@@ -25,6 +26,7 @@ type PuzzleConfig = {
 
 const PUZZLES: PuzzleConfig[] = [
   {
+    gridSize: 6,
     maxDominoes: 18,
     blockedCells: [],
     description: "Place 18 dominoes on a 6x6 grid",
@@ -32,6 +34,7 @@ const PUZZLES: PuzzleConfig[] = [
     password: "3141"
   },
   {
+    gridSize: 6,
     maxDominoes: 17,
     blockedCells: [
       { row: 0, col: 0 },
@@ -42,11 +45,19 @@ const PUZZLES: PuzzleConfig[] = [
     password: "2718"
   },
   {
-    maxDominoes: 18,
+    gridSize: 8,
+    maxDominoes: 16,
     blockedCells: [],
-    description: "Create your own domino pattern on a blank 6x6 grid"
+    description: "Place T-shaped pieces on an 8x8 grid"
   }
 ];
+
+const TPiece = () => (
+  <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="20" y="0" width="20" height="60" className="fill-current" />
+    <rect x="0" y="20" width="60" height="20" className="fill-current" />
+  </svg>
+);
 
 export default function GameBoard() {
   const [puzzleIndex, setPuzzleIndex] = useState(0);
@@ -56,8 +67,8 @@ export default function GameBoard() {
   const currentPuzzle = PUZZLES[puzzleIndex];
 
   const createEmptyGrid = (puzzleConfig: PuzzleConfig): Cell[][] => {
-    const grid = Array(6).fill(null).map(() =>
-      Array(6).fill(null).map(() => ({
+    const grid = Array(puzzleConfig.gridSize).fill(null).map(() =>
+      Array(puzzleConfig.gridSize).fill(null).map(() => ({
         isOccupied: false,
         dominoId: null,
         orientation: null,
@@ -157,13 +168,12 @@ export default function GameBoard() {
 
   const handleCellClick = (row: number, col: number) => {
     if (currentState.dominoesPlaced >= currentPuzzle.maxDominoes) {
-      setErrorMessage("Maximum number of dominoes placed!");
+      setErrorMessage("Maximum number of pieces placed!");
       return;
     }
 
     const newGrid = JSON.parse(JSON.stringify(currentState.grid));
     
-    // Check if clicked cell is blocked
     if (newGrid[row][col].isBlocked) {
       setErrorMessage("This cell is blocked!");
       return;
@@ -171,66 +181,99 @@ export default function GameBoard() {
 
     let isValidMove = false;
     
-    if (selectedOrientation === 'horizontal') {
-      if (col >= 5) {
-        setErrorMessage("Can't place horizontal domino here - out of bounds!");
+    if (puzzleIndex === 2) { // T-piece placement logic for puzzle 3
+      if (row >= currentPuzzle.gridSize - 2 || col >= currentPuzzle.gridSize - 1 || col === 0) {
+        setErrorMessage("Can't place T-piece here - out of bounds!");
         return;
       }
-      // Check if next cell is blocked
-      if (newGrid[row][col + 1].isBlocked) {
-        setErrorMessage("Can't place domino here - next cell is blocked!");
+      
+      // Check if all required cells are free
+      const requiredCells = [
+        [row, col],     // Center
+        [row + 1, col], // Bottom
+        [row, col - 1], // Left
+        [row, col + 1]  // Right
+      ];
+      
+      if (requiredCells.some(([r, c]) => newGrid[r][c].isOccupied)) {
+        setErrorMessage("Can't place T-piece here - space already occupied!");
         return;
       }
-      if (newGrid[row][col].isOccupied || newGrid[row][col + 1].isOccupied) {
-        setErrorMessage("Can't place domino here - space already occupied!");
-        return;
-      }
+
       isValidMove = true;
-      const dominoId = currentState.dominoesPlaced + 1;
-      newGrid[row][col] = {
-        ...newGrid[row][col],
-        isOccupied: true,
-        dominoId,
-        orientation: 'horizontal',
-        isFirst: true,
-      };
-      newGrid[row][col + 1] = {
-        ...newGrid[row][col + 1],
-        isOccupied: true,
-        dominoId,
-        orientation: 'horizontal',
-        isFirst: false,
-      };
+      const pieceId = currentState.dominoesPlaced + 1;
+      
+      requiredCells.forEach(([r, c], index) => {
+        newGrid[r][c] = {
+          ...newGrid[r][c],
+          isOccupied: true,
+          dominoId: pieceId,
+          orientation: 'T',
+          isFirst: index === 0, // Center piece is the first
+        };
+      });
     } else {
-      if (row >= 5) {
-        setErrorMessage("Can't place vertical domino here - out of bounds!");
-        return;
+      if (selectedOrientation === 'horizontal') {
+        if (col >= 5) {
+          setErrorMessage("Can't place horizontal domino here - out of bounds!");
+          return;
+        }
+        // Check if next cell is blocked
+        if (newGrid[row][col + 1].isBlocked) {
+          setErrorMessage("Can't place domino here - next cell is blocked!");
+          return;
+        }
+        if (newGrid[row][col].isOccupied || newGrid[row][col + 1].isOccupied) {
+          setErrorMessage("Can't place domino here - space already occupied!");
+          return;
+        }
+        isValidMove = true;
+        const dominoId = currentState.dominoesPlaced + 1;
+        newGrid[row][col] = {
+          ...newGrid[row][col],
+          isOccupied: true,
+          dominoId,
+          orientation: 'horizontal',
+          isFirst: true,
+        };
+        newGrid[row][col + 1] = {
+          ...newGrid[row][col + 1],
+          isOccupied: true,
+          dominoId,
+          orientation: 'horizontal',
+          isFirst: false,
+        };
+      } else {
+        if (row >= 5) {
+          setErrorMessage("Can't place vertical domino here - out of bounds!");
+          return;
+        }
+        // Check if next cell is blocked
+        if (newGrid[row + 1][col].isBlocked) {
+          setErrorMessage("Can't place domino here - next cell is blocked!");
+          return;
+        }
+        if (newGrid[row][col].isOccupied || newGrid[row + 1][col].isOccupied) {
+          setErrorMessage("Can't place domino here - space already occupied!");
+          return;
+        }
+        isValidMove = true;
+        const dominoId = currentState.dominoesPlaced + 1;
+        newGrid[row][col] = {
+          ...newGrid[row][col],
+          isOccupied: true,
+          dominoId,
+          orientation: 'vertical',
+          isFirst: true,
+        };
+        newGrid[row + 1][col] = {
+          ...newGrid[row + 1][col],
+          isOccupied: true,
+          dominoId,
+          orientation: 'vertical',
+          isFirst: false,
+        };
       }
-      // Check if next cell is blocked
-      if (newGrid[row + 1][col].isBlocked) {
-        setErrorMessage("Can't place domino here - next cell is blocked!");
-        return;
-      }
-      if (newGrid[row][col].isOccupied || newGrid[row + 1][col].isOccupied) {
-        setErrorMessage("Can't place domino here - space already occupied!");
-        return;
-      }
-      isValidMove = true;
-      const dominoId = currentState.dominoesPlaced + 1;
-      newGrid[row][col] = {
-        ...newGrid[row][col],
-        isOccupied: true,
-        dominoId,
-        orientation: 'vertical',
-        isFirst: true,
-      };
-      newGrid[row + 1][col] = {
-        ...newGrid[row + 1][col],
-        isOccupied: true,
-        dominoId,
-        orientation: 'vertical',
-        isFirst: false,
-      };
     }
 
     if (isValidMove) {
@@ -330,40 +373,50 @@ export default function GameBoard() {
         </div>
       )}
 
-      <div className="flex gap-8 mb-4">
-        <button
-          onClick={() => setSelectedOrientation('horizontal')}
-          className={`p-2 rounded transition-all ${
-            selectedOrientation === 'horizontal'
-              ? 'bg-blue-100 text-blue-600 scale-110'
-              : 'text-gray-400 hover:text-gray-600'
-          }`}
-          title="Place horizontal domino"
-        >
-          <div className="w-[60px] h-[30px] border-2 border-current rounded-lg relative">
-            <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-current"/>
-            <div className="absolute left-[25%] top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-current"/>
-            <div className="absolute left-[75%] top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-current"/>
+      {puzzleIndex === 2 ? (
+        <div className="flex gap-8 mb-4 items-center">
+          <div className="text-blue-600">
+            <TPiece />
           </div>
-        </button>
-        <button
-          onClick={() => setSelectedOrientation('vertical')}
-          className={`p-2 rounded transition-all ${
-            selectedOrientation === 'vertical'
-              ? 'bg-blue-100 text-blue-600 scale-110'
-              : 'text-gray-400 hover:text-gray-600'
-          }`}
-          title="Place vertical domino"
-        >
-          <div className="w-[30px] h-[60px] border-2 border-current rounded-lg relative">
-            <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-current"/>
-            <div className="absolute left-1/2 top-[25%] -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-current"/>
-            <div className="absolute left-1/2 top-[75%] -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-current"/>
-          </div>
-        </button>
-      </div>
+        </div>
+      ) : (
+        <div className="flex gap-8 mb-4">
+          <button
+            onClick={() => setSelectedOrientation('horizontal')}
+            className={`p-2 rounded transition-all ${
+              selectedOrientation === 'horizontal'
+                ? 'bg-blue-100 text-blue-600 scale-110'
+                : 'text-gray-400 hover:text-gray-600'
+            }`}
+            title="Place horizontal domino"
+          >
+            <div className="w-[60px] h-[30px] border-2 border-current rounded-lg relative">
+              <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-current"/>
+              <div className="absolute left-[25%] top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-current"/>
+              <div className="absolute left-[75%] top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-current"/>
+            </div>
+          </button>
+          <button
+            onClick={() => setSelectedOrientation('vertical')}
+            className={`p-2 rounded transition-all ${
+              selectedOrientation === 'vertical'
+                ? 'bg-blue-100 text-blue-600 scale-110'
+                : 'text-gray-400 hover:text-gray-600'
+            }`}
+            title="Place vertical domino"
+          >
+            <div className="w-[30px] h-[60px] border-2 border-current rounded-lg relative">
+              <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-current"/>
+              <div className="absolute left-1/2 top-[25%] -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-current"/>
+              <div className="absolute left-1/2 top-[75%] -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-current"/>
+            </div>
+          </button>
+        </div>
+      )}
       
-      <div className="grid grid-cols-6 gap-1 bg-gray-200 p-2 rounded">
+      <div className={`grid gap-1 bg-gray-200 p-2 rounded ${
+        currentPuzzle.gridSize === 8 ? 'grid-cols-8' : 'grid-cols-6'
+      }`}>
         {currentState.grid.map((row, rowIndex) => (
           row.map((cell, colIndex) => (
             <div
