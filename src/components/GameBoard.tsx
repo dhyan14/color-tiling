@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
+import type { FC } from 'react';
 
 type Cell = {
   isOccupied: boolean;
   dominoId: number | null;
-  orientation: 'horizontal' | 'vertical' | 'T' | null;
+  orientation: 'horizontal' | 'vertical' | 'T' | 'square' | null;
   isFirst: boolean;
   isBlocked?: boolean; // For blocked cells in puzzle 2
   rotation?: number; // Add rotation for T pieces
@@ -304,6 +305,7 @@ export default function GameBoard() {
   const [passwordError, setPasswordError] = useState(false);
   const [selectedOrientation, setSelectedOrientation] = useState<'horizontal' | 'vertical'>('horizontal');
   const [selectedRotation, setSelectedRotation] = useState<number>(0);
+  const [squareTetrominoUsed, setSquareTetrominoUsed] = useState(false);
   const currentPuzzle = PUZZLES[puzzleIndex];
 
   const createEmptyGrid = (puzzleConfig: PuzzleConfig): Cell[][] => {
@@ -421,13 +423,61 @@ export default function GameBoard() {
     let isValidMove = false;
     
     if (currentPuzzle.useTetromino) {
-      // Get required cells based on rotation
+      // Handle square tetromino placement
+      if (selectedRotation === -1) {
+        if (squareTetrominoUsed) {
+          setErrorMessage("Square piece already used!");
+          return;
+        }
+        
+        // Check if we can place a 2x2 square
+        if (row + 1 >= currentPuzzle.gridSize || col + 1 >= currentPuzzle.gridSize) {
+          setErrorMessage("Can't place square piece here - out of bounds!");
+          return;
+        }
+        
+        const canPlaceSquare = !newGrid[row][col].isOccupied &&
+          !newGrid[row][col + 1].isOccupied &&
+          !newGrid[row + 1][col].isOccupied &&
+          !newGrid[row + 1][col + 1].isOccupied;
+
+        if (!canPlaceSquare) {
+          setErrorMessage("Can't place square piece here - space already occupied!");
+          return;
+        }
+
+        const dominoId = currentState.dominoesPlaced + 1;
+
+        // Place the 2x2 square
+        for (let r = row; r <= row + 1; r++) {
+          for (let c = col; c <= col + 1; c++) {
+            newGrid[r][c] = {
+              isOccupied: true,
+              dominoId,
+              orientation: 'square',
+              isFirst: r === row && c === col,
+              rotation: 0
+            };
+          }
+        }
+
+        const newState = {
+          grid: newGrid,
+          dominoesPlaced: dominoId
+        };
+
+        setSquareTetrominoUsed(true);
+        saveState(newState);
+        setErrorMessage(null);
+        checkGameCompletion(newGrid);
+        return;
+      }
+
+      // Handle T tetromino placement
       const requiredCells = getTRequiredCells(row, col, selectedRotation);
       
-      // Check if all cells are within bounds
-      if (!requiredCells.every(([r, c]) => 
-        r >= 0 && r < currentPuzzle.gridSize && 
-        c >= 0 && c < currentPuzzle.gridSize)) {
+      // Check bounds
+      if (requiredCells.some(([r, c]) => r < 0 || r >= currentPuzzle.gridSize || c < 0 || c >= currentPuzzle.gridSize)) {
         setErrorMessage("Can't place T-piece here - out of bounds!");
         return;
       }
@@ -438,72 +488,77 @@ export default function GameBoard() {
         return;
       }
 
-      isValidMove = true;
-      const pieceId = currentState.dominoesPlaced + 1;
+      const dominoId = currentState.dominoesPlaced + 1;
       
+      // Place the T piece
       requiredCells.forEach(([r, c], index) => {
         newGrid[r][c] = {
-          ...newGrid[r][c],
           isOccupied: true,
-          dominoId: pieceId,
+          dominoId,
           orientation: 'T',
           isFirst: index === 0,
           rotation: selectedRotation
         };
       });
-    } else {
-      // Existing domino placement logic
-      if (selectedOrientation === 'horizontal') {
-        if (col >= currentPuzzle.gridSize - 1) {
-          setErrorMessage("Can't place horizontal domino here - out of bounds!");
-          return;
-        }
-        if (newGrid[row][col].isOccupied || newGrid[row][col + 1].isOccupied) {
-          setErrorMessage("Can't place domino here - space already occupied!");
-          return;
-        }
-        isValidMove = true;
-        const dominoId = currentState.dominoesPlaced + 1;
-        newGrid[row][col] = {
-          ...newGrid[row][col],
-          isOccupied: true,
-          dominoId,
-          orientation: 'horizontal',
-          isFirst: true,
-        };
-        newGrid[row][col + 1] = {
-          ...newGrid[row][col + 1],
-          isOccupied: true,
-          dominoId,
-          orientation: 'horizontal',
-          isFirst: false,
-        };
-      } else {
-        if (row >= currentPuzzle.gridSize - 1) {
-          setErrorMessage("Can't place vertical domino here - out of bounds!");
-          return;
-        }
-        if (newGrid[row][col].isOccupied || newGrid[row + 1][col].isOccupied) {
-          setErrorMessage("Can't place domino here - space already occupied!");
-          return;
-        }
-        isValidMove = true;
-        const dominoId = currentState.dominoesPlaced + 1;
-        newGrid[row][col] = {
-          ...newGrid[row][col],
-          isOccupied: true,
-          dominoId,
-          orientation: 'vertical',
-          isFirst: true,
-        };
-        newGrid[row + 1][col] = {
-          ...newGrid[row][col + 1],
-          isOccupied: true,
-          dominoId,
-          orientation: 'vertical',
-          isFirst: false,
-        };
+
+      const newState = {
+        grid: newGrid,
+        dominoesPlaced: dominoId
+      };
+
+      saveState(newState);
+      setErrorMessage(null);
+      checkGameCompletion(newGrid);
+      return;
+    }
+
+    // Handle regular domino placement
+    if (selectedOrientation === 'horizontal') {
+      if (col + 1 >= currentPuzzle.gridSize) {
+        setErrorMessage("Can't place domino here - out of bounds!");
+        return;
       }
+      if (newGrid[row][col].isOccupied || newGrid[row][col + 1].isOccupied) {
+        setErrorMessage("Can't place domino here - space already occupied!");
+        return;
+      }
+      isValidMove = true;
+      const dominoId = currentState.dominoesPlaced + 1;
+      newGrid[row][col] = {
+        isOccupied: true,
+        dominoId,
+        orientation: 'horizontal',
+        isFirst: true,
+      };
+      newGrid[row][col + 1] = {
+        isOccupied: true,
+        dominoId,
+        orientation: 'horizontal',
+        isFirst: false,
+      };
+    } else {
+      if (row + 1 >= currentPuzzle.gridSize) {
+        setErrorMessage("Can't place domino here - out of bounds!");
+        return;
+      }
+      if (newGrid[row][col].isOccupied || newGrid[row + 1][col].isOccupied) {
+        setErrorMessage("Can't place domino here - space already occupied!");
+        return;
+      }
+      isValidMove = true;
+      const dominoId = currentState.dominoesPlaced + 1;
+      newGrid[row][col] = {
+        isOccupied: true,
+        dominoId,
+        orientation: 'vertical',
+        isFirst: true,
+      };
+      newGrid[row + 1][col] = {
+        isOccupied: true,
+        dominoId,
+        orientation: 'vertical',
+        isFirst: false,
+      };
     }
 
     if (isValidMove) {
