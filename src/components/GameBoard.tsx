@@ -596,6 +596,17 @@ export default function GameBoard() {
           }
           return updated;
         });
+      } else if (currentPuzzle.tetrominoTypes?.length === 1 && currentPuzzle.tetrominoTypes[0] === 'T') {
+        // Don't remove T pieces from available types in puzzles 3 and 4
+        setAvailableTetrominoTypes(prev => prev);
+      } else if (currentPuzzle.tetrominoTypes?.length === 2 && currentPuzzle.tetrominoTypes.includes('T') && currentPuzzle.tetrominoTypes.includes('square')) {
+        // For puzzle 5, only remove square piece after use, keep T pieces available
+        setAvailableTetrominoTypes(prev => {
+          if (selectedType === 'square') {
+            return prev.filter(t => t !== 'square');
+          }
+          return prev;
+        });
       } else {
         // For other pieces, remove them after first use
         setAvailableTetrominoTypes(prev => prev.filter(t => !newUsedTypes.includes(t)));
