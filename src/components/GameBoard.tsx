@@ -480,7 +480,7 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
       break;
       
     case 'L':
-      const baseL = rotation === 0 ? [
+      const baseL: [number, number][] = rotation === 0 ? [
         [row, col], [row + 1, col], [row + 2, col], [row + 2, col + 1]
       ] : rotation === 90 ? [
         [row + 1, col], [row + 1, col + 1], [row + 1, col + 2], [row, col]
@@ -491,21 +491,21 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
       ];
       
       if (isReflected) {
-        cells.push(...baseL.map(([r, c]) => [r, 2 * col + 1 - c] as [number, number]));
+        cells.push(...baseL.map(([r, c]): [number, number] => [r, 2 * col + 1 - c]));
       } else {
         cells.push(...baseL);
       }
       break;
       
     case 'skew':
-      const baseSkew = rotation === 0 ? [
+      const baseSkew: [number, number][] = rotation === 0 ? [
         [row, col + 1], [row, col + 2], [row + 1, col], [row + 1, col + 1]
       ] : [
         [row, col], [row + 1, col], [row + 1, col + 1], [row + 2, col + 1]
       ];
       
       if (isReflected) {
-        cells.push(...baseSkew.map(([r, c]) => [r, 2 * col + 1 - c] as [number, number]));
+        cells.push(...baseSkew.map(([r, c]): [number, number] => [r, 2 * col + 1 - c]));
       } else {
         cells.push(...baseSkew);
       }
