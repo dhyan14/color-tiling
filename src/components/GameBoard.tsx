@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 
 type Cell = {
   isOccupied: boolean;
@@ -9,76 +9,155 @@ type Cell = {
   isFirst: boolean;
 };
 
+type GameState = {
+  grid: Cell[][];
+  dominoesPlaced: number;
+};
+
 export default function GameBoard() {
-  const [grid, setGrid] = useState<Cell[][]>(() =>
-    Array(6).fill(null).map(() =>
+  const [currentState, setCurrentState] = useState<GameState>({
+    grid: Array(6).fill(null).map(() =>
       Array(6).fill(null).map(() => ({
         isOccupied: false,
         dominoId: null,
         orientation: null,
         isFirst: false,
       }))
-    )
-  );
-  
-  const [dominoesPlaced, setDominoesPlaced] = useState(0);
+    ),
+    dominoesPlaced: 0
+  });
+
+  const [history, setHistory] = useState<GameState[]>([]);
+  const [future, setFuture] = useState<GameState[]>([]);
   const [selectedOrientation, setSelectedOrientation] = useState<'horizontal' | 'vertical'>('horizontal');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const saveState = (newState: GameState) => {
+    setHistory(prev => [...prev, currentState]);
+    setCurrentState(newState);
+    setFuture([]);
+  };
+
+  const handleUndo = () => {
+    if (history.length === 0) return;
+    
+    const previousState = history[history.length - 1];
+    const newHistory = history.slice(0, -1);
+    
+    setFuture(prev => [currentState, ...prev]);
+    setHistory(newHistory);
+    setCurrentState(previousState);
+    setErrorMessage(null);
+    setShowSuccess(false);
+  };
+
+  const handleRedo = () => {
+    if (future.length === 0) return;
+    
+    const nextState = future[0];
+    const newFuture = future.slice(1);
+    
+    setHistory(prev => [...prev, currentState]);
+    setFuture(newFuture);
+    setCurrentState(nextState);
+    setErrorMessage(null);
+  };
+
+  const checkGameCompletion = (grid: Cell[][]) => {
+    // Check if all cells are occupied
+    const allCellsOccupied = grid.every(row => 
+      row.every(cell => cell.isOccupied)
+    );
+    
+    if (allCellsOccupied) {
+      setShowSuccess(true);
+    }
+  };
 
   const handleCellClick = (row: number, col: number) => {
-    if (dominoesPlaced >= 18) return; // Max dominoes reached
+    if (currentState.dominoesPlaced >= 18) {
+      setErrorMessage("Maximum number of dominoes placed!");
+      return;
+    }
+
+    const newGrid = JSON.parse(JSON.stringify(currentState.grid));
+    let isValidMove = false;
     
-    const newGrid = JSON.parse(JSON.stringify(grid));
-    
-    // Check if we can place a domino here
     if (selectedOrientation === 'horizontal') {
-      if (col < 5 && !grid[row][col].isOccupied && !grid[row][col + 1].isOccupied) {
-        const dominoId = dominoesPlaced + 1;
-        newGrid[row][col] = {
-          isOccupied: true,
-          dominoId,
-          orientation: 'horizontal',
-          isFirst: true,
-        };
-        newGrid[row][col + 1] = {
-          isOccupied: true,
-          dominoId,
-          orientation: 'horizontal',
-          isFirst: false,
-        };
-        setGrid(newGrid);
-        setDominoesPlaced(prev => prev + 1);
+      if (col >= 5) {
+        setErrorMessage("Can't place horizontal domino here - out of bounds!");
+        return;
       }
+      if (newGrid[row][col].isOccupied || newGrid[row][col + 1].isOccupied) {
+        setErrorMessage("Can't place domino here - space already occupied!");
+        return;
+      }
+      isValidMove = true;
+      const dominoId = currentState.dominoesPlaced + 1;
+      newGrid[row][col] = {
+        isOccupied: true,
+        dominoId,
+        orientation: 'horizontal',
+        isFirst: true,
+      };
+      newGrid[row][col + 1] = {
+        isOccupied: true,
+        dominoId,
+        orientation: 'horizontal',
+        isFirst: false,
+      };
     } else {
-      if (row < 5 && !grid[row][col].isOccupied && !grid[row + 1][col].isOccupied) {
-        const dominoId = dominoesPlaced + 1;
-        newGrid[row][col] = {
-          isOccupied: true,
-          dominoId,
-          orientation: 'vertical',
-          isFirst: true,
-        };
-        newGrid[row + 1][col] = {
-          isOccupied: true,
-          dominoId,
-          orientation: 'vertical',
-          isFirst: false,
-        };
-        setGrid(newGrid);
-        setDominoesPlaced(prev => prev + 1);
+      if (row >= 5) {
+        setErrorMessage("Can't place vertical domino here - out of bounds!");
+        return;
       }
+      if (newGrid[row][col].isOccupied || newGrid[row + 1][col].isOccupied) {
+        setErrorMessage("Can't place domino here - space already occupied!");
+        return;
+      }
+      isValidMove = true;
+      const dominoId = currentState.dominoesPlaced + 1;
+      newGrid[row][col] = {
+        isOccupied: true,
+        dominoId,
+        orientation: 'vertical',
+        isFirst: true,
+      };
+      newGrid[row + 1][col] = {
+        isOccupied: true,
+        dominoId,
+        orientation: 'vertical',
+        isFirst: false,
+      };
+    }
+
+    if (isValidMove) {
+      const newState = {
+        grid: newGrid,
+        dominoesPlaced: currentState.dominoesPlaced + 1
+      };
+      saveState(newState);
+      setErrorMessage(null);
+      checkGameCompletion(newGrid);
     }
   };
 
   const handleReset = () => {
-    setGrid(Array(6).fill(null).map(() =>
-      Array(6).fill(null).map(() => ({
-        isOccupied: false,
-        dominoId: null,
-        orientation: null,
-        isFirst: false,
-      }))
-    ));
-    setDominoesPlaced(0);
+    const newState = {
+      grid: Array(6).fill(null).map(() =>
+        Array(6).fill(null).map(() => ({
+          isOccupied: false,
+          dominoId: null,
+          orientation: null,
+          isFirst: false,
+        }))
+      ),
+      dominoesPlaced: 0
+    };
+    saveState(newState);
+    setErrorMessage(null);
+    setShowSuccess(false);
   };
 
   const getRandomColor = (id: number) => {
@@ -91,6 +170,18 @@ export default function GameBoard() {
 
   return (
     <div className="flex flex-col items-center gap-6">
+      {showSuccess && (
+        <div className="bg-green-100 text-green-700 px-6 py-3 rounded-lg text-lg font-semibold animate-bounce">
+          🎉 Congratulations! You've completed the puzzle! 🎉
+        </div>
+      )}
+      
+      {errorMessage && (
+        <div className="bg-red-100 text-red-700 px-6 py-3 rounded-lg">
+          {errorMessage}
+        </div>
+      )}
+
       <div className="flex gap-8 mb-4">
         <button
           onClick={() => setSelectedOrientation('horizontal')}
@@ -125,7 +216,7 @@ export default function GameBoard() {
       </div>
       
       <div className="grid grid-cols-6 gap-1 bg-gray-200 p-2 rounded">
-        {grid.map((row, rowIndex) => (
+        {currentState.grid.map((row, rowIndex) => (
           row.map((cell, colIndex) => (
             <div
               key={`${rowIndex}-${colIndex}`}
@@ -140,16 +231,43 @@ export default function GameBoard() {
         ))}
       </div>
 
-      <div className="flex flex-col items-center gap-2">
+      <div className="flex flex-col items-center gap-4">
         <p className="text-lg font-semibold">
-          Dominoes Placed: {dominoesPlaced} / 18
+          Dominoes Placed: {currentState.dominoesPlaced} / 18
         </p>
-        <button
-          onClick={handleReset}
-          className="px-6 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-        >
-          Reset Game
-        </button>
+        
+        <div className="flex gap-4">
+          <button
+            onClick={handleUndo}
+            disabled={history.length === 0}
+            className={`px-4 py-2 rounded ${
+              history.length === 0
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-blue-500 text-white hover:bg-blue-600'
+            } transition-colors`}
+          >
+            ↩ Undo
+          </button>
+          
+          <button
+            onClick={handleRedo}
+            disabled={future.length === 0}
+            className={`px-4 py-2 rounded ${
+              future.length === 0
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-blue-500 text-white hover:bg-blue-600'
+            } transition-colors`}
+          >
+            Redo ↪
+          </button>
+          
+          <button
+            onClick={handleReset}
+            className="px-6 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+          >
+            Reset Game
+          </button>
+        </div>
       </div>
     </div>
   );
