@@ -83,15 +83,15 @@ export const TPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isSelected = fal
       {/* Top horizontal row */}
       <DominoCell 
         className={`${baseCell} left-[0px] top-[0px]`}
-        borders="border-t-[2px] border-l-[2px] border-b-[2px] sm:border-t-[3px] sm:border-l-[3px] sm:border-b-[3px]"
+        borders="border-t-[2px] border-l-[2px] sm:border-t-[3px] sm:border-l-[3px]"
       />
       <DominoCell 
         className={`${baseCell} left-[15px] sm:left-[20px] top-[0px]`}
-        borders="border-t-[2px] border-b-[2px] sm:border-t-[3px] sm:border-b-[3px]"
+        borders="border-t-[2px] sm:border-t-[3px]"
       />
       <DominoCell 
         className={`${baseCell} left-[30px] sm:left-[40px] top-[0px]`}
-        borders="border-t-[2px] border-r-[2px] border-b-[2px] sm:border-t-[3px] sm:border-r-[3px] sm:border-b-[3px]"
+        borders="border-t-[2px] border-r-[2px] sm:border-t-[3px] sm:border-r-[3px]"
       />
       {/* Bottom stem */}
       <DominoCell 
@@ -216,4 +216,4 @@ export const SkewPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isReflected =
       />
     </div>
   );
-}; 
+};

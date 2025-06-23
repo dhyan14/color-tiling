@@ -82,7 +82,7 @@ const PUZZLES: PuzzleConfig[] = [
     useSquareTetromino: true,
     maxSquareTetrominoes: 1,
     requiresPassword: true,
-    password: "2236"
+    password: "1732"
   },
   {
     gridSize: 4,
@@ -627,10 +627,10 @@ export default function GameBoard() {
   const getTRequiredCells = (row: number, col: number, rotation: number): [number, number][] => {
     // Map the visual rotation to the actual rotation for placement
     const visualToActualRotation = {
-      180: 0,  // First piece (visually up) maps to down rotation
-      90: 90,  // Second piece (visually left) stays as left
-      0: 180,  // Third piece (visually down) maps to up rotation
-      270: 270 // Fourth piece (visually right) stays as right
+      0: 0,     // First piece (visually down) maps to down rotation
+      90: 90,   // Second piece (visually left) stays as left
+      180: 180, // Third piece (visually up) maps to up rotation
+      270: 270  // Fourth piece (visually right) stays as right
     };
     
     // Use the mapped rotation for placement
