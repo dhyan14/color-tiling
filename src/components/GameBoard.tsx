@@ -132,7 +132,7 @@ const TetrominoOption: React.FC<TetrominoOptionProps> = ({ rotation, isSelected,
     );
 
     switch(rotation) {
-      case 180: // T pointing up
+      case 0: // T pointing down (now in first position)
         return (
           <>
             {/* Bottom horizontal row */}
@@ -151,10 +151,6 @@ const TetrominoOption: React.FC<TetrominoOptionProps> = ({ rotation, isSelected,
             {/* Top vertical stem */}
             <DominoCell 
               className={`${baseCell} left-[30px] top-[20px]`}
-              borders="border-x-[3px]"
-            />
-            <DominoCell 
-              className={`${baseCell} left-[30px] top-[0px]`}
               borders="border-t-[3px] border-x-[3px]"
             />
           </>
@@ -182,7 +178,7 @@ const TetrominoOption: React.FC<TetrominoOptionProps> = ({ rotation, isSelected,
             />
           </>
         );
-      case 0: // T pointing down
+      case 180: // T pointing up (now in third position)
         return (
           <>
             {/* Top horizontal row */}
@@ -201,10 +197,6 @@ const TetrominoOption: React.FC<TetrominoOptionProps> = ({ rotation, isSelected,
             {/* Bottom stem */}
             <DominoCell 
               className={`${baseCell} left-[30px] top-[40px]`}
-              borders="border-x-[3px]"
-            />
-            <DominoCell 
-              className={`${baseCell} left-[30px] top-[60px]`}
               borders="border-b-[3px] border-x-[3px]"
             />
           </>
