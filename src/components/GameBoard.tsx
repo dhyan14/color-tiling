@@ -1,7 +1,7 @@
 'use client';
 
 import { FC, useState, useCallback } from 'react';
-import { StraightPiece, TPiece, SquarePiece, LPiece, SkewPiece } from './TetrominoPieces';
+import { StraightPiece, TPiece, SquarePiece, LPiece, SkewPiece } from '@/components/TetrominoPieces';
 
 type TetrominoType = 'straight' | 'T' | 'square' | 'L' | 'skew';
 
@@ -97,360 +97,25 @@ const PUZZLES: PuzzleConfig[] = [
   }
 ];
 
-const TPiece: React.FC<{ rotation?: number }> = ({ rotation = 0 }) => {
-  const cellSize = "w-[15px] h-[15px] sm:w-[20px] sm:h-[20px]";
-  const baseCell = `absolute ${cellSize}`;
-  const dotStyle = "absolute w-[4px] h-[4px] sm:w-[6px] sm:h-[6px] rounded-full bg-current left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2";
-
-  const DominoCell = ({ className, borders }: { className: string; borders: string }) => (
-    <div className={`${className} bg-white ${borders} border-current`}>
-      <div className={dotStyle} />
-    </div>
-  );
-
-  return (
-    <div className="relative w-[45px] h-[45px] sm:w-[60px] sm:h-[60px]" style={{ transform: `rotate(${rotation}deg)` }}>
-      {/* Top horizontal row */}
-      <DominoCell 
-        className={`${baseCell} left-[0px] top-[0px]`}
-        borders="border-t-[2px] border-l-[2px] border-b-[2px] sm:border-t-[3px] sm:border-l-[3px] sm:border-b-[3px]"
-      />
-      <DominoCell 
-        className={`${baseCell} left-[15px] sm:left-[20px] top-[0px]`}
-        borders="border-t-[2px] border-b-[2px] sm:border-t-[3px] sm:border-b-[3px]"
-      />
-      <DominoCell 
-        className={`${baseCell} left-[30px] sm:left-[40px] top-[0px]`}
-        borders="border-t-[2px] border-r-[2px] border-b-[2px] sm:border-t-[3px] sm:border-r-[3px] sm:border-b-[3px]"
-      />
-      {/* Bottom stem */}
-      <DominoCell 
-        className={`${baseCell} left-[15px] sm:left-[20px] top-[15px] sm:top-[20px]`}
-        borders="border-l-[2px] border-r-[2px] border-b-[2px] sm:border-l-[3px] sm:border-r-[3px] sm:border-b-[3px]"
-      />
-    </div>
-  );
-};
-
-const TPieceRotations: React.FC = () => (
-  <div className="flex flex-col gap-4 sm:gap-8 items-center justify-center bg-gray-50 p-3 sm:p-6 rounded-lg">
-    <div className="grid grid-cols-2 gap-4 sm:gap-16">
-      {[0, 90, 180, 270].map((rotation) => (
-        <div key={rotation} className="flex flex-col items-center bg-white p-2 sm:p-4 rounded-lg shadow-sm">
-          <div className="w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] flex items-center justify-center bg-white">
-            <div className="text-blue-600">
-              <TPiece rotation={rotation} />
-            </div>
-          </div>
-          <span className="text-xs sm:text-sm text-gray-600 mt-1 sm:mt-2">{rotation}°</span>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
 interface TetrominoOptionProps {
   rotation: number;
   isSelected: boolean;
   onClick: () => void;
 }
 
-const TetrominoOption: React.FC<TetrominoOptionProps> = ({ rotation, isSelected, onClick }) => {
+const TetrominoOption: FC<TetrominoOptionProps> = ({ rotation, isSelected, onClick }) => {
   const baseStyle = "w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] relative transition-all hover:scale-105";
   const colorStyle = isSelected ? "text-blue-600" : "text-gray-500";
   
-  const getTetrominoCells = () => {
-    const cellSize = "w-[15px] h-[15px] sm:w-[20px] sm:h-[20px]";
-    const baseCell = `absolute ${cellSize}`;
-    const dotStyle = `absolute w-[4px] h-[4px] sm:w-[6px] sm:h-[6px] rounded-full ${isSelected ? "bg-blue-600" : "bg-gray-500"}`;
-    
-    const DominoCell = ({ className, borders }: { className: string; borders: string }) => (
-      <div className={`${className} bg-white ${borders} ${isSelected ? "border-blue-600" : "border-gray-500"} border-[2px] sm:border-[3px]`}>
-        <div className={dotStyle} style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }} />
-      </div>
-    );
-
-    switch(rotation) {
-      case 0: // T pointing down (now in first position)
-        return (
-          <>
-            {/* Bottom horizontal row */}
-            <DominoCell 
-              className={`${baseCell} left-[10px] top-[40px]`}
-              borders="border-l-[3px] border-b-[3px]"
-            />
-            <DominoCell 
-              className={`${baseCell} left-[30px] top-[40px]`}
-              borders="border-b-[3px]"
-            />
-            <DominoCell 
-              className={`${baseCell} left-[50px] top-[40px]`}
-              borders="border-r-[3px] border-b-[3px]"
-            />
-            {/* Top vertical stem */}
-            <DominoCell 
-              className={`${baseCell} left-[30px] top-[20px]`}
-              borders="border-t-[3px] border-x-[3px]"
-            />
-          </>
-        );
-      case 90: // T pointing left
-        return (
-          <>
-            {/* Vertical line */}
-            <DominoCell 
-              className={`${baseCell} left-[30px] top-[0px]`}
-              borders="border-t-[3px] border-x-[3px]"
-            />
-            <DominoCell 
-              className={`${baseCell} left-[30px] top-[20px]`}
-              borders="border-x-[3px]"
-            />
-            <DominoCell 
-              className={`${baseCell} left-[30px] top-[40px]`}
-              borders="border-b-[3px] border-x-[3px]"
-            />
-            {/* Left stem */}
-            <DominoCell 
-              className={`${baseCell} left-[10px] top-[20px]`}
-              borders="border-l-[3px] border-y-[3px]"
-            />
-          </>
-        );
-      case 180: // T pointing up (now in third position)
-        return (
-          <>
-            {/* Top horizontal row */}
-            <DominoCell 
-              className={`${baseCell} left-[10px] top-[20px]`}
-              borders="border-l-[3px] border-t-[3px]"
-            />
-            <DominoCell 
-              className={`${baseCell} left-[30px] top-[20px]`}
-              borders="border-t-[3px]"
-            />
-            <DominoCell 
-              className={`${baseCell} left-[50px] top-[20px]`}
-              borders="border-r-[3px] border-t-[3px]"
-            />
-            {/* Bottom stem */}
-            <DominoCell 
-              className={`${baseCell} left-[30px] top-[40px]`}
-              borders="border-b-[3px] border-x-[3px]"
-            />
-          </>
-        );
-      case 270: // T pointing right
-        return (
-          <>
-            {/* Vertical line */}
-            <DominoCell 
-              className={`${baseCell} left-[30px] top-[0px]`}
-              borders="border-t-[3px] border-x-[3px]"
-            />
-            <DominoCell 
-              className={`${baseCell} left-[30px] top-[20px]`}
-              borders="border-x-[3px]"
-            />
-            <DominoCell 
-              className={`${baseCell} left-[30px] top-[40px]`}
-              borders="border-b-[3px] border-x-[3px]"
-            />
-            {/* Right stem */}
-            <DominoCell 
-              className={`${baseCell} left-[50px] top-[20px]`}
-              borders="border-r-[3px] border-y-[3px]"
-            />
-          </>
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
     <button
       onClick={onClick}
       className={`${baseStyle} ${colorStyle} flex items-center justify-center p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
     >
       <div className="relative w-full h-full">
-        {getTetrominoCells()}
+        <TPiece rotation={rotation} isSelected={isSelected} />
       </div>
     </button>
-  );
-};
-
-const SquarePiece: React.FC = () => {
-  const cellSize = "w-[20px] h-[20px]";
-  const baseCell = `absolute ${cellSize}`;
-  const dotStyle = "absolute w-[6px] h-[6px] rounded-full bg-current left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2";
-
-  const DominoCell = ({ className, borders }: { className: string; borders: string }) => (
-    <div className={`${className} bg-white ${borders} border-current`}>
-      <div className={dotStyle} />
-    </div>
-  );
-
-  return (
-    <div className="relative w-[60px] h-[60px]">
-      {/* 2x2 Square */}
-      <DominoCell 
-        className={`${baseCell} left-[10px] top-[10px]`}
-        borders="border-t-[3px] border-l-[3px]"
-      />
-      <DominoCell 
-        className={`${baseCell} left-[30px] top-[10px]`}
-        borders="border-t-[3px] border-r-[3px]"
-      />
-      <DominoCell 
-        className={`${baseCell} left-[10px] top-[30px]`}
-        borders="border-l-[3px] border-b-[3px]"
-      />
-      <DominoCell 
-        className={`${baseCell} left-[30px] top-[30px]`}
-        borders="border-r-[3px] border-b-[3px]"
-      />
-    </div>
-  );
-};
-
-const StraightPiece: React.FC<{ rotation?: number }> = ({ rotation = 0 }) => {
-  const cellSize = "w-[15px] h-[15px] sm:w-[20px] sm:h-[20px]";
-  const baseCell = `absolute ${cellSize}`;
-  const dotStyle = "absolute w-[4px] h-[4px] sm:w-[6px] sm:h-[6px] rounded-full bg-current left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2";
-
-  const DominoCell = ({ className, borders }: { className: string; borders: string }) => (
-    <div className={`${className} bg-white ${borders} border-current`}>
-      <div className={dotStyle} />
-    </div>
-  );
-
-  return (
-    <div className="relative w-[60px] h-[60px] sm:w-[80px] sm:h-[80px]" style={{ transform: `rotate(${rotation}deg)` }}>
-      {rotation === 0 ? (
-        // Horizontal orientation
-        <>
-          <DominoCell 
-            className={`${baseCell} left-[0px] top-[20px]`}
-            borders="border-l-[2px] border-y-[2px] sm:border-l-[3px] sm:border-y-[3px]"
-          />
-          <DominoCell 
-            className={`${baseCell} left-[15px] sm:left-[20px] top-[20px]`}
-            borders="border-y-[2px] sm:border-y-[3px]"
-          />
-          <DominoCell 
-            className={`${baseCell} left-[30px] sm:left-[40px] top-[20px]`}
-            borders="border-y-[2px] sm:border-y-[3px]"
-          />
-          <DominoCell 
-            className={`${baseCell} left-[45px] sm:left-[60px] top-[20px]`}
-            borders="border-r-[2px] border-y-[2px] sm:border-r-[3px] sm:border-y-[3px]"
-          />
-        </>
-      ) : (
-        // Vertical orientation
-        <>
-          <DominoCell 
-            className={`${baseCell} left-[20px] top-[0px]`}
-            borders="border-t-[2px] border-x-[2px] sm:border-t-[3px] sm:border-x-[3px]"
-          />
-          <DominoCell 
-            className={`${baseCell} left-[20px] top-[15px] sm:top-[20px]`}
-            borders="border-x-[2px] sm:border-x-[3px]"
-          />
-          <DominoCell 
-            className={`${baseCell} left-[20px] top-[30px] sm:top-[40px]`}
-            borders="border-x-[2px] sm:border-x-[3px]"
-          />
-          <DominoCell 
-            className={`${baseCell} left-[20px] top-[45px] sm:top-[60px]`}
-            borders="border-b-[2px] border-x-[2px] sm:border-b-[3px] sm:border-x-[3px]"
-          />
-        </>
-      )}
-    </div>
-  );
-};
-
-const LPiece: React.FC<{ rotation?: number; isReflected?: boolean }> = ({ rotation = 0, isReflected = false }) => {
-  const cellSize = "w-[15px] h-[15px] sm:w-[20px] sm:h-[20px]";
-  const baseCell = `absolute ${cellSize}`;
-  const dotStyle = "absolute w-[4px] h-[4px] sm:w-[6px] sm:h-[6px] rounded-full bg-current left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2";
-
-  const DominoCell = ({ className, borders }: { className: string; borders: string }) => (
-    <div className={`${className} bg-white ${borders} border-current`}>
-      <div className={dotStyle} />
-    </div>
-  );
-
-  const style = {
-    transform: `rotate(${rotation}deg) ${isReflected ? 'scaleX(-1)' : ''}`
-  };
-
-  return (
-    <div className="relative w-[60px] h-[60px] sm:w-[80px] sm:h-[80px]" style={style}>
-      {/* Vertical part */}
-      <DominoCell 
-        className={`${baseCell} left-[20px] top-[0px]`}
-        borders="border-t-[2px] border-x-[2px] sm:border-t-[3px] sm:border-x-[3px]"
-      />
-      <DominoCell 
-        className={`${baseCell} left-[20px] top-[15px] sm:top-[20px]`}
-        borders="border-x-[2px] sm:border-x-[3px]"
-      />
-      <DominoCell 
-        className={`${baseCell} left-[20px] top-[30px] sm:top-[40px]`}
-        borders="border-x-[2px] sm:border-x-[3px]"
-      />
-      {/* Horizontal part */}
-      <DominoCell 
-        className={`${baseCell} left-[20px] top-[45px] sm:top-[60px]`}
-        borders="border-b-[2px] border-x-[2px] sm:border-b-[3px] sm:border-x-[3px]"
-      />
-      <DominoCell 
-        className={`${baseCell} left-[35px] sm:left-[40px] top-[45px] sm:top-[60px]`}
-        borders="border-b-[2px] border-r-[2px] sm:border-b-[3px] sm:border-r-[3px]"
-      />
-    </div>
-  );
-};
-
-const SkewPiece: React.FC<{ rotation?: number; isReflected?: boolean }> = ({ rotation = 0, isReflected = false }) => {
-  const cellSize = "w-[15px] h-[15px] sm:w-[20px] sm:h-[20px]";
-  const baseCell = `absolute ${cellSize}`;
-  const dotStyle = "absolute w-[4px] h-[4px] sm:w-[6px] sm:h-[6px] rounded-full bg-current left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2";
-
-  const DominoCell = ({ className, borders }: { className: string; borders: string }) => (
-    <div className={`${className} bg-white ${borders} border-current`}>
-      <div className={dotStyle} />
-    </div>
-  );
-
-  const style = {
-    transform: `rotate(${rotation}deg) ${isReflected ? 'scaleX(-1)' : ''}`
-  };
-
-  return (
-    <div className="relative w-[60px] h-[60px] sm:w-[80px] sm:h-[80px]" style={style}>
-      {/* Top part */}
-      <DominoCell 
-        className={`${baseCell} left-[20px] top-[15px] sm:top-[20px]`}
-        borders="border-t-[2px] border-x-[2px] sm:border-t-[3px] sm:border-x-[3px]"
-      />
-      <DominoCell 
-        className={`${baseCell} left-[35px] sm:left-[40px] top-[15px] sm:top-[20px]`}
-        borders="border-t-[2px] border-r-[2px] sm:border-t-[3px] sm:border-r-[3px]"
-      />
-      {/* Bottom part */}
-      <DominoCell 
-        className={`${baseCell} left-[5px] sm:left-[0px] top-[30px] sm:top-[40px]`}
-        borders="border-l-[2px] border-b-[2px] sm:border-l-[3px] sm:border-b-[3px]"
-      />
-      <DominoCell 
-        className={`${baseCell} left-[20px] top-[30px] sm:top-[40px]`}
-        borders="border-b-[2px] border-x-[2px] sm:border-b-[3px] sm:border-x-[3px]"
-      />
-    </div>
   );
 };
 
@@ -518,7 +183,7 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
   return cells;
 };
 
-const TetrominoSelector: React.FC<{
+const TetrominoSelector: FC<{
   selectedType: TetrominoType | null;
   onSelect: (type: TetrominoType) => void;
   rotation: number;
