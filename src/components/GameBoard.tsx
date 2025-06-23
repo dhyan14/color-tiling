@@ -122,13 +122,23 @@ const TetrominoOption: FC<TetrominoOptionProps> = ({ rotation, isSelected, onCli
 const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType, rotation: number, isReflected: boolean = false): [number, number][] => {
   const cells: [number, number][] = [];
   
+  // Map visual rotation to actual rotation for placement
+  const visualToActualRotation = {
+    0: 0,
+    90: 270,    // When user clicks 90, we use 270 placement
+    180: 180,
+    270: 90     // When user clicks 270, we use 90 placement
+  };
+  
+  const actualRotation = visualToActualRotation[rotation as keyof typeof visualToActualRotation];
+  
   switch (type) {
     case 'straight':
-      if (rotation === 0) {
+      if (actualRotation === 0) {
         cells.push([row, col], [row, col + 1], [row, col + 2], [row, col + 3]);
-      } else if (rotation === 90) {
+      } else if (actualRotation === 90) {
         cells.push([row, col], [row + 1, col], [row + 2, col], [row + 3, col]);
-      } else if (rotation === 180) {
+      } else if (actualRotation === 180) {
         cells.push([row, col - 3], [row, col - 2], [row, col - 1], [row, col]);
       } else { // 270
         cells.push([row - 3, col], [row - 2, col], [row - 1, col], [row, col]);
@@ -136,11 +146,11 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
       break;
       
     case 'T':
-      if (rotation === 0) {
+      if (actualRotation === 0) {
         cells.push([row, col], [row, col + 1], [row, col + 2], [row + 1, col + 1]);
-      } else if (rotation === 90) {
+      } else if (actualRotation === 90) {
         cells.push([row - 1, col], [row, col], [row + 1, col], [row, col + 1]);
-      } else if (rotation === 180) {
+      } else if (actualRotation === 180) {
         cells.push([row - 1, col + 1], [row, col], [row, col + 1], [row, col + 2]);
       } else { // 270
         cells.push([row - 1, col], [row, col - 1], [row, col], [row + 1, col]);
@@ -152,18 +162,18 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
       break;
       
     case 'L':
-      const baseL: [number, number][] = rotation === 0 ? [
+      const baseL: [number, number][] = actualRotation === 0 ? [
         [row, col], [row + 1, col], [row + 2, col], [row + 2, col + 1]
-      ] : rotation === 90 ? [
+      ] : actualRotation === 90 ? [
         [row, col], [row, col + 1], [row, col + 2], [row + 1, col]
-      ] : rotation === 180 ? [
+      ] : actualRotation === 180 ? [
         [row - 2, col], [row - 1, col], [row, col], [row - 2, col + 1]
       ] : [ // 270
         [row, col], [row - 1, col + 2], [row, col + 1], [row, col + 2]
       ];
       
       // For 90-degree rotation, swap the reflection logic
-      if (rotation === 90) {
+      if (actualRotation === 90) {
         if (isReflected) {
           cells.push(...baseL);
         } else {
@@ -179,14 +189,14 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
       break;
       
     case 'skew':
-      const baseSkew: [number, number][] = rotation === 0 || rotation === 180 ? [
+      const baseSkew: [number, number][] = actualRotation === 0 || actualRotation === 180 ? [
         [row, col], [row, col + 1], [row + 1, col + 1], [row + 1, col + 2]
       ] : [ // 90 or 270
         [row, col], [row + 1, col], [row + 1, col - 1], [row + 2, col - 1]
       ];
       
       // For 90-degree rotation, swap the reflection logic
-      if (rotation === 90 || rotation === 270) {
+      if (actualRotation === 90 || actualRotation === 270) {
         if (isReflected) {
           cells.push(...baseSkew);
         } else {
