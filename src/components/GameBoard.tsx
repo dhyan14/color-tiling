@@ -323,52 +323,10 @@ export default function GameBoard() {
   const [selectedTetrominoType, setSelectedTetrominoType] = useState<TetrominoType | null>(null);
   const [selectedIsReflected, setSelectedIsReflected] = useState<boolean>(false);
   const [tTetrominoCount, setTTetrominoCount] = useState<number>(0);
-  const currentPuzzle = PUZZLES[puzzleIndex];
-
-  const [availableTetrominoTypes, setAvailableTetrominoTypes] = useState<TetrominoType[]>([
-    'straight', 'T', 'square', 'L', 'skew'
-  ]);
-
-  const createEmptyGrid = (puzzleConfig: PuzzleConfig): Cell[][] => {
-    const rows = puzzleConfig.gridSize;
-    const cols = puzzleConfig.gridWidth || puzzleConfig.gridSize;
-    const grid: Cell[][] = Array(rows).fill(null).map(() =>
-      Array(cols).fill(null).map(() => ({
-        isOccupied: false,
-        dominoId: null,
-        orientation: null,
-        isFirst: false
-      }))
-    );
-
-    // Mark blocked cells
-    puzzleConfig.blockedCells.forEach(({ row, col }) => {
-      if (row < rows && col < cols) {
-        grid[row][col] = {
-          isOccupied: false,
-          dominoId: null,
-          orientation: null,
-          isFirst: false,
-          isBlocked: true
-        };
-      }
-    });
-
-    return grid;
-  };
-
-  const [currentState, setCurrentState] = useState<GameState>({
-    grid: createEmptyGrid(currentPuzzle),
-    dominoesPlaced: 0
-  });
-
-  const [history, setHistory] = useState<GameState[]>([]);
-  const [future, setFuture] = useState<GameState[]>([]);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [showSuccess, setShowSuccess] = useState(false);
-
+  
   const isLastPuzzle = puzzleIndex === PUZZLES.length - 1;
   const isThankYouPage = puzzleIndex === PUZZLES.length;
+  const currentPuzzle = isThankYouPage ? null : PUZZLES[puzzleIndex];
 
   if (isThankYouPage) {
     return (
@@ -380,9 +338,23 @@ export default function GameBoard() {
     );
   }
 
+  const [currentState, setCurrentState] = useState<GameState>({
+    grid: createEmptyGrid(PUZZLES[0]),
+    dominoesPlaced: 0
+  });
+
+  const [availableTetrominoTypes, setAvailableTetrominoTypes] = useState<TetrominoType[]>([
+    'straight', 'T', 'square', 'L', 'skew'
+  ]);
+
+  const [history, setHistory] = useState<GameState[]>([]);
+  const [future, setFuture] = useState<GameState[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+
   const handlePasswordSubmit = () => {
     const cleanPassword = password.trim();
-    if (cleanPassword === currentPuzzle.password) {
+    if (cleanPassword === currentPuzzle?.password) {
       setShowPasswordModal(false);
       setPassword('');
       setPasswordError(false);
@@ -473,7 +445,7 @@ export default function GameBoard() {
     
     if (allCellsOccupied) {
       setShowSuccess(true);
-      if (currentPuzzle.requiresPassword) {
+      if (currentPuzzle?.requiresPassword) {
         setShowPasswordModal(true);
       }
     }
@@ -893,7 +865,7 @@ export default function GameBoard() {
   return (
     <div className="w-full max-w-4xl mx-auto flex flex-col items-center gap-8">
       <h2 className="text-lg sm:text-xl font-bold text-gray-700 text-center">
-        Puzzle {puzzleIndex + 1}: {currentPuzzle.description}
+        Puzzle {puzzleIndex + 1}: {currentPuzzle?.description}
       </h2>
 
       {showSuccess && (
@@ -901,7 +873,7 @@ export default function GameBoard() {
           <div className="bg-green-100 text-green-700 px-4 sm:px-6 py-3 rounded-lg text-base sm:text-lg font-semibold animate-bounce text-center">
             🎉 Congratulations! You've completed the puzzle! 🎉
           </div>
-          {puzzleIndex + 1 < PUZZLES.length && !currentPuzzle.requiresPassword && (
+          {puzzleIndex + 1 < PUZZLES.length && !currentPuzzle?.requiresPassword && (
             <button
               onClick={handleNextPuzzle}
               className="px-4 sm:px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
@@ -963,7 +935,7 @@ export default function GameBoard() {
         </div>
       )}
 
-      {currentPuzzle.useTetromino ? (
+      {currentPuzzle?.useTetromino ? (
         <div className="flex flex-col gap-4">
           {currentPuzzle.useSquareTetromino && (
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
@@ -1032,11 +1004,11 @@ export default function GameBoard() {
 
       <div className="w-full overflow-x-auto flex justify-center">
         <div className={`inline-grid ${
-          currentPuzzle.gridWidth === 5 ? 'grid-cols-5' :
-          currentPuzzle.gridSize === 8 ? 'grid-cols-8' :
-          currentPuzzle.gridSize === 6 ? 'grid-cols-6' :
-          currentPuzzle.gridSize === 4 ? 'grid-cols-4' :
-          currentPuzzle.gridSize === 5 ? 'grid-cols-5' : ''
+          currentPuzzle?.gridWidth === 5 ? 'grid-cols-5' :
+          currentPuzzle?.gridSize === 8 ? 'grid-cols-8' :
+          currentPuzzle?.gridSize === 6 ? 'grid-cols-6' :
+          currentPuzzle?.gridSize === 4 ? 'grid-cols-4' :
+          currentPuzzle?.gridSize === 5 ? 'grid-cols-5' : ''
         } gap-0.5 sm:gap-1 bg-gray-200 p-2 rounded`}>
           {currentState.grid.map((row, rowIndex) => (
             row.map((cell, colIndex) => {
@@ -1049,7 +1021,7 @@ export default function GameBoard() {
                 key={`${rowIndex}-${colIndex}`}
                 onClick={() => handleCellClick(rowIndex, colIndex)}
                 className={`
-                  ${currentPuzzle.gridSize === 8 
+                  ${currentPuzzle?.gridSize === 8 
                     ? 'w-[30px] h-[30px] sm:w-[40px] sm:h-[40px]' 
                     : 'w-[35px] h-[35px] sm:w-[48px] sm:h-[48px]'}
                   ${cell.isBlocked
@@ -1061,7 +1033,7 @@ export default function GameBoard() {
                   transition-colors duration-200
                   border border-gray-300
                   aspect-square
-                    relative
+                  relative
                 `}
               />
               );
@@ -1072,7 +1044,7 @@ export default function GameBoard() {
 
       <div className="flex flex-col items-center gap-4">
         <p className="text-base sm:text-lg font-semibold text-center">
-          {currentPuzzle.useTetromino ? 'Pieces' : 'Dominoes'} Placed: {currentState.dominoesPlaced} / {currentPuzzle.maxDominoes}
+          {currentPuzzle?.useTetromino ? 'Pieces' : 'Dominoes'} Placed: {currentState.dominoesPlaced} / {currentPuzzle?.maxDominoes}
         </p>
 
         <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
