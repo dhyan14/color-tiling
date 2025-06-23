@@ -103,9 +103,18 @@ const PUZZLES: PuzzleConfig[] = [
     description: "Place 8 straight trominoes (3 blocks long, only 0° and 90° rotations) and 1 single square piece (1x1) on a 5x5 grid. The middle cell can only be used by the square piece.",
     useTetromino: true,
     requiresPassword: true,
-    password: "1234",
+    password: "0301",
     tetrominoTypes: ['straight', 'square'],
     specialMiddleCell: true
+  },
+  {
+    gridSize: 5,
+    maxDominoes: 9,
+    blockedCells: [],
+    description: "Place 8 straight trominoes (3 blocks long, only 0° and 90° rotations) and 1 single square piece (1x1) on a 5x5 grid. No restrictions on the middle cell.",
+    useTetromino: true,
+    requiresPassword: false,
+    tetrominoTypes: ['straight', 'square']
   }
 ];
 
@@ -250,7 +259,7 @@ const TetrominoSelector: FC<{
     <div className="flex flex-col gap-4 items-center p-4 bg-white rounded-lg shadow-sm">
       <div className="grid grid-cols-5 gap-4">
         {availableTypes.map((type) => (
-          <button
+    <button
             key={type}
             onClick={() => onSelect(type)}
             className={`p-2 rounded-lg transition-colors ${
@@ -262,7 +271,7 @@ const TetrominoSelector: FC<{
             {type === 'square' && <SquarePiece />}
             {type === 'L' && <LPiece rotation={selectedType === type ? rotation : 0} isReflected={selectedType === type && isReflected} />}
             {type === 'skew' && <SkewPiece rotation={selectedType === type ? rotation : 0} isReflected={selectedType === type && isReflected} />}
-          </button>
+    </button>
         ))}
       </div>
       
@@ -280,7 +289,7 @@ const TetrominoSelector: FC<{
                 {r}°
               </button>
             ))}
-          </div>
+    </div>
           
           {(selectedType === 'L' || selectedType === 'skew') && (
             <button
@@ -386,6 +395,8 @@ export default function GameBoard() {
       setSelectedIsReflected(false);
       setSquareTetrominoUsed(false);
       setAvailableTetrominoTypes(nextPuzzle.tetrominoTypes || ['straight', 'T', 'square', 'L', 'skew']);
+    } else {
+      setPuzzleIndex(PUZZLES.length); // triggers thank you page
     }
   };
 
@@ -477,10 +488,10 @@ export default function GameBoard() {
                                  currentPuzzle.tetrominoTypes.includes('square');
                                    
       if (!isStraightInPuzzle7) {
-        // Check if the piece type has already been used
-        if (currentState.usedTetrominoTypes?.includes(selectedType)) {
-          setErrorMessage(`${selectedType} piece has already been used!`);
-          return;
+      // Check if the piece type has already been used
+      if (currentState.usedTetrominoTypes?.includes(selectedType)) {
+        setErrorMessage(`${selectedType} piece has already been used!`);
+        return;
         }
       } else {
         // For straight pieces in puzzle 7, check if we've used all 8
@@ -548,7 +559,7 @@ export default function GameBoard() {
         }
       } else {
         // For other pieces, remove them after first use
-        setAvailableTetrominoTypes(prev => prev.filter(t => !newUsedTypes.includes(t)));
+      setAvailableTetrominoTypes(prev => prev.filter(t => !newUsedTypes.includes(t)));
       }
       
       // Reset selection after placing a piece
@@ -801,6 +812,18 @@ export default function GameBoard() {
     ];
     return colors[id % colors.length];
   };
+
+  const isLastPuzzle = puzzleIndex === PUZZLES.length;
+
+  if (isLastPuzzle) {
+    return (
+      <div className="w-full max-w-2xl mx-auto flex flex-col items-center gap-8 mt-16">
+        <h2 className="text-2xl font-bold text-gray-700 text-center">Thank you for playing!</h2>
+        <p className="text-lg text-center">You have completed all puzzles.</p>
+        <p className="text-base text-center">For any contact: <a href="mailto:jaiminpatel@svgu.ac.in" className="text-blue-600 underline">jaiminpatel@svgu.ac.in</a></p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-4xl mx-auto flex flex-col items-center gap-8">

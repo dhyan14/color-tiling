@@ -30,20 +30,20 @@ export const StraightPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isSelecte
       {...props}
     >
       {/* Horizontal row */}
-      <DominoCell 
+      <DominoCell
         className={`${baseCell} left-[0px] top-[12px] sm:top-[20px]`}
         borders="border-[2px] sm:border-[3px]"
       />
-      <DominoCell 
+      <DominoCell
         className={`${baseCell} left-[12px] sm:left-[20px] top-[12px] sm:top-[20px]`}
         borders="border-[2px] sm:border-[3px] border-l-0"
       />
-      <DominoCell 
+      <DominoCell
         className={`${baseCell} left-[24px] sm:left-[40px] top-[12px] sm:top-[20px]`}
         borders="border-[2px] sm:border-[3px] border-l-0"
       />
       {!isTromino && (
-        <DominoCell 
+        <DominoCell
           className={`${baseCell} left-[36px] sm:left-[60px] top-[12px] sm:top-[20px]`}
           borders="border-[2px] sm:border-[3px] border-l-0"
         />
