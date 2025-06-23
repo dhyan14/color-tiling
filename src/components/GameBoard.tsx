@@ -134,42 +134,27 @@ const TetrominoOption: FC<TetrominoOptionProps> = ({ rotation, isSelected, onCli
 const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType, rotation: number, isReflected: boolean = false, puzzle?: PuzzleConfig): [number, number][] => {
   const cells: [number, number][] = [];
   
-  // Helper function to apply reflection and rotation to coordinates
-  const transformCoords = (x: number, y: number, centerX: number, centerY: number): [number, number] => {
-    // First apply reflection if needed
-    const reflectedX = isReflected ? centerX - (x - centerX) : x;
-    
-    // Then apply rotation
-    const rad = (rotation * Math.PI) / 180;
-    const cos = Math.cos(rad);
-    const sin = Math.sin(rad);
-    
-    const rotatedX = centerX + (reflectedX - centerX) * cos - (y - centerY) * sin;
-    const rotatedY = centerY + (reflectedX - centerX) * sin + (y - centerY) * cos;
-    
-    return [Math.round(rotatedY), Math.round(rotatedX)];
-  };
-  
   switch (type) {
     case 'straight':
       // Check if it's a tromino (3 blocks) or tetromino (4 blocks)
-      if (puzzle?.tetrominoTypes?.length === 2 && puzzle.tetrominoTypes.includes('straight') && puzzle.tetrominoTypes.includes('square')) {
-        // Tromino case - 3 blocks
-        cells.push(
-          [row, col],
-          [row, col + 1],
-          [row, col + 2]
-        );
+      const isTromino = puzzle?.tetrominoTypes?.length === 2 && 
+                       puzzle.tetrominoTypes.includes('straight') && 
+                       puzzle.tetrominoTypes.includes('square');
+      
+      const length = isTromino ? 3 : 4;
+      
+      if (rotation === 90) {
+        // Vertical orientation
+        for (let i = 0; i < length; i++) {
+          cells.push([row + i, col]);
+        }
       } else {
-        // Tetromino case - 4 blocks
-        cells.push(
-          [row, col],
-          [row, col + 1],
-          [row, col + 2],
-          [row, col + 3]
-        );
+        // Horizontal orientation (0 degrees)
+        for (let i = 0; i < length; i++) {
+          cells.push([row, col + i]);
+        }
       }
-      break;
+      return cells;
       
     case 'T':
       // Base coordinates for T piece (stem down)
@@ -224,7 +209,20 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
     const centerY = row + 1;
     
     // Transform all coordinates
-    return cells.map(([y, x]) => transformCoords(x, y, centerX, centerY));
+    return cells.map(([y, x]) => {
+      // First apply reflection if needed
+      const reflectedX = isReflected ? centerX - (x - centerX) : x;
+      
+      // Then apply rotation
+      const rad = (rotation * Math.PI) / 180;
+      const cos = Math.cos(rad);
+      const sin = Math.sin(rad);
+      
+      const rotatedX = centerX + (reflectedX - centerX) * cos - (y - centerY) * sin;
+      const rotatedY = centerY + (reflectedX - centerX) * sin + (y - centerY) * cos;
+      
+      return [Math.round(rotatedY), Math.round(rotatedX)];
+    });
   }
   
   return cells;
@@ -240,6 +238,14 @@ const TetrominoSelector: FC<{
   availableTypes: TetrominoType[];
   isTromino: boolean;
 }> = ({ selectedType, onSelect, rotation, onRotate, isReflected, onReflect, availableTypes, isTromino }) => {
+  // Determine available rotations based on piece type and puzzle type
+  const getAvailableRotations = () => {
+    if (isTromino && selectedType === 'straight') {
+      return [0, 90]; // Only 0° and 90° for straight tromino
+    }
+    return [0, 90, 180, 270]; // All rotations for other pieces
+  };
+
   return (
     <div className="flex flex-col gap-4 items-center p-4 bg-white rounded-lg shadow-sm">
       <div className="grid grid-cols-5 gap-4">
@@ -263,7 +269,7 @@ const TetrominoSelector: FC<{
       {selectedType && selectedType !== 'square' && (
         <div className="flex flex-col gap-2 w-full">
           <div className="flex justify-center gap-2">
-            {(isTromino ? [0, 90] : [0, 90, 180, 270]).map((r) => (
+            {getAvailableRotations().map((r) => (
               <button
                 key={r}
                 onClick={() => onRotate(r)}
