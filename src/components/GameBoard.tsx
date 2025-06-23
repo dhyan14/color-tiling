@@ -76,58 +76,56 @@ const TPieceRotations: React.FC = () => (
 );
 
 const TetrominoOption: React.FC<{ rotation: number; isSelected: boolean; onClick: () => void }> = ({ rotation, isSelected, onClick }) => {
-  const baseStyle = "w-[60px] h-[60px] border-2 rounded-lg relative transition-all hover:scale-105";
-  const colorStyle = isSelected ? "border-blue-600 bg-blue-50 shadow-lg" : "border-gray-300 hover:border-gray-400 bg-white";
+  const baseStyle = "w-[80px] h-[80px] relative transition-all hover:scale-105";
+  const colorStyle = isSelected ? "text-blue-600" : "text-gray-500";
   
   const getTetrominoCells = () => {
-    const cellSize = "w-[18px] h-[18px] rounded-sm";
+    const cellSize = "w-[32px] h-[32px] rounded-xl";
     const baseCell = `absolute ${cellSize}`;
-    const filledCell = `${baseCell} ${isSelected ? "bg-blue-600" : "bg-gray-400"} transition-colors duration-200`;
+    const cellStyle = `${baseCell} bg-white border-[3px] ${isSelected ? "border-blue-600" : "border-gray-500"}`;
+    const dotStyle = `absolute w-[8px] h-[8px] rounded-full ${isSelected ? "bg-blue-600" : "bg-gray-500"}`;
     
-    // We'll map the visual rotation to the actual rotation for placement
-    const visualToActualRotation = {
-      180: 0,  // First piece (visually up) maps to down rotation
-      90: 90,  // Second piece (visually left) stays as left
-      0: 180,  // Third piece (visually down) maps to up rotation
-      270: 270 // Fourth piece (visually right) stays as right
-    };
+    const DominoCell = ({ className }: { className: string }) => (
+      <div className={className}>
+        <div className={dotStyle} style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }} />
+      </div>
+    );
     
-    // Use the mapped rotation for the visual display
     switch(rotation) {
       case 180: // First piece - T pointing up
         return (
           <>
-            <div className={`${filledCell} left-[21px] top-[39px]`} />
-            <div className={`${filledCell} left-[3px] top-[21px]`} />
-            <div className={`${filledCell} left-[21px] top-[21px]`} />
-            <div className={`${filledCell} left-[39px] top-[21px]`} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[42px]`} />
+            <DominoCell className={`${cellStyle} left-[4px] top-[22px]`} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[22px]`} />
+            <DominoCell className={`${cellStyle} left-[44px] top-[22px]`} />
           </>
         );
       case 90: // Second piece - T pointing left
         return (
           <>
-            <div className={`${filledCell} left-[21px] top-[3px]`} />
-            <div className={`${filledCell} left-[21px] top-[21px]`} />
-            <div className={`${filledCell} left-[21px] top-[39px]`} />
-            <div className={`${filledCell} left-[3px] top-[21px]`} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[2px]`} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[22px]`} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[42px]`} />
+            <DominoCell className={`${cellStyle} left-[4px] top-[22px]`} />
           </>
         );
       case 0: // Third piece - T pointing down
         return (
           <>
-            <div className={`${filledCell} left-[21px] top-[3px]`} />
-            <div className={`${filledCell} left-[3px] top-[21px]`} />
-            <div className={`${filledCell} left-[21px] top-[21px]`} />
-            <div className={`${filledCell} left-[39px] top-[21px]`} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[2px]`} />
+            <DominoCell className={`${cellStyle} left-[4px] top-[22px]`} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[22px]`} />
+            <DominoCell className={`${cellStyle} left-[44px] top-[22px]`} />
           </>
         );
       case 270: // Fourth piece - T pointing right
         return (
           <>
-            <div className={`${filledCell} left-[21px] top-[3px]`} />
-            <div className={`${filledCell} left-[21px] top-[21px]`} />
-            <div className={`${filledCell} left-[21px] top-[39px]`} />
-            <div className={`${filledCell} left-[39px] top-[21px]`} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[2px]`} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[22px]`} />
+            <DominoCell className={`${cellStyle} left-[24px] top-[42px]`} />
+            <DominoCell className={`${cellStyle} left-[44px] top-[22px]`} />
           </>
         );
       default:
