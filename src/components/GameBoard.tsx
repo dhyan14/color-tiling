@@ -121,99 +121,114 @@ const TetrominoOption: React.FC<TetrominoOptionProps> = ({ rotation, isSelected,
   const colorStyle = isSelected ? "text-blue-600" : "text-gray-500";
   
   const getTetrominoCells = () => {
-    const cellSize = "w-[32px] h-[32px]";
+    const cellSize = "w-[20px] h-[20px]";
     const baseCell = `absolute ${cellSize}`;
-    const borderColor = isSelected ? "border-blue-600" : "border-gray-500";
-    const dotStyle = `absolute w-[8px] h-[8px] rounded-full ${isSelected ? "bg-blue-600" : "bg-gray-500"}`;
+    const dotStyle = `absolute w-[6px] h-[6px] rounded-full ${isSelected ? "bg-blue-600" : "bg-gray-500"}`;
     
-    const DominoCell = ({ className, borders }: { className: string, borders: string }) => (
-      <div className={`${className} bg-white ${borders} ${borderColor}`}>
+    const DominoCell = ({ className, borders }: { className: string; borders: string }) => (
+      <div className={`${className} bg-white ${borders} ${isSelected ? "border-blue-600" : "border-gray-500"} border-[3px]`}>
         <div className={dotStyle} style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }} />
       </div>
     );
-    
+
     switch(rotation) {
       case 180: // T pointing up
         return (
           <>
+            {/* Bottom horizontal row */}
             <DominoCell 
-              className={`${baseCell} left-[24px] top-[42px]`} 
-              borders="border-b-[3px] border-l-[3px] border-r-[3px]"
+              className={`${baseCell} left-[10px] top-[40px]`}
+              borders="border-l-[3px] border-b-[3px]"
             />
             <DominoCell 
-              className={`${baseCell} left-[4px] top-[22px]`} 
-              borders="border-t-[3px] border-l-[3px] border-b-[3px]"
+              className={`${baseCell} left-[30px] top-[40px]`}
+              borders="border-b-[3px]"
             />
             <DominoCell 
-              className={`${baseCell} left-[24px] top-[22px]`} 
+              className={`${baseCell} left-[50px] top-[40px]`}
+              borders="border-r-[3px] border-b-[3px]"
+            />
+            {/* Top vertical stem */}
+            <DominoCell 
+              className={`${baseCell} left-[30px] top-[20px]`}
               borders="border-x-[3px]"
             />
             <DominoCell 
-              className={`${baseCell} left-[44px] top-[22px]`} 
-              borders="border-t-[3px] border-r-[3px] border-b-[3px]"
+              className={`${baseCell} left-[30px] top-[0px]`}
+              borders="border-t-[3px] border-x-[3px]"
             />
           </>
         );
       case 90: // T pointing left
         return (
           <>
+            {/* Vertical line */}
             <DominoCell 
-              className={`${baseCell} left-[24px] top-[2px]`} 
-              borders="border-t-[3px] border-l-[3px] border-r-[3px]"
+              className={`${baseCell} left-[30px] top-[0px]`}
+              borders="border-t-[3px] border-x-[3px]"
             />
             <DominoCell 
-              className={`${baseCell} left-[24px] top-[22px]`} 
-              borders="border-y-[3px]"
+              className={`${baseCell} left-[30px] top-[20px]`}
+              borders="border-x-[3px]"
             />
             <DominoCell 
-              className={`${baseCell} left-[24px] top-[42px]`} 
-              borders="border-b-[3px] border-l-[3px] border-r-[3px]"
+              className={`${baseCell} left-[30px] top-[40px]`}
+              borders="border-b-[3px] border-x-[3px]"
             />
+            {/* Left stem */}
             <DominoCell 
-              className={`${baseCell} left-[4px] top-[22px]`} 
-              borders="border-t-[3px] border-l-[3px] border-b-[3px]"
+              className={`${baseCell} left-[10px] top-[20px]`}
+              borders="border-l-[3px] border-y-[3px]"
             />
           </>
         );
       case 0: // T pointing down
         return (
           <>
+            {/* Top horizontal row */}
             <DominoCell 
-              className={`${baseCell} left-[24px] top-[2px]`} 
-              borders="border-t-[3px] border-l-[3px] border-r-[3px]"
+              className={`${baseCell} left-[10px] top-[20px]`}
+              borders="border-l-[3px] border-t-[3px]"
             />
             <DominoCell 
-              className={`${baseCell} left-[4px] top-[22px]`} 
-              borders="border-t-[3px] border-l-[3px] border-b-[3px]"
+              className={`${baseCell} left-[30px] top-[20px]`}
+              borders="border-t-[3px]"
             />
             <DominoCell 
-              className={`${baseCell} left-[24px] top-[22px]`} 
+              className={`${baseCell} left-[50px] top-[20px]`}
+              borders="border-r-[3px] border-t-[3px]"
+            />
+            {/* Bottom stem */}
+            <DominoCell 
+              className={`${baseCell} left-[30px] top-[40px]`}
               borders="border-x-[3px]"
             />
             <DominoCell 
-              className={`${baseCell} left-[44px] top-[22px]`} 
-              borders="border-t-[3px] border-r-[3px] border-b-[3px]"
+              className={`${baseCell} left-[30px] top-[60px]`}
+              borders="border-b-[3px] border-x-[3px]"
             />
           </>
         );
       case 270: // T pointing right
         return (
           <>
+            {/* Vertical line */}
             <DominoCell 
-              className={`${baseCell} left-[24px] top-[2px]`} 
-              borders="border-t-[3px] border-l-[3px] border-r-[3px]"
+              className={`${baseCell} left-[30px] top-[0px]`}
+              borders="border-t-[3px] border-x-[3px]"
             />
             <DominoCell 
-              className={`${baseCell} left-[24px] top-[22px]`} 
-              borders="border-y-[3px]"
+              className={`${baseCell} left-[30px] top-[20px]`}
+              borders="border-x-[3px]"
             />
             <DominoCell 
-              className={`${baseCell} left-[24px] top-[42px]`} 
-              borders="border-b-[3px] border-l-[3px] border-r-[3px]"
+              className={`${baseCell} left-[30px] top-[40px]`}
+              borders="border-b-[3px] border-x-[3px]"
             />
+            {/* Right stem */}
             <DominoCell 
-              className={`${baseCell} left-[44px] top-[22px]`} 
-              borders="border-t-[3px] border-r-[3px] border-b-[3px]"
+              className={`${baseCell} left-[50px] top-[20px]`}
+              borders="border-r-[3px] border-y-[3px]"
             />
           </>
         );
@@ -703,4 +718,5 @@ export default function GameBoard() {
       </div>
     </div>
   );
+} 
 } 
