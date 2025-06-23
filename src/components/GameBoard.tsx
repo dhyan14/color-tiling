@@ -75,6 +75,64 @@ const TPieceRotations: React.FC = () => (
   </div>
 );
 
+const TetrominoOption: React.FC<{ rotation: number; isSelected: boolean; onClick: () => void }> = ({ rotation, isSelected, onClick }) => {
+  const baseStyle = "w-[60px] h-[60px] border-2 rounded-lg relative transition-all";
+  const colorStyle = isSelected ? "border-blue-600 bg-blue-100" : "border-gray-400";
+  
+  const getTetrominoCells = () => {
+    const cellSize = "w-[18px] h-[18px]";
+    const baseCell = `absolute ${cellSize}`;
+    const filledCell = `${baseCell} ${isSelected ? "bg-blue-600" : "bg-gray-400"}`;
+    
+    switch(rotation) {
+      case 0: // ┳
+        return (
+          <>
+            <div className={`${filledCell} left-[21px] top-[3px]`} />
+            <div className={`${filledCell} left-[3px] top-[21px]`} />
+            <div className={`${filledCell} left-[21px] top-[21px]`} />
+            <div className={`${filledCell} left-[39px] top-[21px]`} />
+          </>
+        );
+      case 90: // ┫
+        return (
+          <>
+            <div className={`${filledCell} left-[21px] top-[3px]`} />
+            <div className={`${filledCell} left-[21px] top-[21px]`} />
+            <div className={`${filledCell} left-[21px] top-[39px]`} />
+            <div className={`${filledCell} left-[3px] top-[21px]`} />
+          </>
+        );
+      case 180: // ┻
+        return (
+          <>
+            <div className={`${filledCell} left-[21px] top-[39px]`} />
+            <div className={`${filledCell} left-[3px] top-[21px]`} />
+            <div className={`${filledCell} left-[21px] top-[21px]`} />
+            <div className={`${filledCell} left-[39px] top-[21px]`} />
+          </>
+        );
+      case 270: // ┣
+        return (
+          <>
+            <div className={`${filledCell} left-[21px] top-[3px]`} />
+            <div className={`${filledCell} left-[21px] top-[21px]`} />
+            <div className={`${filledCell} left-[21px] top-[39px]`} />
+            <div className={`${filledCell} left-[39px] top-[21px]`} />
+          </>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <button onClick={onClick} className={`${baseStyle} ${colorStyle}`}>
+      {getTetrominoCells()}
+    </button>
+  );
+};
+
 export default function GameBoard() {
   const [puzzleIndex, setPuzzleIndex] = useState(0);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -419,22 +477,15 @@ export default function GameBoard() {
 
       {currentPuzzle.useTetromino ? (
         <div className="flex flex-col items-center gap-4">
-          <p className="text-gray-600">Select a T-piece rotation and click on a cell to place it</p>
-          <div className="flex gap-8 items-center justify-center bg-gray-50 p-4 rounded-lg">
+          <p className="text-gray-600">Select a T-piece type to place</p>
+          <div className="flex gap-8 items-center justify-center p-4">
             {[0, 90, 180, 270].map((rotation) => (
-              <button
+              <TetrominoOption
                 key={rotation}
+                rotation={rotation}
+                isSelected={selectedRotation === rotation}
                 onClick={() => setSelectedRotation(rotation)}
-                className={`p-2 rounded transition-all ${
-                  selectedRotation === rotation
-                    ? 'bg-purple-100 text-purple-600 scale-110'
-                    : 'text-gray-400 hover:text-gray-600'
-                }`}
-              >
-                <div className="text-purple-600">
-                  <TPiece rotation={rotation} />
-                </div>
-              </button>
+              />
             ))}
           </div>
         </div>
