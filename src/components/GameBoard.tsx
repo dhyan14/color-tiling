@@ -113,8 +113,10 @@ const PUZZLES: PuzzleConfig[] = [
     blockedCells: [],
     description: "Place 8 straight trominoes (3 blocks long, only 0° and 90° rotations) and 1 single square piece (1x1) on a 5x5 grid. No restrictions on the middle cell.",
     useTetromino: true,
-    requiresPassword: false,
-    tetrominoTypes: ['straight', 'square']
+    requiresPassword: true,
+    password: "done",
+    tetrominoTypes: ['straight', 'square'],
+    specialMiddleCell: false
   }
 ];
 
@@ -551,15 +553,22 @@ export default function GameBoard() {
         usedTetrominoTypes: newUsedTypes
       });
       
-      // Only remove straight piece from available types if we've used all 8
+      // Only remove straight piece from available types if we've used all 8, and remove square when used
       if (isStraightInPuzzle7) {
         const straightPiecesUsed = newUsedTypes.filter(t => t === 'straight').length;
-        if (straightPiecesUsed >= 8) {
-          setAvailableTetrominoTypes(prev => prev.filter(t => t !== 'straight'));
-        }
+        setAvailableTetrominoTypes(prev => {
+          let updated = prev;
+          if (selectedType === 'square') {
+            updated = updated.filter(t => t !== 'square');
+          }
+          if (straightPiecesUsed >= 8) {
+            updated = updated.filter(t => t !== 'straight');
+          }
+          return updated;
+        });
       } else {
         // For other pieces, remove them after first use
-      setAvailableTetrominoTypes(prev => prev.filter(t => !newUsedTypes.includes(t)));
+        setAvailableTetrominoTypes(prev => prev.filter(t => !newUsedTypes.includes(t)));
       }
       
       // Reset selection after placing a piece
@@ -961,7 +970,7 @@ export default function GameBoard() {
           isReflected={selectedIsReflected}
           onReflect={(r) => setSelectedIsReflected(r)}
           availableTypes={availableTetrominoTypes}
-          isTromino={currentPuzzle.specialMiddleCell ?? false}
+          isTromino={currentPuzzle.tetrominoTypes?.length === 2 && currentPuzzle.tetrominoTypes.includes('straight') && currentPuzzle.tetrominoTypes.includes('square')}
         />
       )}
 
