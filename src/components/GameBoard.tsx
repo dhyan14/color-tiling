@@ -265,23 +265,28 @@ export default function GameBoard() {
   ]);
 
   const createEmptyGrid = (puzzleConfig: PuzzleConfig): Cell[][] => {
-    const height = puzzleConfig.gridSize;
-    const width = puzzleConfig.gridWidth || puzzleConfig.gridSize;
-    
-    const grid = Array(height).fill(null).map(() =>
-      Array(width).fill(null).map(() => ({
+    const rows = puzzleConfig.gridSize;
+    const cols = puzzleConfig.gridWidth || puzzleConfig.gridSize;
+    const grid: Cell[][] = Array(rows).fill(null).map(() =>
+      Array(cols).fill(null).map(() => ({
         isOccupied: false,
         dominoId: null,
         orientation: null,
-        isFirst: false,
-        isBlocked: false,
-        rotation: 0,
-        isReflected: false
+        isFirst: false
       }))
     );
 
+    // Mark blocked cells
     puzzleConfig.blockedCells.forEach(({ row, col }) => {
-      grid[row][col].isBlocked = true;
+      if (row < rows && col < cols) {
+        grid[row][col] = {
+          isOccupied: false,
+          dominoId: null,
+          orientation: null,
+          isFirst: false,
+          isBlocked: true
+        };
+      }
     });
 
     return grid;
@@ -835,7 +840,12 @@ export default function GameBoard() {
       )}
 
       <div className="w-full overflow-x-auto flex justify-center">
-        <div className={`inline-grid grid-cols-${currentPuzzle.gridWidth || currentPuzzle.gridSize} gap-0.5 sm:gap-1 bg-gray-200 p-2 rounded`}>
+        <div className={`inline-grid ${
+          currentPuzzle.gridWidth === 5 ? 'grid-cols-5' :
+          currentPuzzle.gridSize === 8 ? 'grid-cols-8' :
+          currentPuzzle.gridSize === 6 ? 'grid-cols-6' :
+          currentPuzzle.gridSize === 4 ? 'grid-cols-4' : ''
+        } gap-0.5 sm:gap-1 bg-gray-200 p-2 rounded`}>
           {currentState.grid.map((row, rowIndex) => (
             row.map((cell, colIndex) => {
               const isPartOfPiece = cell.isOccupied;
