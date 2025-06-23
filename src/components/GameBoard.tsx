@@ -51,7 +51,18 @@ const PUZZLES: PuzzleConfig[] = [
     maxDominoes: 16,
     blockedCells: [],
     description: "Place T-shaped tetromino pieces on an 8x8 grid",
-    useTetromino: true
+    useTetromino: true,
+    requiresPassword: true,
+    password: "1618"
+  },
+  {
+    gridSize: 6,
+    maxDominoes: 9,
+    blockedCells: [],
+    description: "Place T-shaped tetromino pieces on a 6x6 grid",
+    useTetromino: true,
+    requiresPassword: true,
+    password: "2236"
   }
 ];
 
