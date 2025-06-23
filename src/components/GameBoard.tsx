@@ -370,12 +370,18 @@ export default function GameBoard() {
     if (!currentPuzzle || !currentState) return;
     
     // Check if the cell is blocked
-    if (currentState.grid[row][col].isBlocked) return;
+    if (currentState.grid[row][col].isBlocked) {
+      setErrorMessage("This cell is blocked!");
+      return;
+    }
     
     // For puzzle 6 with different Tetromino types
     if (currentPuzzle.tetrominoTypes) {
       const selectedType = selectedTetrominoType;
-      if (!selectedType) return;
+      if (!selectedType) {
+        setErrorMessage("Please select a piece type first!");
+        return;
+      }
       
       // Check if the piece type has already been used
       if (currentState.usedTetrominoTypes?.includes(selectedType)) {
@@ -388,19 +394,30 @@ export default function GameBoard() {
       
       const requiredCells = getTetrominoRequiredCells(row, col, selectedType, rotation, isReflected);
       
-      // Check if all required cells are within bounds and empty
-      if (!requiredCells.every(([r, c]) => 
-        r >= 0 && r < currentPuzzle.gridSize && 
-        c >= 0 && c < currentPuzzle.gridSize &&
-        !currentState.grid[r][c].isOccupied
-      )) {
-        setErrorMessage("Invalid placement! Pieces must be within bounds and not overlap.");
+      // Check if all required cells are within bounds
+      const isWithinBounds = requiredCells.every(([r, c]) => {
+        const maxRow = currentPuzzle.gridSize - 1;
+        const maxCol = (currentPuzzle.gridWidth || currentPuzzle.gridSize) - 1;
+        return r >= 0 && r <= maxRow && c >= 0 && c <= maxCol;
+      });
+      
+      if (!isWithinBounds) {
+        setErrorMessage("Invalid placement! Piece must be within the grid bounds.");
+        return;
+      }
+      
+      // Check if all required cells are empty
+      const areAllCellsEmpty = requiredCells.every(([r, c]) => !currentState.grid[r][c].isOccupied);
+      
+      if (!areAllCellsEmpty) {
+        setErrorMessage("Invalid placement! Cannot overlap with existing pieces.");
         return;
       }
       
       const newGrid = JSON.parse(JSON.stringify(currentState.grid));
       const dominoId = currentState.dominoesPlaced + 1;
       
+      // Place the piece
       requiredCells.forEach(([r, c], index) => {
         newGrid[r][c] = {
           isOccupied: true,
@@ -428,6 +445,7 @@ export default function GameBoard() {
       setSelectedTetrominoType(null);
       setSelectedRotation(0);
       setSelectedIsReflected(false);
+      setErrorMessage(null);
       
       // Check if the game is complete
       if (dominoId === currentPuzzle.maxDominoes) {
@@ -819,26 +837,43 @@ export default function GameBoard() {
       <div className="w-full overflow-x-auto flex justify-center">
         <div className={`inline-grid grid-cols-${currentPuzzle.gridWidth || currentPuzzle.gridSize} gap-0.5 sm:gap-1 bg-gray-200 p-2 rounded`}>
           {currentState.grid.map((row, rowIndex) => (
-            row.map((cell, colIndex) => (
-              <div
-                key={`${rowIndex}-${colIndex}`}
-                onClick={() => handleCellClick(rowIndex, colIndex)}
-                className={`
-                  ${currentPuzzle.gridSize === 8 
-                    ? 'w-[30px] h-[30px] sm:w-[40px] sm:h-[40px]' 
-                    : 'w-[35px] h-[35px] sm:w-[48px] sm:h-[48px]'}
-                  ${cell.isBlocked
-                    ? 'bg-gray-800 cursor-not-allowed'
-                    : cell.isOccupied
-                      ? `${getRandomColor(cell.dominoId!)} cursor-not-allowed`
-                      : 'bg-white cursor-pointer hover:bg-gray-100'
-                  }
-                  transition-colors duration-200
-                  border border-gray-300
-                  aspect-square
-                `}
-              />
-            ))
+            row.map((cell, colIndex) => {
+              const isPartOfPiece = cell.isOccupied;
+              const isVertical = cell.orientation && ['straight', 'T', 'L', 'skew'].includes(cell.orientation) && 
+                                (cell.rotation === 90 || cell.rotation === 270);
+              
+              return (
+                <div
+                  key={`${rowIndex}-${colIndex}`}
+                  onClick={() => handleCellClick(rowIndex, colIndex)}
+                  className={`
+                    ${currentPuzzle.gridSize === 8 
+                      ? 'w-[30px] h-[30px] sm:w-[40px] sm:h-[40px]' 
+                      : 'w-[35px] h-[35px] sm:w-[48px] sm:h-[48px]'}
+                    ${cell.isBlocked
+                      ? 'bg-gray-800 cursor-not-allowed'
+                      : isPartOfPiece
+                        ? `${getRandomColor(cell.dominoId!)} cursor-not-allowed ${isVertical ? 'border-t-0 border-b-0' : 'border-l-0 border-r-0'}`
+                        : 'bg-white cursor-pointer hover:bg-gray-100'
+                    }
+                    transition-colors duration-200
+                    border border-gray-300
+                    aspect-square
+                    relative
+                  `}
+                >
+                  {isPartOfPiece && cell.isFirst && (
+                    <div className={`absolute inset-0 flex items-center justify-center ${
+                      isVertical ? 'flex-col' : 'flex-row'
+                    }`}>
+                      <div className="w-1 h-1 bg-current rounded-full" />
+                      <div className={`${isVertical ? 'h-full w-0.5' : 'w-full h-0.5'} bg-current`} />
+                      <div className="w-1 h-1 bg-current rounded-full" />
+                    </div>
+                  )}
+                </div>
+              );
+            })
           ))}
         </div>
       </div>
