@@ -377,13 +377,22 @@ export default function GameBoard() {
       const nextPuzzle = PUZZLES[puzzleIndex + 1];
       const newState = {
         grid: createEmptyGrid(nextPuzzle),
-        dominoesPlaced: 0
+        dominoesPlaced: 0,
+        usedTetrominoTypes: []
       };
       setCurrentState(newState);
       setHistory([]);
       setFuture([]);
       setShowSuccess(false);
       setErrorMessage(null);
+      setShowPasswordModal(false);
+      setPassword('');
+      setPasswordError(false);
+      setSelectedTetrominoType(null);
+      setSelectedRotation(0);
+      setSelectedIsReflected(false);
+      setSquareTetrominoUsed(false);
+      setAvailableTetrominoTypes(nextPuzzle.tetrominoTypes || ['straight', 'T', 'square', 'L', 'skew']);
     }
   };
 
@@ -421,11 +430,14 @@ export default function GameBoard() {
   const checkGameCompletion = (grid: Cell[][]) => {
     // Check if all non-blocked cells are occupied
     const allCellsOccupied = grid.every(row => 
-      row.every(cell => cell.isOccupied)
+      row.every(cell => cell.isBlocked || cell.isOccupied)
     );
     
     if (allCellsOccupied) {
       setShowSuccess(true);
+      if (currentPuzzle.requiresPassword) {
+        setShowPasswordModal(true);
+      }
     }
   };
 
@@ -532,6 +544,9 @@ export default function GameBoard() {
       // Check if the game is complete
       if (dominoId === currentPuzzle.maxDominoes) {
         checkGameCompletion(newGrid);
+        if (currentPuzzle.requiresPassword) {
+          setShowPasswordModal(true);
+        }
       }
       return;
     }
