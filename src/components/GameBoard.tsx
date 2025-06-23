@@ -56,24 +56,40 @@ const PUZZLES: PuzzleConfig[] = [
 ];
 
 const TPiece: React.FC<{ rotation?: number }> = ({ rotation = 0 }) => {
-  const cellStyle = "w-[32px] h-[32px] absolute rounded-xl bg-white border-[3px] border-current";
-  const dotStyle = "absolute w-[8px] h-[8px] rounded-full bg-current left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2";
+  const cellSize = "w-[20px] h-[20px]";
+  const baseCell = `absolute ${cellSize}`;
+  const dotStyle = "absolute w-[6px] h-[6px] rounded-full bg-current left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2";
 
-  const DominoCell = ({ className }: { className: string }) => (
-    <div className={className}>
+  const DominoCell = ({ className, borders }: { className: string; borders: string }) => (
+    <div className={`${className} bg-white ${borders} border-current`}>
       <div className={dotStyle} />
     </div>
   );
 
   return (
     <div className="relative w-[60px] h-[60px]" style={{ transform: `rotate(${rotation}deg)` }}>
-      {/* Center vertical piece */}
-      <DominoCell className={`${cellStyle} left-[14px] top-[0px]`} />
-      <DominoCell className={`${cellStyle} left-[14px] top-[14px]`} />
-      <DominoCell className={`${cellStyle} left-[14px] top-[28px]`} />
+      {/* Vertical piece */}
+      <DominoCell 
+        className={`${baseCell} left-[20px] top-[0px]`}
+        borders="border-t-[3px] border-l-[3px] border-r-[3px]"
+      />
+      <DominoCell 
+        className={`${baseCell} left-[20px] top-[20px]`}
+        borders="border-y-[3px]"
+      />
+      <DominoCell 
+        className={`${baseCell} left-[20px] top-[40px]`}
+        borders="border-b-[3px] border-l-[3px] border-r-[3px]"
+      />
       {/* Horizontal piece */}
-      <DominoCell className={`${cellStyle} left-[-2px] top-[14px]`} />
-      <DominoCell className={`${cellStyle} left-[30px] top-[14px]`} />
+      <DominoCell 
+        className={`${baseCell} left-[0px] top-[20px]`}
+        borders="border-t-[3px] border-l-[3px] border-b-[3px]"
+      />
+      <DominoCell 
+        className={`${baseCell} left-[40px] top-[20px]`}
+        borders="border-t-[3px] border-r-[3px] border-b-[3px]"
+      />
     </div>
   );
 };
