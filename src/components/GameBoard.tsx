@@ -95,15 +95,19 @@ const TPiece: React.FC<{ rotation?: number }> = ({ rotation = 0 }) => {
 };
 
 const TPieceRotations: React.FC = () => (
-  <div className="flex gap-8 items-center justify-center bg-gray-50 p-4 rounded-lg">
-    {[0, 90, 180, 270].map((rotation) => (
-      <div key={rotation} className="flex flex-col items-center">
-        <div className="text-blue-600">
-          <TPiece rotation={rotation} />
+  <div className="flex flex-col gap-8 items-center justify-center bg-gray-50 p-6 rounded-lg">
+    <div className="grid grid-cols-2 gap-16">
+      {[0, 90, 180, 270].map((rotation) => (
+        <div key={rotation} className="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm">
+          <div className="w-[80px] h-[80px] flex items-center justify-center bg-white">
+            <div className="text-blue-600">
+              <TPiece rotation={rotation} />
+            </div>
+          </div>
+          <span className="text-sm text-gray-600 mt-2">{rotation}°</span>
         </div>
-        <span className="text-sm text-gray-600 mt-2">{rotation}°</span>
-      </div>
-    ))}
+      ))}
+    </div>
   </div>
 );
 
