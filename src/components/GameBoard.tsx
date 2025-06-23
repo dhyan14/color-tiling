@@ -322,6 +322,7 @@ export default function GameBoard() {
   const [squareTetrominoUsed, setSquareTetrominoUsed] = useState(false);
   const [selectedTetrominoType, setSelectedTetrominoType] = useState<TetrominoType | null>(null);
   const [selectedIsReflected, setSelectedIsReflected] = useState<boolean>(false);
+  const [tTetrominoCount, setTTetrominoCount] = useState<number>(0);
   const currentPuzzle = PUZZLES[puzzleIndex];
 
   const [availableTetrominoTypes, setAvailableTetrominoTypes] = useState<TetrominoType[]>([
@@ -416,6 +417,7 @@ export default function GameBoard() {
       setSelectedRotation(0);
       setSelectedIsReflected(false);
       setSquareTetrominoUsed(false);
+      setTTetrominoCount(0);
       if (nextPuzzle.tetrominoTypes) {
         setAvailableTetrominoTypes(nextPuzzle.tetrominoTypes);
       } else if (nextPuzzle.useTetromino) {
@@ -680,6 +682,12 @@ export default function GameBoard() {
         return;
       }
 
+      // Check if we've reached the maximum number of T pieces for the current puzzle
+      if (tTetrominoCount >= currentPuzzle.maxDominoes) {
+        setErrorMessage("Maximum number of T pieces placed!");
+        return;
+      }
+
       // Handle T tetromino placement
       const requiredCells = getTRequiredCells(row, col, selectedRotation);
       
@@ -713,6 +721,7 @@ export default function GameBoard() {
         dominoesPlaced: dominoId
       };
 
+      setTTetrominoCount(prev => prev + 1);
       saveState(newState);
       setErrorMessage(null);
       checkGameCompletion(newGrid);
@@ -837,6 +846,7 @@ export default function GameBoard() {
     setSelectedRotation(0);
     setSelectedIsReflected(false);
     setSquareTetrominoUsed(false);
+    setTTetrominoCount(0);
     if (currentPuzzle.tetrominoTypes) {
       setAvailableTetrominoTypes(currentPuzzle.tetrominoTypes);
     } else if (currentPuzzle.useTetromino) {
