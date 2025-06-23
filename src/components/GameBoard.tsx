@@ -271,24 +271,13 @@ export default function GameBoard() {
           <div className="bg-green-100 text-green-700 px-6 py-3 rounded-lg text-lg font-semibold animate-bounce">
             🎉 Congratulations! You've completed the puzzle! 🎉
           </div>
-          {puzzleIndex + 1 < PUZZLES.length && (
-            <div className="flex gap-4">
-              {currentPuzzle.requiresPassword ? (
-                <button
-                  onClick={() => setShowPasswordModal(true)}
-                  className="px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
-                >
-                  I Completed the Puzzle
-                </button>
-              ) : (
-                <button
-                  onClick={handleNextPuzzle}
-                  className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                >
-                  Next Puzzle →
-                </button>
-              )}
-            </div>
+          {puzzleIndex + 1 < PUZZLES.length && !currentPuzzle.requiresPassword && (
+            <button
+              onClick={handleNextPuzzle}
+              className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+            >
+              Next Puzzle →
+            </button>
           )}
         </div>
       )}
@@ -426,6 +415,15 @@ export default function GameBoard() {
           >
             Reset Game
           </button>
+
+          {currentPuzzle.requiresPassword && (
+            <button
+              onClick={() => setShowPasswordModal(true)}
+              className="px-6 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
+            >
+              I Completed the Puzzle
+            </button>
+          )}
         </div>
       </div>
     </div>
