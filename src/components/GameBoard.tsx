@@ -76,34 +76,25 @@ const TPieceRotations: React.FC = () => (
 );
 
 const TetrominoOption: React.FC<{ rotation: number; isSelected: boolean; onClick: () => void }> = ({ rotation, isSelected, onClick }) => {
-  const baseStyle = "w-[60px] h-[60px] border-2 rounded-lg relative transition-all";
-  const colorStyle = isSelected ? "border-blue-600 bg-blue-100" : "border-gray-400";
+  const baseStyle = "w-[60px] h-[60px] border-2 rounded-lg relative transition-all hover:scale-105";
+  const colorStyle = isSelected ? "border-blue-600 bg-blue-50 shadow-lg" : "border-gray-300 hover:border-gray-400 bg-white";
   
   const getTetrominoCells = () => {
-    const cellSize = "w-[18px] h-[18px]";
+    const cellSize = "w-[18px] h-[18px] rounded-sm";
     const baseCell = `absolute ${cellSize}`;
-    const filledCell = `${baseCell} ${isSelected ? "bg-blue-600" : "bg-gray-400"}`;
+    const filledCell = `${baseCell} ${isSelected ? "bg-blue-600" : "bg-gray-400"} transition-colors duration-200`;
     
+    // We'll map the visual rotation to the actual rotation for placement
+    const visualToActualRotation = {
+      180: 0,  // First piece (visually up) maps to down rotation
+      90: 90,  // Second piece (visually left) stays as left
+      0: 180,  // Third piece (visually down) maps to up rotation
+      270: 270 // Fourth piece (visually right) stays as right
+    };
+    
+    // Use the mapped rotation for the visual display
     switch(rotation) {
-      case 0: // ┳
-        return (
-          <>
-            <div className={`${filledCell} left-[21px] top-[3px]`} />
-            <div className={`${filledCell} left-[3px] top-[21px]`} />
-            <div className={`${filledCell} left-[21px] top-[21px]`} />
-            <div className={`${filledCell} left-[39px] top-[21px]`} />
-          </>
-        );
-      case 90: // ┫
-        return (
-          <>
-            <div className={`${filledCell} left-[21px] top-[3px]`} />
-            <div className={`${filledCell} left-[21px] top-[21px]`} />
-            <div className={`${filledCell} left-[21px] top-[39px]`} />
-            <div className={`${filledCell} left-[3px] top-[21px]`} />
-          </>
-        );
-      case 180: // ┻
+      case 180: // First piece - T pointing up
         return (
           <>
             <div className={`${filledCell} left-[21px] top-[39px]`} />
@@ -112,7 +103,25 @@ const TetrominoOption: React.FC<{ rotation: number; isSelected: boolean; onClick
             <div className={`${filledCell} left-[39px] top-[21px]`} />
           </>
         );
-      case 270: // ┣
+      case 90: // Second piece - T pointing left
+        return (
+          <>
+            <div className={`${filledCell} left-[21px] top-[3px]`} />
+            <div className={`${filledCell} left-[21px] top-[21px]`} />
+            <div className={`${filledCell} left-[21px] top-[39px]`} />
+            <div className={`${filledCell} left-[3px] top-[21px]`} />
+          </>
+        );
+      case 0: // Third piece - T pointing down
+        return (
+          <>
+            <div className={`${filledCell} left-[21px] top-[3px]`} />
+            <div className={`${filledCell} left-[3px] top-[21px]`} />
+            <div className={`${filledCell} left-[21px] top-[21px]`} />
+            <div className={`${filledCell} left-[39px] top-[21px]`} />
+          </>
+        );
+      case 270: // Fourth piece - T pointing right
         return (
           <>
             <div className={`${filledCell} left-[21px] top-[3px]`} />
@@ -127,7 +136,10 @@ const TetrominoOption: React.FC<{ rotation: number; isSelected: boolean; onClick
   };
 
   return (
-    <button onClick={onClick} className={`${baseStyle} ${colorStyle}`}>
+    <button 
+      onClick={onClick} 
+      className={`${baseStyle} ${colorStyle} transform hover:shadow-xl`}
+    >
       {getTetrominoCells()}
     </button>
   );
@@ -355,7 +367,18 @@ export default function GameBoard() {
 
   // Helper function to get required cells for T piece based on rotation
   const getTRequiredCells = (row: number, col: number, rotation: number): [number, number][] => {
-    switch (rotation) {
+    // Map the visual rotation to the actual rotation for placement
+    const visualToActualRotation = {
+      180: 0,  // First piece (visually up) maps to down rotation
+      90: 90,  // Second piece (visually left) stays as left
+      0: 180,  // Third piece (visually down) maps to up rotation
+      270: 270 // Fourth piece (visually right) stays as right
+    };
+    
+    // Use the mapped rotation for placement
+    const actualRotation = visualToActualRotation[rotation as keyof typeof visualToActualRotation];
+    
+    switch(actualRotation) {
       case 0: // T pointing down
         return [
           [row, col],     // center
