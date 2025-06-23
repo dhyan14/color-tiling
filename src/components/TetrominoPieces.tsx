@@ -139,31 +139,96 @@ export const LPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isReflected = fa
     <div className={`${className} bg-white ${borders} border-black`} />
   );
 
-  const containerStyle = {
-    transform: `${isReflected ? 'scaleX(-1) ' : ''}rotate(${rotation}deg)`,
-  };
+  // Calculate positions based on rotation and reflection
+  let cells: { className: string; borders: string }[] = [];
+
+  if (rotation === 0) {
+    // Base L shape (⌞)
+    cells = [
+      { 
+        className: `${baseCell} left-[0px] top-[0px]`,
+        borders: "border-[2px] sm:border-[3px]"
+      },
+      { 
+        className: `${baseCell} left-[0px] top-[12px] sm:top-[20px]`,
+        borders: "border-[2px] sm:border-[3px] border-t-0"
+      },
+      { 
+        className: `${baseCell} left-[0px] top-[24px] sm:top-[40px]`,
+        borders: "border-[2px] sm:border-[3px] border-t-0"
+      },
+      { 
+        className: `${baseCell} ${isReflected ? 'left-[-12px] sm:left-[-20px]' : 'left-[12px] sm:left-[20px]'} top-[24px] sm:top-[40px]`,
+        borders: "border-[2px] sm:border-[3px]"
+      }
+    ];
+  } else if (rotation === 90) {
+    // Rotated 90° clockwise
+    cells = [
+      { 
+        className: `${baseCell} left-[0px] top-[0px]`,
+        borders: "border-[2px] sm:border-[3px]"
+      },
+      { 
+        className: `${baseCell} left-[12px] sm:left-[20px] top-[0px]`,
+        borders: "border-[2px] sm:border-[3px] border-l-0"
+      },
+      { 
+        className: `${baseCell} left-[24px] sm:left-[40px] top-[0px]`,
+        borders: "border-[2px] sm:border-[3px] border-l-0"
+      },
+      { 
+        className: `${baseCell} left-[0px] top-[${isReflected ? '-12px' : '12px'}] sm:top-[${isReflected ? '-20px' : '20px'}]`,
+        borders: "border-[2px] sm:border-[3px]"
+      }
+    ];
+  } else if (rotation === 180) {
+    // Rotated 180°
+    cells = [
+      { 
+        className: `${baseCell} left-[0px] top-[0px]`,
+        borders: "border-[2px] sm:border-[3px]"
+      },
+      { 
+        className: `${baseCell} left-[0px] top-[-12px] sm:top-[-20px]`,
+        borders: "border-[2px] sm:border-[3px]"
+      },
+      { 
+        className: `${baseCell} left-[0px] top-[-24px] sm:top-[-40px]`,
+        borders: "border-[2px] sm:border-[3px] border-b-0"
+      },
+      { 
+        className: `${baseCell} ${isReflected ? 'left-[12px] sm:left-[20px]' : 'left-[-12px] sm:left-[-20px]'} top-[-24px] sm:top-[-40px]`,
+        borders: "border-[2px] sm:border-[3px]"
+      }
+    ];
+  } else { // 270
+    // Rotated 270° clockwise
+    cells = [
+      { 
+        className: `${baseCell} left-[0px] top-[0px]`,
+        borders: "border-[2px] sm:border-[3px]"
+      },
+      { 
+        className: `${baseCell} left-[12px] sm:left-[20px] top-[0px]`,
+        borders: "border-[2px] sm:border-[3px] border-l-0"
+      },
+      { 
+        className: `${baseCell} left-[24px] sm:left-[40px] top-[0px]`,
+        borders: "border-[2px] sm:border-[3px] border-l-0"
+      },
+      { 
+        className: `${baseCell} left-[24px] sm:left-[40px] top-[${isReflected ? '12px' : '-12px'}] sm:top-[${isReflected ? '20px' : '-20px'}]`,
+        borders: "border-[2px] sm:border-[3px]"
+      }
+    ];
+  }
 
   return (
-    <div className="relative w-[36px] h-[36px] sm:w-[60px] sm:h-[60px] transition-transform hover:scale-105" 
-         style={containerStyle}>
-      {/* Base vertical line */}
-      <DominoCell
-        className={`${baseCell} left-[0px] top-[0px]`}
-        borders="border-[2px] sm:border-[3px]"
-      />
-      <DominoCell
-        className={`${baseCell} left-[0px] top-[12px] sm:top-[20px]`}
-        borders="border-[2px] sm:border-[3px] border-t-0"
-      />
-      <DominoCell
-        className={`${baseCell} left-[0px] top-[24px] sm:top-[40px]`}
-        borders="border-[2px] sm:border-[3px] border-t-0"
-      />
-      {/* Horizontal piece */}
-      <DominoCell
-        className={`${baseCell} left-[12px] sm:left-[20px] top-[24px] sm:top-[40px]`}
-        borders="border-[2px] sm:border-[3px] border-l-0"
-      />
+    <div className="relative w-[48px] h-[48px] sm:w-[80px] sm:h-[80px] transition-transform hover:scale-105">
+      {cells.map((cell, index) => (
+        <DominoCell key={index} {...cell} />
+      ))}
     </div>
   );
 };

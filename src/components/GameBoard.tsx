@@ -106,7 +106,7 @@ interface TetrominoOptionProps {
 const TetrominoOption: FC<TetrominoOptionProps> = ({ rotation, isSelected, onClick }) => {
   const baseStyle = "w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] relative transition-all hover:scale-105";
   const colorStyle = isSelected ? "text-blue-600 ring-2 ring-blue-500" : "text-gray-500";
-  
+
   return (
     <button
       onClick={onClick}
@@ -114,7 +114,7 @@ const TetrominoOption: FC<TetrominoOptionProps> = ({ rotation, isSelected, onCli
     >
       <div className="relative w-full h-full">
         <TPiece rotation={rotation} isSelected={isSelected} />
-      </div>
+    </div>
     </button>
   );
 };
@@ -150,75 +150,55 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
       
     case 'L':
       if (rotation === 0) {
-        if (!isReflected) {
-          // Normal L: ⌞
-          cells.push(
-            [row, col],     // Top of vertical line (first piece)
-            [row + 1, col], // Middle of vertical line
-            [row + 2, col], // Bottom of vertical line
-            [row + 2, col + 1]  // Horizontal piece
-          );
-        } else {
-          // Reflected: ⌜
-          cells.push(
-            [row, col],     // Top of vertical line (first piece)
-            [row + 1, col], // Middle of vertical line
-            [row + 2, col], // Bottom of vertical line
-            [row + 2, col - 1]  // Horizontal piece
-          );
-        }
+        // Base L shape (⌞)
+        cells.push(
+          [row, col],      // Top piece (first piece)
+          [row + 1, col],  // Middle vertical piece
+          [row + 2, col],  // Bottom vertical piece
+          [row + 2, col + (isReflected ? -1 : 1)]  // Horizontal piece
+        );
       } else if (rotation === 90) {
         if (!isReflected) {
           // Using 270° reflection functionality
           cells.push(
-            [row, col],         // Left piece (first piece)
-            [row, col + 1],     // Middle piece
-            [row, col + 2],     // Right piece
-            [row - 1, col + 2]  // Top piece
+            [row, col],      // Left piece (first piece)
+            [row, col + 1],  // Middle horizontal piece
+            [row, col + 2],  // Right horizontal piece
+            [row - 1, col]   // Vertical piece
           );
         } else {
           // Using 90° normal functionality
           cells.push(
-            [row, col],         // Left piece (first piece)
-            [row, col + 1],     // Middle piece
-            [row, col + 2],     // Right piece
-            [row + 1, col]      // Bottom piece
+            [row, col],      // Left piece (first piece)
+            [row, col + 1],  // Middle horizontal piece
+            [row, col + 2],  // Right horizontal piece
+            [row + 1, col]   // Vertical piece
           );
         }
       } else if (rotation === 180) {
-        if (!isReflected) {
-          // Normal: ⌜
-          cells.push(
-            [row, col],         // Bottom (first piece)
-            [row - 1, col],     // Middle
-            [row - 2, col],     // Top
-            [row - 2, col - 1]  // Left piece
-          );
-        } else {
-          // Reflected: ⌝
-          cells.push(
-            [row, col],         // Bottom (first piece)
-            [row - 1, col],     // Middle
-            [row - 2, col],     // Top
-            [row - 2, col + 1]  // Right piece
-          );
-        }
+        // Rotated 180°
+        cells.push(
+          [row, col],      // Bottom piece (first piece)
+          [row - 1, col],  // Middle vertical piece
+          [row - 2, col],  // Top vertical piece
+          [row - 2, col + (isReflected ? 1 : -1)]  // Horizontal piece
+        );
       } else { // 270
         if (!isReflected) {
           // Using 90° reflection functionality
           cells.push(
-            [row, col],         // Left piece (first piece)
-            [row, col + 1],     // Middle piece
-            [row, col + 2],     // Right piece
-            [row + 1, col]      // Bottom piece
+            [row, col],      // Left piece (first piece)
+            [row, col + 1],  // Middle horizontal piece
+            [row, col + 2],  // Right horizontal piece
+            [row + 1, col + 2]   // Vertical piece
           );
         } else {
           // Using 270° normal functionality
           cells.push(
-            [row, col],         // Left piece (first piece)
-            [row, col + 1],     // Middle piece
-            [row, col + 2],     // Right piece
-            [row - 1, col + 2]  // Top piece
+            [row, col],      // Left piece (first piece)
+            [row, col + 1],  // Middle horizontal piece
+            [row, col + 2],  // Right horizontal piece
+            [row - 1, col + 2]   // Vertical piece
           );
         }
       }
@@ -259,7 +239,7 @@ const TetrominoSelector: FC<{
     <div className="flex flex-col gap-4 items-center p-4 bg-white rounded-lg shadow-sm">
       <div className="grid grid-cols-5 gap-4">
         {availableTypes.map((type) => (
-          <button
+    <button
             key={type}
             onClick={() => onSelect(type)}
             className={`p-2 rounded-lg transition-colors ${
@@ -271,7 +251,7 @@ const TetrominoSelector: FC<{
             {type === 'square' && <SquarePiece />}
             {type === 'L' && <LPiece rotation={selectedType === type ? rotation : 0} isReflected={selectedType === type && isReflected} />}
             {type === 'skew' && <SkewPiece rotation={selectedType === type ? rotation : 0} isReflected={selectedType === type && isReflected} />}
-          </button>
+    </button>
         ))}
       </div>
       
@@ -289,7 +269,7 @@ const TetrominoSelector: FC<{
                 {r}°
               </button>
             ))}
-          </div>
+    </div>
           
           {(selectedType === 'L' || selectedType === 'skew') && (
             <button
@@ -911,25 +891,25 @@ export default function GameBoard() {
                                 (cell.rotation === 90 || cell.rotation === 270);
               
               return (
-                <div
-                  key={`${rowIndex}-${colIndex}`}
-                  onClick={() => handleCellClick(rowIndex, colIndex)}
-                  className={`
-                    ${currentPuzzle.gridSize === 8 
-                      ? 'w-[30px] h-[30px] sm:w-[40px] sm:h-[40px]' 
-                      : 'w-[35px] h-[35px] sm:w-[48px] sm:h-[48px]'}
-                    ${cell.isBlocked
-                      ? 'bg-gray-800 cursor-not-allowed'
+              <div
+                key={`${rowIndex}-${colIndex}`}
+                onClick={() => handleCellClick(rowIndex, colIndex)}
+                className={`
+                  ${currentPuzzle.gridSize === 8 
+                    ? 'w-[30px] h-[30px] sm:w-[40px] sm:h-[40px]' 
+                    : 'w-[35px] h-[35px] sm:w-[48px] sm:h-[48px]'}
+                  ${cell.isBlocked
+                    ? 'bg-gray-800 cursor-not-allowed'
                       : isPartOfPiece
                         ? `${getRandomColor(cell.dominoId!)} cursor-not-allowed ${isVertical ? 'border-t-0 border-b-0' : 'border-l-0 border-r-0'}`
-                        : 'bg-white cursor-pointer hover:bg-gray-100'
-                    }
-                    transition-colors duration-200
-                    border border-gray-300
-                    aspect-square
+                      : 'bg-white cursor-pointer hover:bg-gray-100'
+                  }
+                  transition-colors duration-200
+                  border border-gray-300
+                  aspect-square
                     relative
-                  `}
-                />
+                `}
+              />
               );
             })
           ))}
@@ -985,4 +965,4 @@ export default function GameBoard() {
       </div>
     </div>
   );
-}
+} 
