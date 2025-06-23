@@ -12,12 +12,9 @@ type TetrominoPieceProps = {
 export const StraightPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isSelected = false }) => {
   const cellSize = "w-[15px] h-[15px] sm:w-[20px] sm:h-[20px]";
   const baseCell = `absolute ${cellSize}`;
-  const dotStyle = "absolute w-[6px] h-[6px] sm:w-[8px] sm:h-[8px] rounded-full bg-black left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2";
 
   const DominoCell = ({ className, borders }: { className: string; borders: string }) => (
-    <div className={`${className} bg-white ${borders} border-black`}>
-      <div className={dotStyle} />
-    </div>
+    <div className={`${className} bg-white ${borders} border-black`} />
   );
 
   return (
@@ -71,12 +68,9 @@ export const StraightPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isSelecte
 export const TPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isSelected = false }) => {
   const cellSize = "w-[15px] h-[15px] sm:w-[20px] sm:h-[20px]";
   const baseCell = `absolute ${cellSize}`;
-  const dotStyle = "absolute w-[6px] h-[6px] sm:w-[8px] sm:h-[8px] rounded-full bg-black left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2";
 
   const DominoCell = ({ className, borders }: { className: string; borders: string }) => (
-    <div className={`${className} bg-white ${borders} border-black`}>
-      <div className={dotStyle} />
-    </div>
+    <div className={`${className} bg-white ${borders} border-black`} />
   );
 
   return (
@@ -107,12 +101,9 @@ export const TPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isSelected = fal
 export const SquarePiece: FC<TetrominoPieceProps> = ({ isSelected = false }) => {
   const cellSize = "w-[20px] h-[20px]";
   const baseCell = `absolute ${cellSize}`;
-  const dotStyle = "absolute w-[6px] h-[6px] sm:w-[8px] sm:h-[8px] rounded-full bg-black left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2";
 
   const DominoCell = ({ className, borders }: { className: string; borders: string }) => (
-    <div className={`${className} bg-white ${borders} border-black`}>
-      <div className={dotStyle} />
-    </div>
+    <div className={`${className} bg-white ${borders} border-black`} />
   );
 
   return (

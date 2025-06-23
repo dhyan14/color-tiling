@@ -871,15 +871,7 @@ export default function GameBoard() {
                     aspect-square
                     relative
                   `}
-                >
-                  {isPartOfPiece && cell.isFirst && (
-                    <div className={`absolute inset-0 flex items-center justify-center ${
-                      isVertical ? 'flex-col' : 'flex-row'
-                    }`}>
-                      <div className="w-2 h-2 rounded-full bg-black" />
-                    </div>
-                  )}
-                </div>
+                />
               );
             })
           ))}
