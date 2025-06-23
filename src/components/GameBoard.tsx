@@ -102,52 +102,100 @@ const TetrominoOption: React.FC<TetrominoOptionProps> = ({ rotation, isSelected,
   const colorStyle = isSelected ? "text-blue-600" : "text-gray-500";
   
   const getTetrominoCells = () => {
-    const cellSize = "w-[32px] h-[32px] rounded-xl";
+    const cellSize = "w-[32px] h-[32px]";
     const baseCell = `absolute ${cellSize}`;
-    const cellStyle = `${baseCell} bg-white border-[3px] ${isSelected ? "border-blue-600" : "border-gray-500"}`;
+    const borderColor = isSelected ? "border-blue-600" : "border-gray-500";
     const dotStyle = `absolute w-[8px] h-[8px] rounded-full ${isSelected ? "bg-blue-600" : "bg-gray-500"}`;
     
-    const DominoCell = ({ className }: { className: string }) => (
-      <div className={className}>
+    const DominoCell = ({ className, borders }: { className: string, borders: string }) => (
+      <div className={`${className} bg-white ${borders} ${borderColor}`}>
         <div className={dotStyle} style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }} />
       </div>
     );
     
     switch(rotation) {
-      case 180: // First piece - T pointing up
+      case 180: // T pointing up
         return (
           <>
-            <DominoCell className={`${cellStyle} left-[24px] top-[42px]`} />
-            <DominoCell className={`${cellStyle} left-[4px] top-[22px]`} />
-            <DominoCell className={`${cellStyle} left-[24px] top-[22px]`} />
-            <DominoCell className={`${cellStyle} left-[44px] top-[22px]`} />
+            <DominoCell 
+              className={`${baseCell} left-[24px] top-[42px]`} 
+              borders="border-b-[3px] border-l-[3px] border-r-[3px]"
+            />
+            <DominoCell 
+              className={`${baseCell} left-[4px] top-[22px]`} 
+              borders="border-t-[3px] border-l-[3px] border-b-[3px]"
+            />
+            <DominoCell 
+              className={`${baseCell} left-[24px] top-[22px]`} 
+              borders="border-x-[3px]"
+            />
+            <DominoCell 
+              className={`${baseCell} left-[44px] top-[22px]`} 
+              borders="border-t-[3px] border-r-[3px] border-b-[3px]"
+            />
           </>
         );
-      case 90: // Second piece - T pointing left
+      case 90: // T pointing left
         return (
           <>
-            <DominoCell className={`${cellStyle} left-[24px] top-[2px]`} />
-            <DominoCell className={`${cellStyle} left-[24px] top-[22px]`} />
-            <DominoCell className={`${cellStyle} left-[24px] top-[42px]`} />
-            <DominoCell className={`${cellStyle} left-[4px] top-[22px]`} />
+            <DominoCell 
+              className={`${baseCell} left-[24px] top-[2px]`} 
+              borders="border-t-[3px] border-l-[3px] border-r-[3px]"
+            />
+            <DominoCell 
+              className={`${baseCell} left-[24px] top-[22px]`} 
+              borders="border-y-[3px]"
+            />
+            <DominoCell 
+              className={`${baseCell} left-[24px] top-[42px]`} 
+              borders="border-b-[3px] border-l-[3px] border-r-[3px]"
+            />
+            <DominoCell 
+              className={`${baseCell} left-[4px] top-[22px]`} 
+              borders="border-t-[3px] border-l-[3px] border-b-[3px]"
+            />
           </>
         );
-      case 0: // Third piece - T pointing down
+      case 0: // T pointing down
         return (
           <>
-            <DominoCell className={`${cellStyle} left-[24px] top-[2px]`} />
-            <DominoCell className={`${cellStyle} left-[4px] top-[22px]`} />
-            <DominoCell className={`${cellStyle} left-[24px] top-[22px]`} />
-            <DominoCell className={`${cellStyle} left-[44px] top-[22px]`} />
+            <DominoCell 
+              className={`${baseCell} left-[24px] top-[2px]`} 
+              borders="border-t-[3px] border-l-[3px] border-r-[3px]"
+            />
+            <DominoCell 
+              className={`${baseCell} left-[4px] top-[22px]`} 
+              borders="border-t-[3px] border-l-[3px] border-b-[3px]"
+            />
+            <DominoCell 
+              className={`${baseCell} left-[24px] top-[22px]`} 
+              borders="border-x-[3px]"
+            />
+            <DominoCell 
+              className={`${baseCell} left-[44px] top-[22px]`} 
+              borders="border-t-[3px] border-r-[3px] border-b-[3px]"
+            />
           </>
         );
-      case 270: // Fourth piece - T pointing right
+      case 270: // T pointing right
         return (
           <>
-            <DominoCell className={`${cellStyle} left-[24px] top-[2px]`} />
-            <DominoCell className={`${cellStyle} left-[24px] top-[22px]`} />
-            <DominoCell className={`${cellStyle} left-[24px] top-[42px]`} />
-            <DominoCell className={`${cellStyle} left-[44px] top-[22px]`} />
+            <DominoCell 
+              className={`${baseCell} left-[24px] top-[2px]`} 
+              borders="border-t-[3px] border-l-[3px] border-r-[3px]"
+            />
+            <DominoCell 
+              className={`${baseCell} left-[24px] top-[22px]`} 
+              borders="border-y-[3px]"
+            />
+            <DominoCell 
+              className={`${baseCell} left-[24px] top-[42px]`} 
+              borders="border-b-[3px] border-l-[3px] border-r-[3px]"
+            />
+            <DominoCell 
+              className={`${baseCell} left-[44px] top-[22px]`} 
+              borders="border-t-[3px] border-r-[3px] border-b-[3px]"
+            />
           </>
         );
       default:
