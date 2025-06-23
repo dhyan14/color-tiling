@@ -162,53 +162,39 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
       break;
       
     case 'L':
-      const baseL: [number, number][] = actualRotation === 0 ? [
-        [row, col], [row + 1, col], [row + 2, col], [row + 2, col + 1]
-      ] : actualRotation === 90 ? [
-        [row, col], [row, col + 1], [row, col + 2], [row + 1, col]
-      ] : actualRotation === 180 ? [
-        [row - 2, col], [row - 1, col], [row, col], [row - 2, col + 1]
-      ] : [ // 270
-        [row, col], [row - 1, col + 2], [row, col + 1], [row, col + 2]
-      ];
-      
-      // For 90-degree rotation, swap the reflection logic
-      if (actualRotation === 90) {
-        if (isReflected) {
-          cells.push(...baseL);
-        } else {
-          cells.push(...baseL.map(([r, c]): [number, number] => [r, 2 * col + 2 - c]));
-        }
-      } else {
-        if (isReflected) {
-          cells.push(...baseL.map(([r, c]): [number, number] => [r, 2 * col + 1 - c]));
-        } else {
-          cells.push(...baseL);
-        }
+      let baseL: [number, number][];
+      if (actualRotation === 0) {
+        baseL = [[row, col], [row + 1, col], [row + 2, col], [row + 2, col + (isReflected ? -1 : 1)]];
+      } else if (actualRotation === 90) {
+        baseL = [[row, col], [row, col + 1], [row, col + 2], [row + (isReflected ? -1 : 1), col]];
+      } else if (actualRotation === 180) {
+        baseL = [[row, col], [row - 1, col], [row - 2, col], [row - 2, col + (isReflected ? -1 : 1)]];
+      } else { // 270
+        baseL = [[row, col], [row, col - 1], [row, col - 2], [row + (isReflected ? -1 : 1), col]];
       }
+      cells.push(...baseL);
       break;
       
     case 'skew':
-      const baseSkew: [number, number][] = actualRotation === 0 || actualRotation === 180 ? [
-        [row, col], [row, col + 1], [row + 1, col + 1], [row + 1, col + 2]
-      ] : [ // 90 or 270
-        [row, col], [row + 1, col], [row + 1, col - 1], [row + 2, col - 1]
-      ];
-      
-      // For 90-degree rotation, swap the reflection logic
-      if (actualRotation === 90 || actualRotation === 270) {
-        if (isReflected) {
-          cells.push(...baseSkew);
-        } else {
-          cells.push(...baseSkew.map(([r, c]): [number, number] => [r, 2 * col - c]));
-        }
-      } else {
-        if (isReflected) {
-          cells.push(...baseSkew.map(([r, c]): [number, number] => [r, 2 * col + 2 - c]));
-        } else {
-          cells.push(...baseSkew);
-        }
+      let baseSkew: [number, number][];
+      if (actualRotation === 0) {
+        baseSkew = isReflected ? 
+          [[row, col + 2], [row, col + 1], [row + 1, col + 1], [row + 1, col]] :
+          [[row, col], [row, col + 1], [row + 1, col + 1], [row + 1, col + 2]];
+      } else if (actualRotation === 90) {
+        baseSkew = isReflected ?
+          [[row - 2, col], [row - 1, col], [row - 1, col + 1], [row, col + 1]] :
+          [[row, col], [row + 1, col], [row + 1, col + 1], [row + 2, col + 1]];
+      } else if (actualRotation === 180) {
+        baseSkew = isReflected ?
+          [[row, col], [row, col + 1], [row - 1, col + 1], [row - 1, col + 2]] :
+          [[row, col + 2], [row, col + 1], [row - 1, col + 1], [row - 1, col]];
+      } else { // 270
+        baseSkew = isReflected ?
+          [[row, col + 1], [row - 1, col + 1], [row - 1, col], [row - 2, col]] :
+          [[row, col], [row - 1, col], [row - 1, col - 1], [row - 2, col - 1]];
       }
+      cells.push(...baseSkew);
       break;
   }
   
