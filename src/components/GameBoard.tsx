@@ -89,7 +89,7 @@ const PUZZLES: PuzzleConfig[] = [
     gridSize: 4,
     maxDominoes: 5,
     blockedCells: [],
-    description: "Place different Tetromino pieces (Straight, T, Square, L, and Skew) on a 4x5 grid",
+    description: "Place different Tetromino pieces (Straight, T, Square, L, and Skew) on a 4x5 grid. Each piece can only be used once. Pieces can be rotated and reflected to fit the grid.",
     useTetromino: true,
     requiresPassword: true,
     password: "1732",
