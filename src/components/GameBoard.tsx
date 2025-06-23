@@ -19,6 +19,8 @@ type PuzzleConfig = {
   maxDominoes: number;
   blockedCells: { row: number; col: number }[];
   description: string;
+  requiresPassword?: boolean;
+  password?: string;
 };
 
 const PUZZLES: PuzzleConfig[] = [
@@ -33,12 +35,22 @@ const PUZZLES: PuzzleConfig[] = [
       { row: 0, col: 0 }, // Upper left corner
       { row: 5, col: 5 }, // Lower right corner
     ],
-    description: "Place 17 dominoes on a 6x6 grid with blocked corners"
+    description: "Place 17 dominoes on a 6x6 grid with blocked corners",
+    requiresPassword: true,
+    password: "9910"
+  },
+  {
+    maxDominoes: 18,
+    blockedCells: [],
+    description: "Create your own domino pattern on a blank 6x6 grid"
   }
 ];
 
 export default function GameBoard() {
   const [puzzleIndex, setPuzzleIndex] = useState(0);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [password, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState(false);
   const currentPuzzle = PUZZLES[puzzleIndex];
 
   const createEmptyGrid = (puzzleConfig: PuzzleConfig): Cell[][] => {
@@ -71,6 +83,17 @@ export default function GameBoard() {
   const [selectedOrientation, setSelectedOrientation] = useState<'horizontal' | 'vertical'>('horizontal');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  const handlePasswordSubmit = () => {
+    if (password === currentPuzzle.password) {
+      setShowPasswordModal(false);
+      setPassword('');
+      setPasswordError(false);
+      handleNextPuzzle();
+    } else {
+      setPasswordError(true);
+    }
+  };
 
   const handleNextPuzzle = () => {
     if (puzzleIndex + 1 < PUZZLES.length) {
@@ -249,13 +272,64 @@ export default function GameBoard() {
             🎉 Congratulations! You've completed the puzzle! 🎉
           </div>
           {puzzleIndex + 1 < PUZZLES.length && (
-            <button
-              onClick={handleNextPuzzle}
-              className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-            >
-              Next Puzzle →
-            </button>
+            <div className="flex gap-4">
+              {currentPuzzle.requiresPassword ? (
+                <button
+                  onClick={() => setShowPasswordModal(true)}
+                  className="px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+                >
+                  I Completed the Puzzle
+                </button>
+              ) : (
+                <button
+                  onClick={handleNextPuzzle}
+                  className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                >
+                  Next Puzzle →
+                </button>
+              )}
+            </div>
           )}
+        </div>
+      )}
+      
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg shadow-xl">
+            <h3 className="text-lg font-semibold mb-4">Enter Password</h3>
+            <input
+              type="text"
+              maxLength={4}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setPasswordError(false);
+              }}
+              className="border-2 border-gray-300 rounded px-3 py-2 mb-4 w-full focus:border-blue-500 outline-none"
+              placeholder="Enter 4-digit password"
+            />
+            {passwordError && (
+              <p className="text-red-500 text-sm mb-4">Incorrect password. Please try again.</p>
+            )}
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowPasswordModal(false);
+                  setPassword('');
+                  setPasswordError(false);
+                }}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handlePasswordSubmit}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                Submit
+              </button>
+            </div>
+          </div>
         </div>
       )}
       
