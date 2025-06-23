@@ -158,21 +158,21 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
           [row + 2, col + (isReflected ? -1 : 1)]  // Horizontal piece
         );
       } else if (rotation === 90) {
-        if (!isReflected) {
-          // Using 270° reflection functionality
+        if (isReflected) {
+          // 90° normal functionality
           cells.push(
             [row, col],      // Left piece (first piece)
             [row, col + 1],  // Middle horizontal piece
             [row, col + 2],  // Right horizontal piece
-            [row - 1, col]   // Vertical piece
+            [row + 1, col]   // Bottom piece
           );
         } else {
-          // Using 90° normal functionality
+          // 90° reflection functionality
           cells.push(
             [row, col],      // Left piece (first piece)
             [row, col + 1],  // Middle horizontal piece
             [row, col + 2],  // Right horizontal piece
-            [row + 1, col]   // Vertical piece
+            [row - 1, col]   // Top piece
           );
         }
       } else if (rotation === 180) {
@@ -184,21 +184,21 @@ const getTetrominoRequiredCells = (row: number, col: number, type: TetrominoType
           [row - 2, col + (isReflected ? 1 : -1)]  // Horizontal piece
         );
       } else { // 270
-        if (!isReflected) {
-          // Using 90° reflection functionality
+        if (isReflected) {
+          // 270° normal functionality
           cells.push(
             [row, col],      // Left piece (first piece)
             [row, col + 1],  // Middle horizontal piece
             [row, col + 2],  // Right horizontal piece
-            [row + 1, col + 2]   // Vertical piece
+            [row - 1, col + 2]   // Top piece
           );
         } else {
-          // Using 270° normal functionality
+          // 270° reflection functionality
           cells.push(
             [row, col],      // Left piece (first piece)
             [row, col + 1],  // Middle horizontal piece
             [row, col + 2],  // Right horizontal piece
-            [row - 1, col + 2]   // Vertical piece
+            [row + 1, col + 2]   // Bottom piece
           );
         }
       }
