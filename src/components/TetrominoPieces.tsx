@@ -198,4 +198,3 @@ export const SkewPiece: FC<TetrominoPieceProps> = ({ rotation = 0, isReflected =
     </div>
   );
 };
-};
