@@ -1080,7 +1080,7 @@ export default function GameBoard() {
                           ? `${getRandomColor(cell.dominoId!)} cursor-not-allowed ${isVertical ? 'border-t-0 border-b-0' : 'border-l-0 border-r-0'}`
                           : 'bg-white cursor-pointer hover:bg-gray-100'
                     }
-                    ${isLastPlaced ? 'ring-4 ring-yellow-400' : ''}
+                    ${isLastPlaced ? 'ring-4 ring-orange-500' : ''}
                     transition-colors duration-200
                     border border-gray-300
                     aspect-square
