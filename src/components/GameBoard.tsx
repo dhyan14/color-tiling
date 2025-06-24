@@ -20,6 +20,7 @@ interface GameState {
   grid: Cell[][];
   dominoesPlaced: number;
   usedTetrominoTypes?: TetrominoType[];
+  lastPlacedCell?: { row: number; col: number; };
 }
 
 interface PuzzleConfig {
@@ -158,19 +159,29 @@ interface TetrominoOptionProps {
   onClick: () => void;
 }
 
-const TetrominoOption: FC<TetrominoOptionProps> = ({ rotation, isSelected, onClick }) => {
+const TetrominoOption: React.FC<TetrominoOptionProps> = ({ rotation, isSelected, onClick }): JSX.Element => {
   const baseStyle = "w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] relative transition-all hover:scale-105";
   const colorStyle = isSelected ? "text-blue-600 ring-2 ring-blue-500" : "text-gray-500";
 
   return (
-    <button
-      onClick={onClick}
-      className={`${baseStyle} ${colorStyle} flex items-center justify-center p-2 rounded-lg focus:outline-none`}
-    >
-      <div className="relative w-full h-full">
-        <TPiece rotation={rotation} isSelected={isSelected} />
-      </div>
-    </button>
+    <div className="flex flex-col gap-2 items-center">
+      <button
+        onClick={onClick}
+        className={`${baseStyle} ${colorStyle} flex items-center justify-center p-2 rounded-lg focus:outline-none`}
+      >
+        <div className="relative w-full h-full">
+          <TPiece rotation={rotation} isSelected={isSelected} />
+        </div>
+      </button>
+      <button
+        onClick={onClick}
+        className={`${baseStyle} ${colorStyle} flex items-center justify-center p-2 rounded-lg focus:outline-none transform scale-75`}
+      >
+        <div className="relative w-full h-full">
+          <TPiece rotation={rotation} isSelected={isSelected} />
+        </div>
+      </button>
+    </div>
   );
 };
 
@@ -351,6 +362,7 @@ export default function GameBoard() {
   const [selectedTetrominoType, setSelectedTetrominoType] = useState<TetrominoType | null>(null);
   const [selectedIsReflected, setSelectedIsReflected] = useState<boolean>(false);
   const [tTetrominoCount, setTTetrominoCount] = useState<number>(0);
+  const [lastPlacedCell, setLastPlacedCell] = useState<{ row: number; col: number } | null>(null);
   
   const isLastPuzzle = puzzleIndex === PUZZLES.length - 1;
   const isThankYouPage = puzzleIndex === PUZZLES.length;
@@ -436,9 +448,12 @@ export default function GameBoard() {
   };
 
   const saveState = (newState: GameState) => {
-    setHistory(prev => [...prev, currentState]);
-    setCurrentState(newState);
+    setHistory([...history, currentState]);
     setFuture([]);
+    setCurrentState(newState);
+    if (newState.lastPlacedCell) {
+      setLastPlacedCell(newState.lastPlacedCell);
+    }
   };
 
   const handleUndo = () => {
@@ -591,7 +606,8 @@ export default function GameBoard() {
       saveState({
         grid: newGrid,
         dominoesPlaced: dominoId,
-        usedTetrominoTypes: newUsedTypes
+        usedTetrominoTypes: newUsedTypes,
+        lastPlacedCell: { row, col }
       });
       
       // Only remove straight piece from available types if we've used all 8, and remove square when used
@@ -694,7 +710,8 @@ export default function GameBoard() {
 
         const newState = {
           grid: newGrid,
-          dominoesPlaced: dominoId
+          dominoesPlaced: dominoId,
+          lastPlacedCell: { row, col }
         };
 
         setSquareTetrominoUsed(true);
@@ -740,7 +757,8 @@ export default function GameBoard() {
 
       const newState = {
         grid: newGrid,
-        dominoesPlaced: dominoId
+        dominoesPlaced: dominoId,
+        lastPlacedCell: { row, col }
       };
 
       setTTetrominoCount(prev => prev + 1);
@@ -802,7 +820,8 @@ export default function GameBoard() {
     if (isValidMove) {
       const newState = {
         grid: newGrid,
-        dominoesPlaced: currentState.dominoesPlaced + 1
+        dominoesPlaced: currentState.dominoesPlaced + 1,
+        lastPlacedCell: { row, col }
       };
       saveState(newState);
       setErrorMessage(null);
@@ -1045,27 +1064,29 @@ export default function GameBoard() {
               const isPartOfPiece = cell.isOccupied;
               const isVertical = cell.orientation && ['straight', 'T', 'L', 'skew'].includes(cell.orientation) && 
                                 (cell.rotation === 90 || cell.rotation === 270);
+              const isLastPlaced = lastPlacedCell && lastPlacedCell.row === rowIndex && lastPlacedCell.col === colIndex;
               
               return (
-              <div
-                key={`${rowIndex}-${colIndex}`}
-                onClick={() => handleCellClick(rowIndex, colIndex)}
-                className={`
-                  ${currentPuzzle?.gridSize === 8 
-                    ? 'w-[30px] h-[30px] sm:w-[40px] sm:h-[40px]' 
-                    : 'w-[35px] h-[35px] sm:w-[48px] sm:h-[48px]'}
-                  ${cell.isBlocked
-                    ? 'bg-gray-800 cursor-not-allowed'
-                      : isPartOfPiece
-                        ? `${getRandomColor(cell.dominoId!)} cursor-not-allowed ${isVertical ? 'border-t-0 border-b-0' : 'border-l-0 border-r-0'}`
-                      : 'bg-white cursor-pointer hover:bg-gray-100'
-                  }
-                  transition-colors duration-200
-                  border border-gray-300
-                  aspect-square
-                  relative
-                `}
-              />
+                <div
+                  key={`${rowIndex}-${colIndex}`}
+                  onClick={() => handleCellClick(rowIndex, colIndex)}
+                  className={`
+                    ${currentPuzzle?.gridSize === 8 
+                      ? 'w-[30px] h-[30px] sm:w-[40px] sm:h-[40px]' 
+                      : 'w-[35px] h-[35px] sm:w-[48px] sm:h-[48px]'}
+                    ${cell.isBlocked
+                      ? 'bg-gray-800 cursor-not-allowed'
+                        : isPartOfPiece
+                          ? `${getRandomColor(cell.dominoId!)} cursor-not-allowed ${isVertical ? 'border-t-0 border-b-0' : 'border-l-0 border-r-0'}`
+                          : 'bg-white cursor-pointer hover:bg-gray-100'
+                    }
+                    ${isLastPlaced ? 'ring-4 ring-yellow-400' : ''}
+                    transition-colors duration-200
+                    border border-gray-300
+                    aspect-square
+                    relative
+                  `}
+                />
               );
             })
           ))}
