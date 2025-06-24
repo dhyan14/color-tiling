@@ -457,28 +457,31 @@ export default function GameBoard() {
   };
 
   const handleUndo = () => {
-    if (history.length === 0) return;
-    
-    const previousState = history[history.length - 1];
-    const newHistory = history.slice(0, -1);
-    
-    setFuture(prev => [currentState, ...prev]);
-    setHistory(newHistory);
-    setCurrentState(previousState);
-    setErrorMessage(null);
-    setShowSuccess(false);
+    if (history.length > 0) {
+      const previousState = history[history.length - 1];
+      const newHistory = history.slice(0, -1);
+      setHistory(newHistory);
+      setFuture([currentState, ...future]);
+      setCurrentState(previousState);
+      setLastPlacedCell(previousState.lastPlacedCell || null);
+      if (currentPuzzle.useTetromino) {
+        setTTetrominoCount(prev => prev - 1);
+      }
+    }
   };
 
   const handleRedo = () => {
-    if (future.length === 0) return;
-    
-    const nextState = future[0];
-    const newFuture = future.slice(1);
-    
-    setHistory(prev => [...prev, currentState]);
-    setFuture(newFuture);
-    setCurrentState(nextState);
-    setErrorMessage(null);
+    if (future.length > 0) {
+      const nextState = future[0];
+      const newFuture = future.slice(1);
+      setHistory([...history, currentState]);
+      setFuture(newFuture);
+      setCurrentState(nextState);
+      setLastPlacedCell(nextState.lastPlacedCell || null);
+      if (currentPuzzle.useTetromino) {
+        setTTetrominoCount(prev => prev + 1);
+      }
+    }
   };
 
   const checkGameCompletion = (grid: Cell[][]) => {
@@ -880,7 +883,8 @@ export default function GameBoard() {
     const newState = {
       grid: createEmptyGrid(currentPuzzle),
       dominoesPlaced: 0,
-      usedTetrominoTypes: []
+      usedTetrominoTypes: [],
+      lastPlacedCell: null
     };
     saveState(newState);
     setSelectedTetrominoType(null);
@@ -888,6 +892,7 @@ export default function GameBoard() {
     setSelectedIsReflected(false);
     setSquareTetrominoUsed(false);
     setTTetrominoCount(0);
+    setLastPlacedCell(null);
     if (currentPuzzle.tetrominoTypes) {
       setAvailableTetrominoTypes(currentPuzzle.tetrominoTypes);
     } else if (currentPuzzle.useTetromino) {
