@@ -21,24 +21,24 @@ const GRID_SIZE = 8;
 const MAX_PIECES = 16;
 
 const TetrominoOption = ({ rotation, isSelected, onClick }: { rotation: number; isSelected: boolean; onClick: () => void; }) => {
-  const baseStyle = "w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] relative transition-all hover:scale-105";
+  const baseStyle = "w-[48px] h-[48px] sm:w-[64px] sm:h-[64px] relative transition-all hover:scale-105 flex items-center justify-center";
   const colorStyle = isSelected ? "text-blue-600 ring-2 ring-blue-500" : "text-gray-500";
 
   return (
     <div className="flex flex-col gap-2 items-center">
       <button
         onClick={onClick}
-        className={`${baseStyle} ${colorStyle} flex items-center justify-center p-2 rounded-lg focus:outline-none`}
+        className={`${baseStyle} ${colorStyle} p-2 rounded-lg focus:outline-none`}
       >
-        <div className="relative w-full h-full">
+        <div className="relative w-full h-full flex items-center justify-center">
           <TPiece rotation={rotation} isSelected={isSelected} />
         </div>
       </button>
       <button
         onClick={onClick}
-        className={`${baseStyle} ${colorStyle} flex items-center justify-center p-2 rounded-lg focus:outline-none transform scale-75`}
+        className={`${baseStyle} ${colorStyle} p-2 rounded-lg focus:outline-none transform scale-75`}
       >
-        <div className="relative w-full h-full">
+        <div className="relative w-full h-full flex items-center justify-center">
           <TPiece rotation={rotation} isSelected={isSelected} />
         </div>
       </button>
