@@ -1,6 +1,7 @@
 'use client';
 
 import React, { FC, useState, useCallback } from 'react';
+import type { JSX } from 'react';
 import { StraightPiece, TPiece, SquarePiece, LPiece, SkewPiece } from '@/components/TetrominoPieces';
 
 type TetrominoType = 'straight' | 'T' | 'square' | 'L' | 'skew';
@@ -279,9 +280,13 @@ const TetrominoSelector: FC<{
   onReflect: (reflected: boolean) => void;
   availableTypes: TetrominoType[];
   isTromino: boolean;
-}> = ({ selectedType, onSelect, rotation, onRotate, isReflected, onReflect, availableTypes, isTromino }) => {
-  // Determine available rotations based on piece type and puzzle type
+  puzzleIndex: number;
+}> = ({ selectedType, onSelect, rotation, onRotate, isReflected, onReflect, availableTypes, isTromino, puzzleIndex }) => {
   const getAvailableRotations = () => {
+    // For puzzle 3 and 4 (T tetromino puzzles), show only unique orientations
+    if (puzzleIndex === 2 || puzzleIndex === 3) {
+      return [0, 90]; // Only show 0° and 90° since other rotations are symmetrical
+    }
     if (isTromino && selectedType === 'straight') {
       return [0, 90]; // Only 0° and 90° for straight tromino
     }
@@ -1028,6 +1033,7 @@ export default function GameBoard() {
           onReflect={(r) => setSelectedIsReflected(r)}
           availableTypes={availableTetrominoTypes}
           isTromino={currentPuzzle.tetrominoTypes?.length === 2 && currentPuzzle.tetrominoTypes.includes('straight') && currentPuzzle.tetrominoTypes.includes('square')}
+          puzzleIndex={puzzleIndex}
         />
       )}
 
