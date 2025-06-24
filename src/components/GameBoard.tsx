@@ -169,7 +169,7 @@ const TetrominoOption: FC<TetrominoOptionProps> = ({ rotation, isSelected, onCli
     >
       <div className="relative w-full h-full">
         <TPiece rotation={rotation} isSelected={isSelected} />
-    </div>
+      </div>
     </button>
   );
 };
@@ -285,7 +285,7 @@ const TetrominoSelector: FC<{
   const getAvailableRotations = () => {
     // For puzzle 3 and 4 (T tetromino puzzles), show only unique orientations
     if (puzzleIndex === 2 || puzzleIndex === 3) {
-      return [0, 90]; // Only show 0° and 90° since other rotations are symmetrical
+      return [0, 90, 180, 270]; // Show all rotations for T tetromino
     }
     if (isTromino && selectedType === 'straight') {
       return [0, 90]; // Only 0° and 90° for straight tromino
@@ -297,7 +297,7 @@ const TetrominoSelector: FC<{
     <div className="flex flex-col gap-4 items-center p-4 bg-white rounded-lg shadow-sm">
       <div className="grid grid-cols-5 gap-4">
         {availableTypes.map((type) => (
-    <button
+          <button
             key={type}
             onClick={() => onSelect(type)}
             className={`p-2 rounded-lg transition-colors ${
@@ -309,38 +309,33 @@ const TetrominoSelector: FC<{
             {type === 'square' && <SquarePiece />}
             {type === 'L' && <LPiece rotation={selectedType === type ? rotation : 0} isReflected={selectedType === type && isReflected} />}
             {type === 'skew' && <SkewPiece rotation={selectedType === type ? rotation : 0} isReflected={selectedType === type && isReflected} />}
-    </button>
+          </button>
         ))}
       </div>
       
-      {selectedType && selectedType !== 'square' && (
-        <div className="flex flex-col gap-2 w-full">
-          <div className="flex justify-center gap-2">
-            {getAvailableRotations().map((r) => (
-              <button
-                key={r}
-                onClick={() => onRotate(r)}
-                className={`p-2 rounded-lg transition-colors ${
-                  rotation === r ? 'bg-blue-100 border-2 border-blue-500' : 'bg-gray-100 hover:bg-gray-200'
-                }`}
-              >
-                {r}°
-              </button>
-            ))}
-    </div>
-          
-          {(selectedType === 'L' || selectedType === 'skew') && (
-            <button
-              onClick={() => onReflect(!isReflected)}
-              className={`mt-2 p-2 rounded-lg transition-colors ${
-                isReflected ? 'bg-blue-100 border-2 border-blue-500' : 'bg-gray-100 hover:bg-gray-200'
-              }`}
-            >
-              Reflect
-            </button>
-          )}
+      <div className="flex flex-col gap-2 w-full">
+        <div className="flex justify-center gap-2">
+          {getAvailableRotations().map((r) => (
+            <TetrominoOption
+              key={r}
+              rotation={r}
+              isSelected={rotation === r}
+              onClick={() => onRotate(r)}
+            />
+          ))}
         </div>
-      )}
+          
+        {(selectedType === 'L' || selectedType === 'skew') && (
+          <button
+            onClick={() => onReflect(!isReflected)}
+            className={`mt-2 p-2 rounded-lg transition-colors ${
+              isReflected ? 'bg-blue-100 border-2 border-blue-500' : 'bg-gray-100 hover:bg-gray-200'
+            }`}
+          >
+            Reflect
+          </button>
+        )}
+      </div>
     </div>
   );
 };
